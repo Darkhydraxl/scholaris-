@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./venv/Scripts/python.exe -c ' *)",
+      "Bash(export FLASK_APP=run.py)",
+      "Bash(./venv/Scripts/python.exe -m flask db init)",
+      "Bash(./venv/Scripts/python.exe -m flask db migrate -m \"Initial schema: users, projects, chapter_submissions, chapter_annotations, notifications, deadlines, supervisor_assignments, audit_logs\")",
+      "Bash(./venv/Scripts/python.exe -m flask db upgrade)",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)",
+      "Bash(mkdir -p \"/c/Users/HP/AppData/Local/Temp/claude/C--Users-HP-Documents-fiyin-s-folder/da78d575-509a-4e45-b581-195dfe4b52a0/scratchpad\")",
+      "WebFetch(domain:skiper-ui.com)",
+      "Skill(ui-ux-pro-max)",
+      "Skill(ui-ux-pro-max:*)",
+      "PowerShell(ngrok config add-authtoken 3GPlGfVEIqXRA2FcSD9i2i3qWRc_c6JGhBr7LtRFYPRevvNX 2>&1)",
+      "PowerShell(ngrok http 5000 2>&1)"
+    ]
+  }
+}
