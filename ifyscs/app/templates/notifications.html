@@ -1,0 +1,731 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+
+{% set unread_count = notifications | selectattr('is_read', 'eq', false) | list | length %}
+{% set read_count = notifications | selectattr('is_read', 'eq', true) | list | length %}
+{% set total_count = notifications | length %}
+
+{% block content %}
+
+{# ══════════════════ UPCOMING MEETINGS (students only) ══════════════════ #}
+{% if current_user.role == 'student' and (upcoming_meetings or past_meetings) %}
+<div class="nm-section">
+  <div class="nm-section-hdr">
+    <h2 class="nm-section-title">Upcoming Meetings</h2>
+    {% if upcoming_meetings %}
+    <span class="nm-section-count">{{ upcoming_meetings|length }} scheduled</span>
+    {% endif %}
+  </div>
+
+  {% if upcoming_meetings %}
+    {% for m in upcoming_meetings %}
+    {% set cs = m.computed_status %}
+    <div class="nm-meeting-card nm-{{ cs }}">
+      <!-- Platform icon -->
+      <div class="nm-platform-dot nm-dot-{{ 'google' if m.platform == 'google_meet' else 'zoom' }}">
+        {% if m.platform == 'google_meet' %}
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21.8 11.2c0-.7-.1-1.3-.2-2H12v3.8h5.5c-.2 1.2-1 2.2-2 2.9v2.4h3.3c1.9-1.8 3-4.4 3-7.1z" fill="#4285F4"/>
+          <path d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.4c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.5C4.7 19.7 8.1 22 12 22z" fill="#34A853"/>
+          <path d="M6.4 14.1c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.6H3C2.4 8.9 2 10.4 2 12s.4 3.1 1 4.4l3.4-2.3z" fill="#FBBC05"/>
+          <path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 3.1 14.7 2 12 2 8.1 2 4.7 4.3 3 7.6l3.4 2.4C7.2 7.7 9.4 6 12 6z" fill="#EA4335"/>
+        </svg>
+        {% else %}
+        <svg viewBox="0 0 24 24" fill="#2D8CFF">
+          <path d="M4.5 8.25h-.75A2.25 2.25 0 001.5 10.5v3a2.25 2.25 0 002.25 2.25h.75V8.25zM19.5 8.25h.75A2.25 2.25 0 0122.5 10.5v3a2.25 2.25 0 01-2.25 2.25h-.75V8.25zM16.5 6.75a6 6 0 00-9 0V17.25a6 6 0 009 0V6.75z"/>
+        </svg>
+        {% endif %}
+      </div>
+
+      <!-- Body -->
+      <div class="nm-meeting-body">
+        <div class="nm-meeting-title">{{ m.title }}</div>
+        <div class="nm-meeting-supervisor">With {{ m.supervisor.full_name }}</div>
+        <div class="nm-meeting-meta">
+          <span class="nm-meta-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            {{ m.date.strftime('%a, %b %d %Y') }}
+          </span>
+          <span class="nm-meta-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            {{ m.time.strftime('%H:%M') }}
+          </span>
+          <span class="nm-meta-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>
+            {{ m.duration_display }}
+          </span>
+          <span class="nm-meta-pill">
+            {{ m.platform_display }}
+          </span>
+        </div>
+        {% if m.description %}
+        <div class="nm-meeting-desc">{{ m.description }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Right: badge + join -->
+      <div class="nm-meeting-right">
+        <span class="nm-badge nm-badge-{{ cs }}">
+          <span class="nm-badge-dot"></span>
+          {{ 'Live' if cs == 'live' else 'Upcoming' }}
+        </span>
+        {% if m.meeting_link %}
+        <a href="{{ m.meeting_link }}" target="_blank" rel="noopener"
+           class="nm-join-btn {{ 'nm-join-upcoming' if cs == 'upcoming' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+          Join Meeting
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+  {% else %}
+  <div style="text-align:center;padding:32px 16px;color:var(--text-secondary);font-size:13.5px;">
+    No upcoming meetings right now.
+  </div>
+  {% endif %}
+
+  {# Meeting History (past) #}
+  {% if past_meetings %}
+  <div style="margin-top:20px;">
+    <button type="button" class="nm-history-toggle" id="nmHistoryToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      Meeting History ({{ past_meetings|length }})
+    </button>
+    <div class="nm-history-list" id="nmHistoryList">
+      {% for m in past_meetings %}
+      <div class="nm-past-card">
+        <div class="nm-past-platform nm-past-{{ 'google' if m.platform == 'google_meet' else 'zoom' }}">
+          {% if m.platform == 'google_meet' %}
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21.8 11.2c0-.7-.1-1.3-.2-2H12v3.8h5.5c-.2 1.2-1 2.2-2 2.9v2.4h3.3c1.9-1.8 3-4.4 3-7.1z" fill="#4285F4"/>
+            <path d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.4c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.5C4.7 19.7 8.1 22 12 22z" fill="#34A853"/>
+            <path d="M6.4 14.1c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.6H3C2.4 8.9 2 10.4 2 12s.4 3.1 1 4.4l3.4-2.3z" fill="#FBBC05"/>
+            <path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 3.1 14.7 2 12 2 8.1 2 4.7 4.3 3 7.6l3.4 2.4C7.2 7.7 9.4 6 12 6z" fill="#EA4335"/>
+          </svg>
+          {% else %}
+          <svg viewBox="0 0 24 24" fill="#2D8CFF"><path d="M4.5 8.25h-.75A2.25 2.25 0 001.5 10.5v3a2.25 2.25 0 002.25 2.25h.75V8.25zM19.5 8.25h.75A2.25 2.25 0 0122.5 10.5v3a2.25 2.25 0 01-2.25 2.25h-.75V8.25zM16.5 6.75a6 6 0 00-9 0V17.25a6 6 0 009 0V6.75z"/></svg>
+          {% endif %}
+        </div>
+        <div class="nm-past-body">
+          <div class="nm-past-title">{{ m.title }}</div>
+          <div class="nm-past-meta">{{ m.date.strftime('%b %d, %Y') }} · {{ m.time.strftime('%H:%M') }} · {{ m.duration_display }} · {{ m.platform_display }}</div>
+        </div>
+        <span class="nm-past-badge">Completed</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<hr style="border:none;border-top:1px solid var(--card-light-border);margin-bottom:28px;">
+{% endif %}
+{# ════════════════════ END MEETINGS SECTION ════════════════════ #}
+
+<div class="nf-header">
+  <div class="nf-header-left">
+    <h1 class="nf-title">Notifications</h1>
+    <p class="nf-subtitle" id="nfSubtitle">
+      <span class="nf-subtitle-dot{{ ' nf-subtitle-dot--clear' if unread_count == 0 }}" id="nfSubtitleDot" aria-hidden="true"></span>
+      <span id="nfUnreadCountText">{{ unread_count ~ ' unread' if unread_count > 0 else "You're all caught up" }}</span>
+    </p>
+  </div>
+  {% if unread_count > 0 %}
+  <button type="button" class="btn btn-outline btn-sm js-submit-btn nf-mark-all-btn" id="markAllReadBtn" data-url="{{ url_for('notification.mark_all_read') }}">
+    <span class="btn-spinner"></span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12l5 5L18 6"/><path d="M9.5 17L22 6"/></svg>
+    <span class="btn-label">Mark all as read</span>
+  </button>
+  {% endif %}
+</div>
+
+{% if notifications %}
+<div class="nf-tabs" id="nfTabs" role="tablist">
+  <button type="button" class="nf-tab active" data-filter="all" role="tab" aria-selected="true">
+    All <span class="nf-tab-count" id="nfCountAll">{{ total_count }}</span>
+  </button>
+  <button type="button" class="nf-tab" data-filter="unread" role="tab" aria-selected="false">
+    Unread <span class="nf-tab-count" id="nfCountUnread">{{ unread_count }}</span>
+  </button>
+  <button type="button" class="nf-tab" data-filter="read" role="tab" aria-selected="false">
+    Read <span class="nf-tab-count" id="nfCountRead">{{ read_count }}</span>
+  </button>
+</div>
+
+<ul id="notificationList" class="nf-list">
+  {% for n in notifications %}
+  {% set msg = n.message | lower %}
+  {% if 'approved' in msg %}
+    {% set icon_category = 'approved' %}
+  {% elif 'rejected' in msg or 'revision' in msg %}
+    {% set icon_category = 'rejected' %}
+  {% elif 'deadline' in msg or 'due' in msg %}
+    {% set icon_category = 'deadline' %}
+  {% elif 'submitted' in msg %}
+    {% set icon_category = 'submitted' %}
+  {% else %}
+    {% set icon_category = 'default' %}
+  {% endif %}
+  <li class="notification-row nf-card {{ 'unread' if not n.is_read }}" data-id="{{ n.id }}" style="opacity:0;">
+    <div class="nf-icon-circle {{ 'nf-icon-read' if n.is_read else 'nf-icon-' ~ icon_category }}" aria-hidden="true">
+      {% if n.is_read %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+      {% elif icon_category == 'approved' %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+      {% elif icon_category == 'rejected' %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      {% elif icon_category == 'deadline' %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+      {% elif icon_category == 'submitted' %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      {% else %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      {% endif %}
+    </div>
+
+    <div class="nf-body">
+      <p class="nf-message">{{ n.message }}</p>
+      <p class="nf-time">{{ n.created_at.strftime('%b %d · %H:%M') }}</p>
+    </div>
+
+    <span class="nf-unread-dot" aria-hidden="true"></span>
+
+    {% if not n.is_read %}
+    <button type="button" class="nf-mark-read-btn js-mark-read" data-id="{{ n.id }}" data-url="{{ url_for('notification.mark_read', notification_id=n.id) }}">
+      Mark read
+    </button>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+
+{% else %}
+<div class="nf-empty">
+  <svg class="nf-empty-bell" id="nfEmptyBell" width="120" height="120" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+    <path d="M60 20a6 6 0 00-6 6v3.3C43.6 32 36 41.7 36 53v24l-8 10h64l-8-10V53c0-11.3-7.6-21-18-23.7V26a6 6 0 00-6-6z" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" opacity="0.55"/>
+    <path d="M50 91a10 10 0 0020 0" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+    <circle cx="90" cy="34" r="9" fill="var(--accent-gold)"/>
+    <path d="M86.5 34l2.5 2.5 5-5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <h2 class="nf-empty-title">All caught up</h2>
+  <p class="nf-empty-sub">You have no notifications right now.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════ Meetings Section ══════════════════════════ */
+.nm-section { margin-bottom: 40px; }
+.nm-section-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.nm-section-title {
+  font-size: 18px; font-weight: 800; letter-spacing: -.01em;
+}
+.nm-section-count {
+  font-size: 12px; font-weight: 700;
+  background: var(--soft-icon-bg); color: var(--text-secondary);
+  border-radius: 99px; padding: 3px 10px;
+}
+
+/* Meeting card */
+.nm-meeting-card {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: var(--card-dark, #1a2744);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-left: 4px solid transparent;
+  border-radius: var(--radius-card);
+  padding: 18px 20px; margin-bottom: 10px;
+  position: relative; overflow: hidden;
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  opacity: 0;
+}
+.nm-meeting-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 40%, transparent);
+}
+.nm-meeting-card:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.28); }
+.nm-meeting-card.nm-live     { border-left-color: #4cd964; }
+.nm-meeting-card.nm-upcoming { border-left-color: #60a5fa; }
+
+/* Platform icon circle */
+.nm-platform-dot {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.nm-platform-dot svg { width: 22px; height: 22px; }
+.nm-dot-google { background: rgba(66,133,244,0.15); }
+.nm-dot-zoom   { background: rgba(45,140,255,0.15); }
+
+/* Body */
+.nm-meeting-body { flex: 1; min-width: 0; }
+.nm-meeting-title { font-size: 15px; font-weight: 700; color: var(--text-on-dark-card); margin-bottom: 6px; }
+.nm-meeting-meta  { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.nm-meta-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 600; color: var(--text-on-dark-card-muted);
+}
+.nm-meta-pill svg { width: 11px; height: 11px; }
+.nm-meeting-supervisor { font-size: 12px; color: var(--text-on-dark-card-muted); margin-bottom: 6px; }
+.nm-meeting-desc { font-size: 12.5px; color: var(--text-on-dark-card-muted); line-height: 1.5; margin-top: 4px; }
+
+/* Right side */
+.nm-meeting-right {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0;
+}
+
+/* Status badges */
+.nm-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 99px;
+  white-space: nowrap;
+}
+.nm-badge-live     { background: rgba(76,217,100,0.2);  color: #4cd964; }
+.nm-badge-upcoming { background: rgba(59,130,246,0.2);  color: #60a5fa; }
+.nm-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.nm-badge-live .nm-badge-dot { animation: nm-pulse 2s ease-in-out infinite; }
+@keyframes nm-pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+/* Join button */
+.nm-join-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700;
+  padding: 9px 18px; border-radius: 99px;
+  background: #4cd964; color: #0d1117;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: opacity 160ms, transform 160ms;
+  white-space: nowrap;
+}
+.nm-join-btn:hover { opacity: 0.88; transform: scale(1.03); }
+.nm-join-btn svg { width: 13px; height: 13px; }
+.nm-join-btn.nm-join-upcoming {
+  background: rgba(96,165,250,0.18); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3);
+}
+
+/* Meeting history (past) */
+.nm-history-toggle {
+  background: none; border: 1px solid var(--card-light-border);
+  color: var(--text-secondary); font-family: inherit;
+  font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 99px;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background 160ms, color 160ms;
+}
+.nm-history-toggle:hover { background: var(--card-light); color: var(--text-primary); }
+.nm-history-toggle svg { width: 13px; height: 13px; transition: transform 220ms; }
+.nm-history-toggle.open svg { transform: rotate(180deg); }
+.nm-history-list { display: none; margin-top: 12px; }
+.nm-history-list.open { display: block; }
+
+.nm-past-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--card-light); border: 1px solid var(--card-light-border);
+  border-radius: var(--radius-card); padding: 14px 18px; margin-bottom: 8px;
+  opacity: 0.7;
+}
+.nm-past-platform { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nm-past-platform svg { width: 16px; height: 16px; }
+.nm-past-google { background: rgba(66,133,244,0.1); color: #4285f4; }
+.nm-past-zoom   { background: rgba(45,140,255,0.1);  color: #2d8cff; }
+.nm-past-body { flex: 1; min-width: 0; }
+.nm-past-title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+.nm-past-meta  { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+.nm-past-badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: rgba(100,100,100,0.14); color: var(--text-secondary); }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .nm-meeting-card { flex-wrap: wrap; gap: 12px; }
+  .nm-meeting-right { flex-direction: row; align-items: center; flex-wrap: wrap; }
+}
+
+[data-theme="dark"] .nm-past-card { background: rgba(255,255,255,0.04); }
+
+/* ══════════════════════════ Header ══════════════════════════ */
+.nf-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.nf-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+.nf-subtitle {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--text-secondary);
+  margin-top: 6px;
+}
+.nf-subtitle-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent-gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-gold) 22%, transparent);
+  transition: background 250ms ease, box-shadow 250ms ease;
+}
+.nf-subtitle-dot--clear {
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 22%, transparent);
+}
+
+.nf-mark-all-btn { flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .nf-header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .nf-mark-all-btn { width: 100%; justify-content: center; }
+}
+
+/* ══════════════════════════ Filter tabs ══════════════════════════ */
+.nf-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.nf-tabs::-webkit-scrollbar { display: none; }
+
+.nf-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--card-light-border);
+  background: var(--card-light);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 160ms var(--ease-out), color 160ms var(--ease-out),
+              border-color 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+.nf-tab:hover { transform: translateY(-1px); }
+.nf-tab.active {
+  background: var(--ring-accent);
+  color: var(--active-pill-text);
+  border-color: var(--ring-accent);
+}
+.nf-tab-count {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--soft-icon-bg);
+  color: var(--text-primary);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+  min-width: 19px;
+  text-align: center;
+  line-height: 1.5;
+}
+.nf-tab.active .nf-tab-count { background: rgba(255,255,255,0.22); color: inherit; }
+
+/* ══════════════════════════ Notification list / cards ══════════════════════════ */
+.nf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-row.nf-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-card);
+  transition: background 260ms var(--ease-out), transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+.notification-row.nf-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-pop);
+}
+.notification-row.nf-card.unread {
+  background: color-mix(in srgb, var(--accent-gold) 5%, var(--card-light));
+  border-left-color: var(--accent-gold);
+}
+
+.nf-hidden { display: none !important; }
+
+.nf-icon-circle {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.nf-icon-circle svg { width: 18px; height: 18px; }
+.nf-icon-approved  { background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+.nf-icon-rejected  { background: color-mix(in srgb, var(--danger) 16%, transparent); color: var(--danger); }
+.nf-icon-deadline  { background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); }
+.nf-icon-submitted { background: color-mix(in srgb, var(--accent-navy) 16%, transparent); color: var(--accent-navy); }
+.nf-icon-default   { background: var(--soft-icon-bg); color: var(--soft-icon-fg); }
+.nf-icon-read      { background: color-mix(in srgb, #22c55e 16%, transparent); color: #22c55e; }
+
+.nf-body { flex: 1; min-width: 0; }
+.nf-message {
+  font-size: 14.5px;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+.notification-row.unread .nf-message { font-weight: 600; }
+.nf-time { font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
+
+.nf-unread-dot {
+  position: absolute;
+  top: 14px; right: 16px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-gold) 20%, transparent);
+}
+.notification-row:not(.unread) .nf-unread-dot { display: none; }
+
+.nf-mark-read-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--card-light-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 160ms var(--ease-out), color 160ms var(--ease-out),
+              border-color 160ms var(--ease-out), transform 160ms var(--ease-out), opacity 160ms var(--ease-out);
+}
+.nf-mark-read-btn:hover {
+  background: var(--ring-accent);
+  color: var(--active-pill-text);
+  border-color: var(--ring-accent);
+  transform: translateY(-1px);
+}
+.nf-mark-read-btn.is-loading { opacity: 0.55; pointer-events: none; }
+
+@media (max-width: 640px) {
+  .notification-row.nf-card { flex-wrap: wrap; padding: 14px 16px; gap: 12px; }
+  .nf-mark-read-btn { margin-left: 56px; }
+}
+
+/* ══════════════════════════ Empty state ══════════════════════════ */
+.nf-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  min-height: 44vh;
+}
+.nf-empty-bell {
+  margin-bottom: 20px;
+  opacity: 0;
+  transform-origin: 60px 24px;
+}
+.nf-empty-bell.nf-swing { animation: nf-bell-swing 3.4s ease-in-out infinite; animation-delay: 300ms; }
+@keyframes nf-bell-swing {
+  0%, 46%, 100% { transform: rotate(0deg); }
+  8%  { transform: rotate(-9deg); }
+  16% { transform: rotate(7deg); }
+  24% { transform: rotate(-5deg); }
+  32% { transform: rotate(3deg); }
+  40% { transform: rotate(-1deg); }
+}
+.nf-empty-title { font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+.nf-empty-sub { font-size: 14px; color: var(--text-secondary); max-width: 320px; line-height: 1.6; }
+
+/* ══════════════════════════ Dark mode polish ══════════════════════════ */
+[data-theme="dark"] .nf-tab-count { background: rgba(255,255,255,0.08); }
+[data-theme="dark"] .nf-tab.active .nf-tab-count { background: rgba(0,0,0,0.28); }
+[data-theme="dark"] .notification-row.nf-card:hover { box-shadow: 0 14px 40px rgba(0,0,0,0.5); }
+[data-theme="dark"] .nf-mark-read-btn:hover { color: var(--active-pill-text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-row.nf-card:hover, .nf-tab:hover, .nf-mark-read-btn:hover { transform: none; }
+  .nf-empty-bell.nf-swing { animation: none; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { animate, stagger } = anime;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ── Meeting cards entrance ─────────────────────────────────────────── */
+    const meetingCards = document.querySelectorAll('.nm-meeting-card');
+    if (meetingCards.length) {
+      if (prefersReducedMotion) {
+        meetingCards.forEach(c => { c.style.opacity = '1'; });
+      } else {
+        animate(meetingCards, {
+          opacity: [0, 1], translateY: [14, 0],
+          duration: 400, ease: 'outCubic', delay: stagger(65, { start: 60 }),
+        });
+      }
+    }
+
+    /* ── Meeting history toggle ──────────────────────────────────────────── */
+    const historyToggle = document.getElementById('nmHistoryToggle');
+    const historyList   = document.getElementById('nmHistoryList');
+    if (historyToggle && historyList) {
+      historyToggle.addEventListener('click', () => {
+        const open = historyList.classList.toggle('open');
+        historyToggle.classList.toggle('open', open);
+      });
+    }
+
+    /* ── Entrance: notification cards stagger in from the right ─────────── */
+    const cards = document.querySelectorAll('#notificationList .notification-row');
+    if (cards.length) {
+      if (prefersReducedMotion) {
+        cards.forEach((c) => { c.style.opacity = '1'; });
+      } else {
+        animate(cards, {
+          translateX: [30, 0],
+          opacity: [0, 1],
+          duration: 420,
+          ease: 'outCubic',
+          delay: stagger(55, { start: 60 }),
+        });
+      }
+    }
+
+    /* ── Empty state: bell pops in, then swings gently forever ─────────── */
+    const emptyBell = document.getElementById('nfEmptyBell');
+    if (emptyBell) {
+      if (prefersReducedMotion) {
+        emptyBell.style.opacity = '1';
+      } else {
+        animate(emptyBell, {
+          opacity: [0, 1],
+          scale: [0.6, 1],
+          duration: 560,
+          ease: 'outBack(1.4)',
+          onComplete: () => emptyBell.classList.add('nf-swing'),
+        });
+      }
+    }
+
+    /* ── Filter tabs (client-side only) ─────────────────────────────────── */
+    function shouldShowForFilter(row, filter) {
+      if (filter === 'all') return true;
+      const isUnread = row.classList.contains('unread');
+      return filter === 'unread' ? isUnread : !isUnread;
+    }
+    function activeFilter() {
+      const tab = document.querySelector('.nf-tab.active');
+      return tab ? tab.dataset.filter : 'all';
+    }
+
+    const tabs = document.querySelectorAll('.nf-tab');
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        if (tab.classList.contains('active')) return;
+        tabs.forEach((t) => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+
+        const filter = tab.dataset.filter;
+        document.querySelectorAll('#notificationList .notification-row').forEach((row) => {
+          row.classList.toggle('nf-hidden', !shouldShowForFilter(row, filter));
+        });
+
+        if (!prefersReducedMotion) {
+          const visible = document.querySelectorAll('#notificationList .notification-row:not(.nf-hidden)');
+          if (visible.length) {
+            animate(visible, { opacity: [0.4, 1], duration: 180, ease: 'outCubic' });
+          }
+        }
+      });
+    });
+
+    /* ── Live counters + border fade when a row is marked read ─────────── */
+    const unreadCountEl = document.getElementById('nfCountUnread');
+    const readCountEl = document.getElementById('nfCountRead');
+    const subtitleText = document.getElementById('nfUnreadCountText');
+    const subtitleDot = document.getElementById('nfSubtitleDot');
+    const markAllBtn = document.getElementById('markAllReadBtn');
+
+    function onNotificationRead(row) {
+      if (unreadCountEl) {
+        const n = Math.max(0, parseInt(unreadCountEl.textContent, 10) - 1);
+        unreadCountEl.textContent = String(n);
+        if (subtitleText) subtitleText.textContent = n > 0 ? (n + ' unread') : "You're all caught up";
+        if (subtitleDot) subtitleDot.classList.toggle('nf-subtitle-dot--clear', n === 0);
+        if (n === 0 && markAllBtn) {
+          if (prefersReducedMotion) {
+            markAllBtn.style.display = 'none';
+          } else {
+            animate(markAllBtn, {
+              opacity: [1, 0], scale: [1, 0.9], duration: 220, ease: 'inCubic',
+              onComplete: () => { markAllBtn.style.display = 'none'; },
+            });
+          }
+        }
+      }
+      if (readCountEl) {
+        readCountEl.textContent = String(parseInt(readCountEl.textContent, 10) + 1);
+      }
+
+      /* the gold left-border accent fades away */
+      if (prefersReducedMotion) {
+        row.style.borderLeftColor = 'transparent';
+      } else {
+        animate(row, { borderLeftColor: 'rgba(201,149,42,0)', duration: 300, ease: 'outCubic' });
+      }
+
+      /* re-check whether the row still belongs under the active tab */
+      const filter = activeFilter();
+      const shouldShow = shouldShowForFilter(row, filter);
+      const isHidden = row.classList.contains('nf-hidden');
+      if (shouldShow && isHidden) {
+        row.classList.remove('nf-hidden');
+        if (!prefersReducedMotion) {
+          animate(row, { opacity: [0, 1], duration: 260, ease: 'outCubic' });
+        }
+      } else if (!shouldShow && !isHidden) {
+        if (prefersReducedMotion) {
+          row.classList.add('nf-hidden');
+        } else {
+          animate(row, {
+            opacity: [1, 0], duration: 200, ease: 'inCubic',
+            onComplete: () => { row.classList.add('nf-hidden'); row.style.opacity = ''; },
+          });
+        }
+      }
+    }
+
+    const list = document.getElementById('notificationList');
+    if (list) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          if (m.type !== 'attributes' || m.attributeName !== 'class') return;
+          const row = m.target;
+          if (!(row.classList && row.classList.contains('notification-row'))) return;
+          const oldClasses = (m.oldValue || '').split(' ');
+          const wasUnread = oldClasses.indexOf('unread') !== -1;
+          const isUnreadNow = row.classList.contains('unread');
+          if (wasUnread && !isUnreadNow) {
+            onNotificationRead(row);
+          }
+        });
+      });
+      observer.observe(list, { attributes: true, attributeFilter: ['class'], attributeOldValue: true, subtree: true });
+    }
+  });
+</script>
+{% endblock %}

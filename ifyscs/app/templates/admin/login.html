@@ -1,0 +1,629 @@
+{% extends "base.html" %}
+{% block title %}Admin — Control Center{% endblock %}
+
+{% block page_theme %}{{ session.get('theme', 'dark') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;800&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════
+   Mercury Admin Login
+════════════════════════════════════ */
+
+/* Kill the body mesh gradient for the auth page */
+body { background: #050505 !important; overflow: hidden; }
+[data-theme="light"] body { background: #f0f0f0 !important; }
+@media (prefers-color-scheme: light) { body { background: #f0f0f0 !important; } }
+
+.mcr-wrap *,
+.mcr-wrap *::before,
+.mcr-wrap *::after {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mcr-wrap {
+  background: #050505;
+  color: #ffffff;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Hidden SVG filter */
+.mcr-svg-filter {
+  position: absolute;
+  width: 0; height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── Blob stage ── */
+.mcr-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.55;
+}
+
+.mcr-blob {
+  position: absolute;
+  background: radial-gradient(circle at 35% 35%, #e8e8e8, #888 60%, #555);
+  border-radius: 50%;
+  animation: mcr-float 20s infinite alternate ease-in-out;
+  box-shadow:
+    inset -12px -12px 28px rgba(0,0,0,0.45),
+    inset 6px 6px 14px rgba(255,255,255,0.22),
+    8px 12px 32px rgba(0,0,0,0.35);
+  transition: margin 0.1s ease-out;
+}
+
+@keyframes mcr-float {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(10vw, 20vh) scale(1.2); }
+  66%  { transform: translate(-5vw, 10vh) scale(0.8); }
+  100% { transform: translate(5vw, -10vh) scale(1.1); }
+}
+
+/* ── Auth container ── */
+.mcr-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 420px;
+  padding: 48px 52px;
+}
+
+/* ── Brand ── */
+.mcr-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+.mcr-logo { width: 22px; height: 30px; flex-shrink: 0; }
+.mcr-brand-name {
+  font-family: 'Asgrike', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.82);
+}
+
+/* ── Node ID eyebrow ── */
+.mcr-node-id {
+  display: block;
+  font-family: 'Space Mono', 'SF Mono', ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.32);
+  margin-bottom: 20px;
+}
+
+/* ── Heading ── */
+.mcr-heading {
+  font-weight: 800;
+  font-size: 3rem;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  margin: 0 0 50px -2px;
+}
+
+/* Fill-text animation (ported from LoadingFillText component) */
+.mcr-hstack {
+  position: relative;
+  display: block;
+}
+.mcr-hbg {
+  display: block;
+  color: rgba(255,255,255,0.12);
+  user-select: none;
+}
+.mcr-hfill {
+  position: absolute;
+  inset: 0;
+  color: #ffffff;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── Form ── */
+.mcr-form { display: flex; flex-direction: column; }
+
+/* Each field is a bordered row */
+.mcr-field {
+  position: relative;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+.mcr-form .mcr-field:first-child {
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.mcr-field:focus-within { transform: translateX(10px); }
+
+.mcr-label {
+  display: block;
+  font-family: 'Space Mono', 'SF Mono', ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.36);
+  margin-bottom: 14px;
+}
+
+/* Input wrapper */
+.mcr-iw { position: relative; }
+
+.mcr-input {
+  width: 100%;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  color: #ffffff;
+  padding: 6px 0;
+  font-size: 17px;
+  font-family: 'Space Mono', 'SF Mono', ui-monospace, monospace;
+  outline: none;
+  letter-spacing: 0.04em;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Never animate background — overrides main.css transition */
+  transition: color 0.2s, border-color 0.2s !important;
+}
+.mcr-input:focus,
+.mcr-input:active,
+.mcr-input:focus-visible,
+.mcr-input:not(:placeholder-shown) {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  outline: none;
+}
+.mcr-input::placeholder {
+  color: rgba(255,255,255,0.28);
+  font-family: 'Space Mono', 'SF Mono', ui-monospace, monospace;
+}
+/* Autofill: only keep text color, no inset shadow painting */
+.mcr-input:-webkit-autofill,
+.mcr-input:-webkit-autofill:hover,
+.mcr-input:-webkit-autofill:focus,
+.mcr-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  /* delay background transition to ~forever so autofill tint fades quickly */
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Glow line on the field's bottom border */
+.mcr-glow {
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: #e0e0e0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+  box-shadow: 0 0 14px rgba(224,224,224,0.7);
+  pointer-events: none;
+}
+.mcr-field:focus-within .mcr-glow { transform: scaleX(1); }
+
+/* Password eye toggle */
+.mcr-pw-wrap { position: relative; }
+.mcr-pw-wrap .mcr-input { padding-right: 36px; }
+.mcr-pw-eye {
+  position: absolute;
+  top: 50%; right: 0;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; padding: 0;
+  color: rgba(255,255,255,0.22);
+  display: flex; align-items: center;
+  transition: color 130ms;
+}
+.mcr-pw-eye:hover { color: rgba(255,255,255,0.55); }
+.mcr-pw-eye svg { width: 16px; height: 16px; }
+
+/* ── FlowButton submit ── */
+.mcr-submit-wrap {
+  margin-top: 40px;
+  position: relative;
+}
+
+.mcr-btn {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 18px 40px;
+  font-size: 10.5px;
+  font-weight: 800;
+  font-family: 'Space Mono', 'SF Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: color 0.35s;
+}
+.mcr-btn:hover { color: #ffffff; }
+.mcr-btn:active { transform: scale(0.99); }
+
+/* Flow blob - dark circle expands from center */
+.mcr-btn .flow-blob {
+  position: absolute;
+  width: 300%; height: 300%;
+  left: -100%; top: -100%;
+  border-radius: 50%;
+  background: #111111;
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+.mcr-btn:hover .flow-blob { transform: scale(1); }
+
+/* Left arrow - slides in */
+.mcr-btn .flow-arrow-left {
+  position: absolute; left: 20px; top: 50%;
+  transform: translateY(-50%) translateX(-140%);
+  opacity: 0; display: flex; align-items: center;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  z-index: 2;
+}
+.mcr-btn:hover .flow-arrow-left { transform: translateY(-50%) translateX(0); opacity: 1; }
+
+/* Right arrow - slides out */
+.mcr-btn .flow-arrow-right {
+  position: absolute; right: 20px; top: 50%;
+  transform: translateY(-50%) translateX(0);
+  opacity: 1; display: flex; align-items: center;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  z-index: 2;
+}
+.mcr-btn:hover .flow-arrow-right { transform: translateY(-50%) translateX(140%); opacity: 0; }
+
+/* Label shifts right */
+.mcr-btn .btn-label {
+  position: relative; z-index: 2; display: inline-block;
+  transform: translateX(0);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mcr-btn:hover .btn-label { transform: translateX(8px); }
+.mcr-btn .btn-spinner { position: relative; z-index: 2; }
+
+/* Spinner */
+.btn-spinner {
+  display: none;
+  width: 13px; height: 13px;
+  border: 2px solid rgba(0,0,0,0.18);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: mcr-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+.is-loading .btn-spinner { display: block; }
+.is-loading .btn-label { opacity: 0.7; }
+@keyframes mcr-spin { to { transform: rotate(360deg); } }
+
+/* ── Footer ── */
+.mcr-footer {
+  margin-top: 38px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Override base absolute positioning for theme toggle in this layout */
+.mcr-footer .theme-toggle-switch {
+  position: relative;
+  top: auto; right: auto;
+}
+
+.mcr-remember {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Space Mono', 'SF Mono', ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer; user-select: none;
+}
+.mcr-remember input[type="checkbox"] {
+  accent-color: #e0e0e0; cursor: pointer;
+}
+
+/* Flash messages */
+.mcr-wrap .flash-list { margin-bottom: 8px; }
+
+/* Form errors */
+.mcr-wrap .form-error {
+  font-family: 'Space Mono', ui-monospace, monospace;
+  font-size: 10px;
+  color: rgba(255,100,100,0.85);
+  margin-top: 6px;
+}
+
+/* ════════════════════════════════════
+   Light mode
+════════════════════════════════════ */
+@media (prefers-color-scheme: light) {
+  .mcr-wrap { background: #f0f0f0; color: #050505; }
+  .mcr-blob { background: linear-gradient(135deg, #444, #999); box-shadow: inset -10px -10px 20px rgba(255,255,255,0.3), 10px 10px 30px rgba(0,0,0,0.12); }
+  .mcr-stage { opacity: 0.28; }
+  .mcr-brand-name { color: rgba(0,0,0,0.78); }
+  .mcr-node-id { color: rgba(0,0,0,0.32); }
+  .mcr-heading { color: #050505; }
+  .mcr-label { color: rgba(0,0,0,0.36); }
+  .mcr-input { color: #050505; border-bottom-color: rgba(0,0,0,0.12); }
+  .mcr-input::placeholder { color: rgba(0,0,0,0.18); }
+  .mcr-glow { background: #333; box-shadow: 0 0 12px rgba(0,0,0,0.2); }
+  .mcr-pw-eye { color: rgba(0,0,0,0.22); }
+  .mcr-pw-eye:hover { color: rgba(0,0,0,0.55); }
+  .mcr-mercury-drop { background: #222; }
+  .mcr-btn { background: #111; color: #fff; }
+  .btn-spinner { border-color: rgba(255,255,255,0.2); border-top-color: #fff; }
+  .mcr-remember { color: rgba(0,0,0,0.32); }
+  .mcr-remember input[type="checkbox"] { accent-color: #333; }
+  .mcr-wrap .form-error { color: #c0392b; }
+}
+
+[data-theme="light"] body { background: #f0f0f0 !important; }
+[data-theme="light"] .mcr-wrap { background: #f0f0f0; color: #050505; }
+[data-theme="light"] .mcr-hbg { color: rgba(0,0,0,0.1); }
+[data-theme="light"] .mcr-hfill { color: #050505; }
+[data-theme="light"] .mcr-input { color: #050505; }
+[data-theme="light"] .mcr-input:-webkit-autofill,
+[data-theme="light"] .mcr-input:-webkit-autofill:hover,
+[data-theme="light"] .mcr-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #050505 !important;
+}
+@media (prefers-color-scheme: light) {
+  .mcr-input { color: #050505; }
+  .mcr-input:-webkit-autofill,
+  .mcr-input:-webkit-autofill:hover,
+  .mcr-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #050505 !important;
+  }
+}
+[data-theme="light"] .mcr-blob { background: linear-gradient(135deg, #444, #999); box-shadow: inset -10px -10px 20px rgba(255,255,255,0.3), 10px 10px 30px rgba(0,0,0,0.12); }
+[data-theme="light"] .mcr-stage { opacity: 0.28; }
+[data-theme="light"] .mcr-brand-name { color: rgba(0,0,0,0.78); }
+[data-theme="light"] .mcr-node-id { color: rgba(0,0,0,0.32); }
+[data-theme="light"] .mcr-heading { color: #050505; }
+[data-theme="light"] .mcr-label { color: rgba(0,0,0,0.36); }
+[data-theme="light"] .mcr-input { color: #050505; border-bottom-color: rgba(0,0,0,0.12); }
+[data-theme="light"] .mcr-input::placeholder { color: rgba(0,0,0,0.18); }
+[data-theme="light"] .mcr-glow { background: #333; box-shadow: 0 0 12px rgba(0,0,0,0.2); }
+[data-theme="light"] .mcr-pw-eye { color: rgba(0,0,0,0.22); }
+[data-theme="light"] .mcr-pw-eye:hover { color: rgba(0,0,0,0.55); }
+[data-theme="light"] .mcr-mercury-drop { background: #222; }
+[data-theme="light"] .mcr-btn { background: #111; color: #fff; }
+[data-theme="light"] .btn-spinner { border-color: rgba(255,255,255,0.2); border-top-color: #fff; }
+[data-theme="light"] .mcr-remember { color: rgba(0,0,0,0.32); }
+[data-theme="light"] .mcr-remember input[type="checkbox"] { accent-color: #333; }
+[data-theme="light"] .mcr-wrap .form-error { color: #c0392b; }
+[data-theme="dark"] .mcr-wrap { background: #050505; color: #fff; }
+
+/* ════════════════════════════════════
+   Mobile
+════════════════════════════════════ */
+@media (max-width: 640px) {
+  .mcr-container { padding: 40px 28px; }
+  .mcr-heading { font-size: 2.6rem; margin-bottom: 40px; }
+}
+@media (max-width: 400px) {
+  .mcr-container { padding: 32px 20px; }
+  .mcr-heading { font-size: 2.1rem; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mcr-blob { animation: none !important; }
+  .mcr-field { transition: none !important; }
+  .mcr-glow { transition: none !important; }
+  .mcr-mercury-drop { transition: none !important; }
+}
+</style>
+{% endblock %}
+
+{% block auth_content %}
+<div class="mcr-wrap">
+
+  <!-- SVG gooey filter (referenced by both the stage and the submit button) -->
+  <svg class="mcr-svg-filter" aria-hidden="true">
+    <defs>
+      <filter id="gooey">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+        <feColorMatrix in="blur" mode="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"/>
+        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Liquid blob background -->
+  <div class="mcr-stage" aria-hidden="true">
+    <div class="mcr-blob"></div>
+    <div class="mcr-blob"></div>
+    <div class="mcr-blob"></div>
+    <div class="mcr-blob"></div>
+    <div class="mcr-blob"></div>
+    <div class="mcr-blob"></div>
+  </div>
+
+  <main class="mcr-container">
+
+    <!-- Scholaris brand -->
+    <div class="mcr-brand">
+      <svg class="mcr-logo" viewBox="0 0 60 82" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="60" height="82" fill="#c8a47e"/>
+        <rect x="3" y="3" width="54" height="76" fill="none" stroke="#15100a" stroke-width="2"/>
+        <rect x="8" y="8" width="44" height="66" fill="none" stroke="#15100a" stroke-width="1.5"/>
+        <polygon points="9,9 51,9 51,21 9,39" fill="#15100a"/>
+        <polygon points="51,73 9,73 9,61 51,43" fill="#15100a"/>
+      </svg>
+      <span class="mcr-brand-name">Scholaris</span>
+    </div>
+
+    <span class="mcr-node-id">Admin Portal</span>
+
+    <h1 class="mcr-heading" aria-label="CONTROL CENTER">
+      <span class="mcr-hstack" aria-hidden="true">
+        <span class="mcr-hbg">CONTROL<br/>CENTER</span>
+        <span class="mcr-hfill" id="headingFill">CONTROL<br/>CENTER</span>
+      </span>
+    </h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-list" id="flashMessages" data-flashes='{{ messages|tojson }}'></div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" novalidate class="mcr-form" autocomplete="off">
+      {{ form.hidden_tag() }}
+
+      <div class="mcr-field">
+        <label class="mcr-label">User Identity</label>
+        {{ form.email(placeholder="Enter email", autocomplete="email", class="mcr-input") }}
+        <div class="mcr-glow"></div>
+        {% for err in form.email.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+      </div>
+
+      <div class="mcr-field">
+        <label class="mcr-label">Password</label>
+        <div class="mcr-pw-wrap mcr-iw">
+          {{ form.password(placeholder="••••••••", autocomplete="current-password", class="mcr-input", id="pwField") }}
+          <button type="button" class="mcr-pw-eye" id="pwToggle" aria-label="Show password" tabindex="-1">
+            <svg id="eyeOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="eyeClosed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"/></svg>
+          </button>
+        </div>
+        <div class="mcr-glow"></div>
+        {% for err in form.password.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+      </div>
+
+      <div class="mcr-submit-wrap">
+        <button type="submit" class="mcr-btn js-submit-btn">
+          <span class="btn-spinner"></span>
+          <span class="flow-blob" aria-hidden="true"></span>
+          <span class="flow-arrow-left" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 7H2M2 7l4-4M2 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="btn-label">Access Admin Panel</span>
+          <span class="flow-arrow-right" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M12 7l-4-4M12 7l-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </div>
+    </form>
+
+    <footer class="mcr-footer">
+      <label class="mcr-remember">
+        {{ form.remember() }}<span>Keep me signed in</span>
+      </label>
+      <button class="theme-toggle-switch" id="themeToggleBtn" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </footer>
+
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  /* Randomise blob positions, sizes, and animation timing on each load */
+  var blobs = document.querySelectorAll('.mcr-blob');
+  blobs.forEach(function (b) {
+    var size = Math.random() * 200 + 140;
+    b.style.width            = size + 'px';
+    b.style.height           = size + 'px';
+    b.style.left             = (Math.random() * 80 + 10) + '%';
+    b.style.top              = (Math.random() * 80 + 10) + '%';
+    b.style.animationDelay    = -(Math.random() * 20) + 's';
+    b.style.animationDuration = (Math.random() * 15 + 15) + 's';
+  });
+
+  /* Mouse parallax — direct DOM, no re-renders */
+  document.addEventListener('mousemove', function (e) {
+    var x = e.clientX / window.innerWidth;
+    var y = e.clientY / window.innerHeight;
+    blobs.forEach(function (b, i) {
+      var spd = (i + 1) * 18;
+      b.style.marginLeft = (x * spd) + 'px';
+      b.style.marginTop  = (y * spd) + 'px';
+    });
+  }, { passive: true });
+
+  /* LoadingFillText: sweep CONTROL CENTER from left to right with random spring-like increments */
+  (function () {
+    var fill = document.getElementById('headingFill');
+    if (!fill) return;
+    var prog = 0;
+    var id = setInterval(function () {
+      prog = Math.min(1, prog + Math.random() * 0.22);
+      fill.style.clipPath = 'inset(0 ' + (Math.round((1 - prog) * 1000) / 10) + '% 0 0)';
+      if (prog >= 1) clearInterval(id);
+    }, 480);
+  })();
+
+  /* Force transparent input backgrounds — beats every CSS rule including !important */
+  var mcrInputs = document.querySelectorAll('.mcr-input');
+  function forceTransparent() {
+    mcrInputs.forEach(function (inp) {
+      inp.style.setProperty('background', 'transparent', 'important');
+      inp.style.setProperty('background-color', 'transparent', 'important');
+      inp.style.setProperty('box-shadow', 'none', 'important');
+      inp.style.setProperty('-webkit-box-shadow', 'none', 'important');
+    });
+  }
+  forceTransparent();
+  mcrInputs.forEach(function (inp) {
+    ['focus', 'blur', 'input', 'change', 'click', 'touchstart', 'touchend', 'keydown']
+      .forEach(function (ev) { inp.addEventListener(ev, forceTransparent, { passive: true }); });
+  });
+
+  /* Submit spinner */
+  document.querySelectorAll('form').forEach(function (f) {
+    f.addEventListener('submit', function () {
+      var btn = f.querySelector('.js-submit-btn');
+      if (btn) { btn.classList.add('is-loading'); btn.disabled = true; }
+    });
+  });
+
+  /* Password visibility toggle */
+  var pw      = document.getElementById('pwField');
+  var tog     = document.getElementById('pwToggle');
+  var eOpen   = document.getElementById('eyeOpen');
+  var eClosed = document.getElementById('eyeClosed');
+  if (tog && pw) {
+    tog.addEventListener('click', function () {
+      var show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      eOpen.style.display   = show ? 'none' : '';
+      eClosed.style.display = show ? '' : 'none';
+    });
+  }
+})();
+</script>
+{% endblock %}

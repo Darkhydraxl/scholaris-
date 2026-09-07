@@ -1,0 +1,30 @@
+{% macro ring(percent, label='Complete', size=168, stroke=12) -%}
+{% set r = (size / 2) - (stroke / 2) %}
+{% set circumference = (2 * 3.14159265 * r) | round(2) %}
+<div class="progress-ring" style="width:{{ size }}px;height:{{ size }}px;">
+  <svg viewBox="0 0 {{ size }} {{ size }}">
+    <circle class="track" cx="{{ size / 2 }}" cy="{{ size / 2 }}" r="{{ r }}" stroke-width="{{ stroke }}"></circle>
+    <circle class="progress js-progress-ring-circle" cx="{{ size / 2 }}" cy="{{ size / 2 }}" r="{{ r }}" stroke-width="{{ stroke }}"
+      stroke-dasharray="{{ circumference }}" stroke-dashoffset="{{ circumference }}"
+      data-circumference="{{ circumference }}" data-target-percent="{{ percent }}"></circle>
+  </svg>
+  <div class="progress-ring-text">
+    <span class="pct js-count-up" data-target="{{ percent }}" data-suffix="%">0%</span>
+    <span class="lbl">{{ label }}</span>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro mini_ring(percent, size=48, stroke=4) -%}
+{% set r = (size / 2) - (stroke / 2) %}
+{% set circumference = (2 * 3.14159265 * r) | round(2) %}
+<div class="mini-ring">
+  <svg viewBox="0 0 {{ size }} {{ size }}">
+    <circle class="track" cx="{{ size / 2 }}" cy="{{ size / 2 }}" r="{{ r }}" stroke-width="{{ stroke }}"></circle>
+    <circle class="progress js-progress-ring-circle" cx="{{ size / 2 }}" cy="{{ size / 2 }}" r="{{ r }}" stroke-width="{{ stroke }}"
+      stroke-dasharray="{{ circumference }}" stroke-dashoffset="{{ circumference }}"
+      data-circumference="{{ circumference }}" data-target-percent="{{ percent }}"></circle>
+  </svg>
+  <div class="mini-ring-text">{{ percent }}%</div>
+</div>
+{%- endmacro %}

@@ -1,0 +1,1068 @@
+{% extends "base.html" %}
+{% block page_theme %}{{ session.get('theme', 'dark') }}{% endblock %}
+{% block title %}Create account{% endblock %}
+
+{% block auth_content %}
+<div class="asl-wrap">
+
+  <!-- ══════ Left panel: form + doodle background ══════ -->
+  <div class="asl-left">
+
+    <!-- Doodle frame — same as login, colour-switched by theme -->
+    <svg class="asl-doodle-frame" xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 460 900" preserveAspectRatio="xMidYMid slice"
+         aria-hidden="true">
+      <defs><style>
+        .ld{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
+        .ldt{fill:currentColor;font-family:monospace;font-weight:bold;}
+      </style></defs>
+      <g transform="translate(10,10) scale(0.82)" opacity=".8">
+        <path class="ld" stroke-width="2.2" d="M0,55 C2,-5 25,-8 28,-2 L28,55"/>
+        <path class="ld" stroke-width="2.2" d="M28,55 C28,-5 50,-8 56,-2 L56,55"/>
+        <text class="ldt" x="5" y="20" font-size="10">MATH</text>
+        <line class="ld" stroke-width="1.2" x1="5" y1="30" x2="25" y2="30"/>
+        <line class="ld" stroke-width="1.2" x1="5" y1="38" x2="25" y2="38"/>
+        <line class="ld" stroke-width="1.2" x1="32" y1="30" x2="52" y2="30"/>
+        <line class="ld" stroke-width="1.2" x1="32" y1="38" x2="52" y2="38"/>
+      </g>
+      <g transform="translate(108,6) scale(0.74)" opacity=".8">
+        <circle class="ld" stroke-width="2.2" cx="20" cy="20" r="16"/>
+        <path class="ld" stroke-width="2" d="M13,34 Q13,40 20,40 Q27,40 27,34"/>
+        <line class="ld" stroke-width="2" x1="14" y1="40" x2="26" y2="40"/>
+        <line class="ld" stroke-width="2" x1="15" y1="44" x2="25" y2="44"/>
+        <line class="ld" stroke-width="2" x1="20" y1="1" x2="20" y2="-6"/>
+        <line class="ld" stroke-width="1.8" x1="38" y1="8" x2="44" y2="4"/>
+        <line class="ld" stroke-width="1.8" x1="2"  y1="8" x2="-4" y2="4"/>
+        <path class="ld" stroke-width="1.5" d="M15,26 L20,32 L25,26"/>
+      </g>
+      <g transform="translate(198,2) rotate(-10,6,40) scale(0.72)" opacity=".75">
+        <rect class="ld" stroke-width="2" x="0" y="8" width="12" height="55" rx="2"/>
+        <path class="ld" stroke-width="2" d="M0,63 L6,76 L12,63"/>
+        <rect class="ld" stroke-width="2" x="0" y="0" width="12" height="10" rx="2"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="58" x2="12" y2="58"/>
+      </g>
+      <g transform="translate(282,5) scale(0.66)" opacity=".8">
+        <path class="ld" stroke-width="2.2" d="M0,38 A38,38 0 0,1 76,38"/>
+        <line class="ld" stroke-width="2" x1="0" y1="38" x2="76" y2="38"/>
+        <line class="ld" stroke-width="1.5" x1="38" y1="0" x2="38" y2="8"/>
+        <line class="ld" stroke-width="1.2" x1="57" y1="6" x2="54" y2="12"/>
+        <line class="ld" stroke-width="1.2" x1="19" y1="6" x2="22" y2="12"/>
+      </g>
+      <g transform="translate(358,8) scale(0.68)" opacity=".82">
+        <rect class="ld" stroke-width="2" x="0" y="36" width="62" height="13" rx="2"/>
+        <rect class="ld" stroke-width="2" x="3" y="22" width="58" height="13" rx="2"/>
+        <rect class="ld" stroke-width="2" x="6" y="8"  width="54" height="13" rx="2"/>
+      </g>
+      <g transform="translate(392,74)" opacity=".72">
+        <text fill="currentColor" x="0"  y="18" font-size="18">★</text>
+        <text fill="currentColor" x="22" y="10" font-size="12">★</text>
+        <text fill="currentColor" x="38" y="22" font-size="9">★</text>
+      </g>
+      <g transform="translate(8,160) scale(0.82)" opacity=".82">
+        <path class="ld" stroke-width="2.2" d="M10,0 L10,28 L0,55 Q0,68 18,68 Q36,68 36,55 L26,28 L26,0"/>
+        <line class="ld" stroke-width="2.5" x1="7" y1="0" x2="29" y2="0"/>
+        <circle class="ld" stroke-width="1.8" cx="14" cy="52" r="4"/>
+        <circle class="ld" stroke-width="1.5" cx="24" cy="44" r="3"/>
+        <circle class="ld" stroke-width="1.5" cx="17" cy="38" r="2.5"/>
+      </g>
+      <g transform="translate(5,300) scale(0.74)" opacity=".8">
+        <path class="ld" stroke-width="2.2" d="M20,0 C8,12 32,24 20,36 C8,48 32,60 20,72 C8,84 32,96 20,108"/>
+        <path class="ld" stroke-width="2.2" d="M20,0 C32,12 8,24 20,36 C32,48 8,60 20,72 C32,84 8,96 20,108"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="18" x2="29" y2="18"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="36" x2="29" y2="36"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="54" x2="29" y2="54"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="72" x2="29" y2="72"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="90" x2="29" y2="90"/>
+      </g>
+      <g transform="translate(6,476) scale(0.68)" opacity=".82">
+        <rect class="ld" stroke-width="2.2" x="0" y="0" width="48" height="62" rx="5"/>
+        <rect class="ld" stroke-width="1.8" x="5" y="6"  width="38" height="13" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="5"  y="25" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="19" y="25" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="33" y="25" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="5"  y="37" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="19" y="37" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="33" y="37" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="5"  y="49" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="19" y="49" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="33" y="49" width="11" height="9" rx="2"/>
+      </g>
+      <g transform="translate(432,140) scale(0.8)" opacity=".8">
+        <rect class="ld" stroke-width="2" x="0" y="0" width="14" height="78" rx="2"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="10" x2="8" y2="10"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="20" x2="8" y2="20"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="30" x2="8" y2="30"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="40" x2="8" y2="40"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="50" x2="8" y2="50"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="60" x2="8" y2="60"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="70" x2="8" y2="70"/>
+      </g>
+      <g transform="translate(378,306) scale(0.74)" opacity=".82">
+        <path class="ld" stroke-width="2.2" d="M0,14 Q0,10 4,10 L22,10 L27,2 L56,2 Q60,2 60,6 L60,52 Q60,56 56,56 L4,56 Q0,56 0,52 Z"/>
+      </g>
+      <g transform="translate(437,440) scale(0.78)" opacity=".8">
+        <rect class="ld" stroke-width="2" x="0" y="0" width="14" height="52" rx="7"/>
+        <path class="ld" stroke-width="2" d="M2,52 L7,66 L12,52"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="14" x2="14" y2="14"/>
+      </g>
+      <g transform="translate(382,554) scale(0.7)" opacity=".8">
+        <rect class="ld" stroke-width="2" x="0" y="15" width="50" height="40" rx="5"/>
+        <path class="ld" stroke-width="2" d="M5,15 Q5,0 25,0 Q45,0 45,15"/>
+        <path class="ld" stroke-width="2" d="M10,0 L10,-16 L20,-16"/>
+        <path class="ld" stroke-width="2" d="M40,0 L40,-16 L30,-16"/>
+      </g>
+      <g transform="translate(10,800) scale(0.74)" opacity=".82">
+        <rect class="ld" stroke-width="2.5" x="0" y="0" width="62" height="46" rx="3"/>
+        <line class="ld" stroke-width="2" x1="8"  y1="46" x2="3"  y2="65"/>
+        <line class="ld" stroke-width="2" x1="54" y1="46" x2="59" y2="65"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="42" x2="62" y2="42"/>
+        <text class="ldt" x="7" y="24" font-size="13">ABC</text>
+        <text class="ldt" x="7" y="39" font-size="12">123</text>
+      </g>
+      <g transform="translate(68,808) scale(0.72)" opacity=".78">
+        <rect class="ld" stroke-width="2" x="0" y="18" width="50" height="6" rx="1"/>
+        <line class="ld" stroke-width="2" x1="5"  y1="24" x2="5"  y2="52"/>
+        <line class="ld" stroke-width="2" x1="45" y1="24" x2="45" y2="52"/>
+        <rect class="ld" stroke-width="2" x="58" y="26" width="28" height="5" rx="1"/>
+        <line class="ld" stroke-width="2" x1="58" y1="26" x2="58" y2="8"/>
+        <line class="ld" stroke-width="2" x1="58" y1="8"  x2="86" y2="8"/>
+        <line class="ld" stroke-width="2" x1="62" y1="31" x2="62" y2="52"/>
+        <line class="ld" stroke-width="2" x1="82" y1="31" x2="82" y2="52"/>
+      </g>
+      <g transform="translate(168,812) scale(0.68)" opacity=".82">
+        <path class="ld" stroke-width="2" d="M35,0 L70,18 L35,36 L0,18 Z"/>
+        <path class="ld" stroke-width="2" d="M15,18 Q15,42 35,46 Q55,42 55,18"/>
+        <line class="ld" stroke-width="2" x1="70" y1="18" x2="70" y2="42"/>
+        <circle class="ld" stroke-width="1.5" cx="70" cy="44" r="3"/>
+      </g>
+      <g transform="translate(286,808) scale(0.66)" opacity=".82">
+        <circle class="ld" stroke-width="2.2" cx="28" cy="28" r="25"/>
+        <ellipse class="ld" stroke-width="1.5" cx="28" cy="28" rx="12" ry="25"/>
+        <line class="ld" stroke-width="1.5" x1="3"  y1="28" x2="53" y2="28"/>
+        <line class="ld" stroke-width="1"   x1="28" y1="3"  x2="28" y2="53"/>
+        <line class="ld" stroke-width="2"   x1="28" y1="53" x2="28" y2="64"/>
+        <line class="ld" stroke-width="2"   x1="18" y1="64" x2="38" y2="64"/>
+      </g>
+      <g transform="translate(352,810) scale(0.68)" opacity=".8">
+        <path class="ld" stroke-width="2" d="M5,48 Q2,5 25,3 Q48,5 45,48 Z"/>
+        <circle class="ld" stroke-width="1.8" cx="25" cy="3"  r="4"/>
+        <circle class="ld" stroke-width="2"   cx="25" cy="52" r="4"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="48" x2="50" y2="48"/>
+      </g>
+      <g transform="translate(406,818) scale(0.62)" opacity=".82">
+        <path class="ld" stroke-width="2.2" d="M22,12 Q8,10 5,28 Q2,44 10,52 Q16,60 22,56 Q28,60 34,52 Q42,44 39,28 Q36,10 22,12 Z"/>
+        <path class="ld" stroke-width="2"   d="M22,12 Q22,3 28,1 Q34,-2 33,5"/>
+        <path class="ld" stroke-width="1.5" d="M22,8 Q17,2 15,8"/>
+      </g>
+    </svg>
+
+    <button class="theme-toggle-switch" id="themeToggleBtn" aria-label="Toggle dark mode">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+
+    <div class="asl-glow" aria-hidden="true"></div>
+    <div class="asl-inner page-enter">
+
+      <!-- Brand -->
+      <div class="asl-brand sidebar-logo">
+        <svg class="logo-mark" viewBox="0 0 60 82" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="60" height="82" fill="#c8a47e"/>
+          <rect x="3" y="3" width="54" height="76" fill="none" stroke="#15100a" stroke-width="2"/>
+          <rect x="8" y="8" width="44" height="66" fill="none" stroke="#15100a" stroke-width="1.5"/>
+          <polygon points="9,9 51,9 51,21 9,39" fill="#15100a"/>
+          <polygon points="51,73 9,73 9,61 51,43" fill="#15100a"/>
+        </svg>
+        <span class="logo-name">Scholaris</span>
+      </div>
+
+      <p class="asl-eyebrow">Student portal</p>
+      <h1 class="asl-heading" aria-label="Create an account">
+        <span class="asl-hstack" aria-hidden="true">
+          <span class="asl-hbg">Create an <em>account</em></span>
+          <span class="asl-hfill" id="registerHeadingFill">Create an <em>account</em></span>
+        </span>
+      </h1>
+      <p class="asl-sub">Submit chapters, get expert feedback and track your FYP from start to finish.</p>
+
+      <div class="asl-feature-pills">
+        <span class="asl-fp">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Chapter uploads
+        </span>
+        <span class="asl-fp">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Progress tracking
+        </span>
+        <span class="asl-fp">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Expert feedback
+        </span>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-list" id="flashMessages" data-flashes='{{ messages|tojson }}'></div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Form -->
+      <form method="POST" novalidate class="asl-form">
+        {{ form.hidden_tag() }}
+
+        <div class="asl-field">
+          {{ form.full_name(placeholder="Full name", autocomplete="name", class="asl-input") }}
+          {% for err in form.full_name.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        <div class="asl-field">
+          {{ form.email(placeholder="Email address", autocomplete="email", class="asl-input") }}
+          {% for err in form.email.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        <div class="asl-field">
+          <div id="dept-hidden-wrap" style="display:none" aria-hidden="true">{{ form.department() }}</div>
+          {% for err in form.department.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        <div class="asl-field">
+          <div class="asl-pw-wrap">
+            {{ form.password(placeholder="Password", autocomplete="new-password", class="asl-input", id="pwField") }}
+            <button type="button" class="asl-pw-eye" id="pwToggle" aria-label="Show password" tabindex="-1">
+              <svg id="eyeOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="eyeClosed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"/></svg>
+            </button>
+          </div>
+          {% for err in form.password.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        <div class="asl-field">
+          <div class="asl-pw-wrap">
+            {{ form.confirm_password(placeholder="Confirm password", autocomplete="new-password", class="asl-input", id="pwConfirmField") }}
+            <button type="button" class="asl-pw-eye" id="pwConfirmToggle" aria-label="Show confirm password" tabindex="-1">
+              <svg id="eyeOpen2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="eyeClosed2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"/></svg>
+            </button>
+          </div>
+          {% for err in form.confirm_password.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        <button type="submit" class="asl-btn-primary js-submit-btn">
+          <span class="btn-spinner"></span>
+          <span class="flow-blob" aria-hidden="true"></span>
+          <span class="flow-arrow-left" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 7H2M2 7l4-4M2 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="btn-label">Create account</span>
+          <span class="flow-arrow-right" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M12 7l-4-4M12 7l-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </form>
+
+      <p class="asl-foot">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- ══════ Right panel: doodle illustration ══════ -->
+  <div class="asl-right" aria-hidden="true">
+    <img src="{{ url_for('static', filename='img/login-doodle.jpg') }}" class="asl-doodle-img" alt="">
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,600;0,700;1,400;1,600&display=swap');
+
+/* Default dark body background; light mode overridden below */
+body { background: #0c0c10; }
+[data-theme="light"] body { background: #f5e6b8; }
+
+/* ═══════════════════════════════════
+   Layout
+═══════════════════════════════════ */
+.asl-wrap {
+  display: flex;
+  min-height: 100vh;
+  background: #0c0c10;
+}
+
+/* ─── Left panel ─── */
+.asl-left {
+  width: 460px;
+  flex-shrink: 0;
+  background: #0c0c10;
+  color: #c9952a;            /* drives doodle SVG currentColor */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 52px;
+  position: relative;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+/* Doodle SVG sits behind the form */
+.asl-doodle-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+/* Form content sits above the SVG */
+.asl-left .theme-toggle-switch,
+.asl-inner { position: relative; z-index: 1; }
+
+.asl-left .theme-toggle-switch {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 10;
+}
+
+.asl-inner { width: 100%; padding: 16px 0; }
+
+/* Brand logo */
+.asl-brand.sidebar-logo { padding: 0 0 28px !important; }
+.asl-brand .logo-mark   { width: 36px !important; height: 49px !important; }
+.asl-brand .logo-name   { color: #f0ede8 !important; font-size: 16px !important; }
+
+/* Heading + subtitle */
+.asl-heading {
+  font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #f0ede8;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.asl-heading em {
+  font-style: italic;
+  color: #c8a47e;
+}
+/* Fill-text animation */
+.asl-hstack { position: relative; display: block; }
+.asl-hbg    { display: block; opacity: 0.13; user-select: none; }
+.asl-hfill  {
+  position: absolute; inset: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden; pointer-events: none;
+}
+.asl-sub {
+  font-size: 13.5px;
+  color: rgba(240,237,232,0.52);
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* ─── Eyebrow label ─── */
+.asl-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(200,164,126,0.55);
+  margin-bottom: 12px;
+}
+.asl-eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ─── Feature trust-pills ─── */
+.asl-feature-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 13px 0 20px;
+}
+.asl-fp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 99px;
+  background: rgba(200,164,126,0.07);
+  border: 1px solid rgba(200,164,126,0.14);
+  color: rgba(240,237,232,0.46);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.asl-fp svg { flex-shrink: 0; color: rgba(200,164,126,0.6); }
+
+/* ─── Ambient glow orb ─── */
+.asl-glow {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,164,126,0.065) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Field tokens (dark default, light override) ─── */
+.asl-left {
+  --f-bg:           rgba(255,255,255,0.07);
+  --f-border:       rgba(255,255,255,0.14);
+  --f-color:        #f0ede8;
+  --f-placeholder:  rgba(240,237,232,0.32);
+  --f-focus-border: rgba(200,164,126,0.65);
+  --f-focus-bg:     rgba(200,164,126,0.07);
+  --f-arrow:        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(240,237,232,0.45)' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  --f-opt-bg:       #1a1a24;
+  --f-opt-color:    #f0ede8;
+}
+[data-theme="light"] .asl-left {
+  --f-bg:           #ffffff;
+  --f-border:       rgba(160,110,60,0.35);
+  --f-color:        #15100a;
+  --f-placeholder:  rgba(21,16,10,0.35);
+  --f-focus-border: rgba(160,110,60,0.65);
+  --f-focus-bg:     #ffffff;
+  --f-arrow:        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(21,16,10,0.5)' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  --f-opt-bg:       #ffffff;
+  --f-opt-color:    #15100a;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .asl-left {
+    --f-bg:           #ffffff;
+    --f-border:       rgba(160,110,60,0.35);
+    --f-color:        #15100a;
+    --f-placeholder:  rgba(21,16,10,0.35);
+    --f-focus-border: rgba(160,110,60,0.65);
+    --f-focus-bg:     #ffffff;
+    --f-arrow:        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(21,16,10,0.5)' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    --f-opt-bg:       #ffffff;
+    --f-opt-color:    #15100a;
+  }
+}
+
+/* ─── Form ─── */
+.asl-form { display: flex; flex-direction: column; gap: 10px; }
+.asl-field { display: flex; flex-direction: column; gap: 4px; }
+
+.asl-label {
+  font-size: 12px;
+  color: var(--f-placeholder);
+  margin-bottom: 2px;
+}
+
+.asl-input,
+.asl-wrap input[type="text"],
+.asl-wrap input[type="email"],
+.asl-wrap input[type="password"],
+.asl-wrap select {
+  width: 100%;
+  padding: 13px 16px;
+  background-color: var(--f-bg);
+  border: 1px solid var(--f-border);
+  border-radius: 11px;
+  color: var(--f-color);
+  -webkit-text-fill-color: var(--f-color);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 200ms ease, background-color 200ms ease;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.asl-input::placeholder,
+.asl-wrap input::placeholder { color: var(--f-placeholder); -webkit-text-fill-color: var(--f-placeholder); }
+.asl-input:focus,
+.asl-wrap input:focus,
+.asl-wrap select:focus {
+  border-color: var(--f-focus-border);
+  background-color: var(--f-focus-bg);
+}
+
+/* Select arrow */
+.asl-select {
+  background-image: var(--f-arrow);
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px !important;
+  cursor: pointer;
+  color: var(--f-placeholder);
+  -webkit-text-fill-color: var(--f-placeholder);
+}
+.asl-select.has-value {
+  color: var(--f-color);
+  -webkit-text-fill-color: var(--f-color);
+}
+.asl-select option { background: var(--f-opt-bg); color: var(--f-opt-color); }
+
+[data-theme="light"] .asl-select {
+  background-color: #ffffff !important;
+  border-color: rgba(160,110,60,0.5) !important;
+  color: #15100a !important;
+  -webkit-text-fill-color: #15100a !important;
+}
+[data-theme="light"] .asl-select.has-value {
+  color: #15100a !important;
+  -webkit-text-fill-color: #15100a !important;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .asl-select {
+    background-color: #ffffff !important;
+    border-color: rgba(160,110,60,0.5) !important;
+    color: rgba(21,16,10,0.45) !important;
+    -webkit-text-fill-color: rgba(21,16,10,0.45) !important;
+  }
+  :root:not([data-theme="dark"]) .asl-select.has-value {
+    color: #15100a !important;
+    -webkit-text-fill-color: #15100a !important;
+  }
+}
+
+/* Password eye toggle */
+.asl-pw-wrap { position: relative; }
+.asl-pw-wrap .asl-input { padding-right: 46px; }
+.asl-pw-eye {
+  position: absolute;
+  top: 50%; right: 13px;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; padding: 0;
+  color: rgba(240,237,232,0.32);
+  display: flex; align-items: center;
+  transition: color 140ms;
+}
+.asl-pw-eye:hover { color: rgba(240,237,232,0.65); }
+.asl-pw-eye svg { width: 17px; height: 17px; }
+
+/* Primary button */
+.asl-btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: #c8a47e;
+  color: #15100a;
+  overflow: hidden;
+  position: relative;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+  transition: background 150ms, transform 120ms, box-shadow 150ms;
+  box-shadow: 0 4px 18px rgba(200,164,126,0.28);
+}
+.asl-btn-primary:hover {
+  background: #d4af8c;
+  box-shadow: 0 6px 24px rgba(200,164,126,0.42);
+}
+.asl-btn-primary:active { transform: scale(0.99); }
+.asl-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* FlowButton animation */
+.asl-btn-primary .flow-blob {
+  position: absolute;
+  width: 300%; height: 300%;
+  left: -100%; top: -100%;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.13);
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+.asl-btn-primary:hover .flow-blob { transform: scale(1); }
+.asl-btn-primary .flow-arrow-left {
+  position: absolute; left: 18px; top: 50%;
+  transform: translateY(-50%) translateX(-140%);
+  opacity: 0; display: flex; align-items: center;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  z-index: 2; color: inherit;
+}
+.asl-btn-primary:hover .flow-arrow-left { transform: translateY(-50%) translateX(0); opacity: 1; }
+.asl-btn-primary .flow-arrow-right {
+  position: absolute; right: 18px; top: 50%;
+  transform: translateY(-50%) translateX(0);
+  opacity: 1; display: flex; align-items: center;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  z-index: 2; color: inherit;
+}
+.asl-btn-primary:hover .flow-arrow-right { transform: translateY(-50%) translateX(140%); opacity: 0; }
+.asl-btn-primary .btn-label {
+  position: relative; z-index: 2; display: inline-block;
+  transform: translateX(0);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.asl-btn-primary:hover .btn-label { transform: translateX(8px); }
+.asl-btn-primary .btn-spinner { position: relative; z-index: 2; }
+
+/* Inline spinner */
+.btn-spinner {
+  display: none;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(21,16,10,0.25);
+  border-top-color: #15100a;
+  border-radius: 50%;
+  animation: asl-spin 0.7s linear infinite;
+}
+.is-loading .btn-spinner { display: block; }
+.is-loading .btn-label   { opacity: 0.8; }
+@keyframes asl-spin { to { transform: rotate(360deg); } }
+
+/* Footer */
+.asl-foot {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(240,237,232,0.36);
+}
+.asl-foot a { color: #c8a47e; font-weight: 600; text-decoration: none; }
+.asl-foot a:hover { text-decoration: underline; }
+
+/* Flash messages */
+.asl-wrap .flash-list { margin-bottom: 14px; }
+
+/* ═══════════════════════════════════
+   Light mode overrides
+═══════════════════════════════════ */
+[data-theme="light"] .asl-wrap { background: #f5e6b8; }
+
+[data-theme="light"] .asl-left {
+  background: #f5e6b8;
+  color: #b8956a;
+  border-right-color: rgba(160,110,60,0.18);
+}
+
+[data-theme="light"] .asl-brand .logo-name { color: #15100a !important; }
+[data-theme="light"] .asl-heading          { color: #15100a; }
+[data-theme="light"] .asl-heading em       { color: #a06e3c; }
+[data-theme="light"] .asl-sub              { color: rgba(21,16,10,0.5); }
+[data-theme="light"] .asl-label            { color: rgba(21,16,10,0.5); }
+[data-theme="light"] .asl-eyebrow          { color: rgba(160,110,60,0.52); }
+[data-theme="light"] .asl-fp {
+  background: rgba(160,110,60,0.07);
+  border-color: rgba(160,110,60,0.15);
+  color: rgba(21,16,10,0.42);
+}
+[data-theme="light"] .asl-fp svg { color: rgba(160,110,60,0.6); }
+[data-theme="light"] .asl-glow {
+  background: radial-gradient(circle, rgba(160,110,60,0.055) 0%, transparent 65%);
+}
+
+/* field colours now handled by CSS vars on .asl-left — see token block above */
+
+[data-theme="light"] .asl-pw-eye       { color: rgba(21,16,10,0.32); }
+[data-theme="light"] .asl-pw-eye:hover { color: rgba(21,16,10,0.65); }
+
+[data-theme="light"] .asl-foot         { color: rgba(21,16,10,0.4); }
+
+[data-theme="light"] .asl-left { border-bottom-color: rgba(160,110,60,0.18); }
+
+/* Right panel light-mode blends */
+[data-theme="light"] .asl-right::before {
+  background: linear-gradient(
+    to right,
+    #f5e6b8 0%,
+    rgba(245,230,184,0.62) 14%,
+    rgba(245,230,184,0.18) 34%,
+    transparent 54%
+  );
+}
+[data-theme="light"] .asl-right::after {
+  background:
+    linear-gradient(to bottom, rgba(245,230,184,0.3) 0%, transparent 22%),
+    linear-gradient(to top,    rgba(245,230,184,0.3) 0%, transparent 22%);
+}
+[data-theme="light"] .asl-doodle-img {
+  filter: saturate(1.08) contrast(1.04) brightness(1.0);
+}
+
+
+/* ═══════════════════════════════════
+   Right panel — doodle image
+═══════════════════════════════════ */
+.asl-right {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Left-edge blend into the dark left panel */
+.asl-right::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    #0c0c10 0%,
+    rgba(12,12,16,0.62) 14%,
+    rgba(12,12,16,0.18) 34%,
+    transparent 54%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Top/bottom vignette */
+.asl-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, transparent 22%),
+    linear-gradient(to top,    rgba(0,0,0,0.22) 0%, transparent 22%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.asl-doodle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  filter: saturate(1.14) contrast(1.06) brightness(0.96);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* ═══════════════════════════════════
+   Responsive
+═══════════════════════════════════ */
+@media (max-width: 880px) {
+  .asl-wrap  { flex-direction: column; }
+  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); overflow: visible; overflow-y: visible; }
+  .asl-right { flex: none; min-height: 260px; }
+  [data-theme="light"] .asl-left { border-bottom-color: rgba(160,110,60,0.18); }
+
+  .asl-right::before {
+    background: linear-gradient(
+      to bottom,
+      #0c0c10 0%,
+      rgba(12,12,16,0.55) 18%,
+      transparent 50%
+    );
+  }
+  [data-theme="light"] .asl-right::before {
+    background: linear-gradient(
+      to bottom,
+      #f5e6b8 0%,
+      rgba(245,230,184,0.55) 18%,
+      transparent 50%
+    );
+  }
+}
+@media (max-width: 480px) {
+  .asl-left    { padding: 28px 20px; }
+  .asl-heading { font-size: 28px; }
+  .asl-feature-pills { margin: 10px 0 16px; }
+}
+
+/* Hide native department select — combobox replaces it */
+#department { display: none !important; }
+
+/* ─── Searchable combobox ─── */
+.asl-combobox {
+  position: relative;
+}
+
+/* Arrow rendered as pseudo-element — no background-image on the input itself */
+.asl-combobox::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 8px;
+  background-image: var(--f-arrow);
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+
+.asl-dept-input {
+  padding-right: 38px;
+  cursor: pointer;
+  color: var(--f-placeholder);
+  -webkit-text-fill-color: var(--f-placeholder);
+}
+.asl-dept-input.dept-has-value {
+  color: var(--f-color);
+  -webkit-text-fill-color: var(--f-color);
+}
+
+/* Light mode arrow color */
+[data-theme="light"] .asl-combobox::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(21,16,10,0.5)' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .asl-combobox::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(21,16,10,0.5)' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+}
+
+.asl-combobox-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: #1a1a24;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 11px;
+  max-height: 210px;
+  overflow-y: auto;
+  z-index: 200;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+.asl-combobox-dropdown.open { display: block; }
+
+.asl-combobox-option {
+  padding: 10px 16px;
+  font-size: 13.5px;
+  color: #f0ede8;
+  cursor: pointer;
+  transition: background 80ms;
+}
+.asl-combobox-option:hover,
+.asl-combobox-option.is-active {
+  background: rgba(200,164,126,0.13);
+  color: #c8a47e;
+}
+.asl-combobox-empty {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: rgba(240,237,232,0.35);
+  font-style: italic;
+}
+
+[data-theme="light"] .asl-combobox-dropdown {
+  background: #ffffff;
+  border-color: rgba(160,110,60,0.3);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+}
+[data-theme="light"] .asl-combobox-option { color: #15100a; }
+[data-theme="light"] .asl-combobox-option:hover,
+[data-theme="light"] .asl-combobox-option.is-active {
+  background: rgba(160,110,60,0.09);
+  color: #8a5a1e;
+}
+[data-theme="light"] .asl-combobox-empty { color: rgba(21,16,10,0.35); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+(function () {
+  /* Staggered entrance animations */
+  if (typeof anime !== 'undefined') {
+    var _a = anime, animate = _a.animate, stagger = _a.stagger;
+    animate('.asl-eyebrow',       { opacity:[0,1], translateY:[-6,0],  duration:400, ease:'outCubic',      delay:80  });
+    animate('.asl-heading',       { opacity:[0,1], translateY:[18,0],  duration:560, ease:'outBack(1.05)', delay:150 });
+    animate('.asl-sub',           { opacity:[0,1], translateY:[8,0],   duration:380, ease:'outCubic',      delay:250 });
+    animate('.asl-feature-pills', { opacity:[0,1], translateY:[8,0],   duration:360, ease:'outCubic',      delay:320 });
+    animate('.asl-fp',            { opacity:[0,1], scale:[0.93,1],     duration:300, ease:'outBack(1.1)',  delay:stagger(50,{start:350}) });
+    animate('.asl-form, .asl-foot', {
+      opacity:[0,1], translateY:[8,0], duration:340, ease:'outCubic',
+      delay:stagger(40,{start:440})
+    });
+  }
+
+  /* Fill sweep on "Create an account" — starts after entrance animation */
+  setTimeout(function () {
+    var fill = document.getElementById('registerHeadingFill');
+    if (!fill) return;
+    var prog = 0;
+    var id = setInterval(function () {
+      prog = Math.min(1, prog + Math.random() * 0.22);
+      fill.style.clipPath = 'inset(0 ' + (Math.round((1 - prog) * 1000) / 10) + '% 0 0)';
+      if (prog >= 1) clearInterval(id);
+    }, 480);
+  }, 710);
+
+  /* ─── Searchable department combobox ─── */
+  (function () {
+    var hiddenSel = document.getElementById('department');
+    if (!hiddenSel) return;
+
+    /* Build option list from the native select (skip blank placeholder) */
+    var opts = Array.from(hiddenSel.options)
+      .filter(function (o) { return o.value !== ''; })
+      .map(function (o) { return { value: o.value, label: o.text }; });
+
+    /* Create wrapper + input + dropdown */
+    var wrap = document.createElement('div');
+    wrap.className = 'asl-combobox';
+
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'asl-input asl-dept-input';
+    inp.placeholder = '— Select department —';
+    inp.autocomplete = 'off';
+    inp.setAttribute('aria-label', 'Search department');
+    inp.setAttribute('aria-autocomplete', 'list');
+
+    var drop = document.createElement('div');
+    drop.className = 'asl-combobox-dropdown';
+    drop.setAttribute('role', 'listbox');
+
+    wrap.appendChild(inp);
+    wrap.appendChild(drop);
+
+    /* Insert combobox after the hidden wrapper div */
+    var deptWrap = document.getElementById('dept-hidden-wrap');
+    deptWrap.parentNode.insertBefore(wrap, deptWrap.nextSibling);
+
+    /* If form re-rendered with a previous value, show it */
+    if (hiddenSel.value) {
+      var pre = opts.find(function (o) { return o.value === hiddenSel.value; });
+      if (pre) { inp.value = pre.label; inp.classList.add('dept-has-value'); }
+    }
+
+    var activeIdx = -1;
+    var isOpen    = false;
+
+    function render(q) {
+      var list = q
+        ? opts.filter(function (o) { return o.label.toLowerCase().indexOf(q.toLowerCase()) !== -1; })
+        : opts;
+
+      drop.innerHTML = '';
+      activeIdx = -1;
+
+      if (!list.length) {
+        var msg = document.createElement('div');
+        msg.className = 'asl-combobox-empty';
+        msg.textContent = 'No departments found';
+        drop.appendChild(msg);
+        return;
+      }
+
+      list.forEach(function (opt) {
+        var el = document.createElement('div');
+        el.className = 'asl-combobox-option';
+        el.setAttribute('role', 'option');
+        el.dataset.value = opt.value;
+        el.textContent = opt.label;
+        el.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          pick(opt.value, opt.label);
+        });
+        drop.appendChild(el);
+      });
+    }
+
+    function pick(value, label) {
+      hiddenSel.value = value;
+      inp.value = label;
+      inp.classList.add('dept-has-value');
+      close();
+    }
+
+    function open(q) {
+      render(q != null ? q : '');
+      drop.classList.add('open');
+      isOpen = true;
+    }
+
+    function close() {
+      drop.classList.remove('open');
+      isOpen    = false;
+      activeIdx = -1;
+    }
+
+    function items() { return drop.querySelectorAll('.asl-combobox-option'); }
+
+    function setActive(idx) {
+      var els = items();
+      els.forEach(function (el) { el.classList.remove('is-active'); });
+      if (idx >= 0 && idx < els.length) {
+        els[idx].classList.add('is-active');
+        els[idx].scrollIntoView({ block: 'nearest' });
+        activeIdx = idx;
+      }
+    }
+
+    inp.addEventListener('focus', function () { open(inp.value); });
+
+    inp.addEventListener('input', function () {
+      open(inp.value);
+      if (!inp.value) hiddenSel.value = '';
+    });
+
+    inp.addEventListener('keydown', function (e) {
+      var els = items();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!isOpen) open(inp.value);
+        setActive(Math.min(activeIdx + 1, els.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActive(Math.max(activeIdx - 1, 0));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIdx >= 0 && els[activeIdx]) {
+          pick(els[activeIdx].dataset.value, els[activeIdx].textContent);
+        }
+      } else if (e.key === 'Escape') {
+        close();
+      }
+    });
+
+    /* Close when clicking outside */
+    document.addEventListener('mousedown', function (e) {
+      if (!wrap.contains(e.target)) {
+        close();
+        /* If typed text doesn't match selected value, clear input */
+        if (inp.value && !hiddenSel.value) inp.value = '';
+      }
+    });
+  }());
+
+  /* Submit loading */
+  document.querySelectorAll('form').forEach(function (f) {
+    f.addEventListener('submit', function () {
+      var btn = f.querySelector('.js-submit-btn');
+      if (btn) { btn.classList.add('is-loading'); btn.disabled = true; }
+    });
+  });
+
+  /* Password visibility toggles */
+  function bindEye(fieldId, toggleId, openId, closedId) {
+    var pw = document.getElementById(fieldId);
+    var tog = document.getElementById(toggleId);
+    var open = document.getElementById(openId);
+    var closed = document.getElementById(closedId);
+    if (!tog || !pw) return;
+    tog.addEventListener('click', function () {
+      var show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      open.style.display   = show ? 'none' : '';
+      closed.style.display = show ? '' : 'none';
+    });
+  }
+  bindEye('pwField',        'pwToggle',        'eyeOpen',  'eyeClosed');
+  bindEye('pwConfirmField', 'pwConfirmToggle', 'eyeOpen2', 'eyeClosed2');
+})();
+</script>
+{% endblock %}

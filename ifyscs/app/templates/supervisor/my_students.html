@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% from "components/progress_ring.html" import mini_ring %}
+{% block title %}My Students{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page header ─────────────────────────────────────────── */
+.ms-hdr {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.ms-hdr-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary); }
+.ms-hdr-sub   { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+
+.ms-pills { display: flex; gap: 8px; flex-shrink: 0; }
+.ms-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 99px;
+  border: 1px solid var(--card-light-border);
+  background: var(--card-light);
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.ms-pill-val { font-size: 15px; font-weight: 800; line-height: 1; }
+.ms-pill-pending { color: var(--warning); border-color: rgba(243,156,18,0.25); background: rgba(243,156,18,0.07); }
+
+/* ── Student card ────────────────────────────────────────── */
+.ms-card {
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  opacity: 0;
+}
+.ms-card.ms-has-pending { border-left: 3px solid var(--warning); }
+
+/* Dark top band */
+.ms-top {
+  background: var(--card-dark);
+  padding: 18px 18px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.ms-av {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase;
+}
+.ms-av-0 { background: var(--accent-gold); }
+.ms-av-1 { background: #6c63ff; }
+.ms-av-2 { background: var(--success); }
+.ms-av-3 { background: #e06c75; }
+.ms-av-4 { background: #5ba0e0; }
+
+.ms-top-info { flex: 1; min-width: 0; }
+.ms-name {
+  font-size: 13.5px; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
+}
+.ms-project {
+  font-size: 11px; color: rgba(255,255,255,0.48); line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Ring override: make visible on dark bg */
+.ms-top .mini-ring            { flex-shrink: 0; }
+.ms-top .mini-ring .track     { stroke: rgba(255,255,255,0.12); }
+.ms-top .mini-ring-text       { color: #fff; font-size: 10px; font-weight: 700; }
+
+/* Card body */
+.ms-body { padding: 16px 18px 18px; flex: 1; display: flex; flex-direction: column; }
+
+/* Mini stat counters */
+.ms-counters { display: flex; gap: 7px; margin-bottom: 15px; }
+.ms-counter {
+  flex: 1; text-align: center; padding: 9px 4px;
+  border: 1px solid var(--card-light-border); border-radius: 10px;
+}
+.ms-counter-val {
+  font-size: 17px; font-weight: 800; line-height: 1; margin-bottom: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.ms-counter-lab { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+.ms-counter-val-total   { color: var(--text-primary); }
+.ms-counter-val-done    { color: var(--success); }
+.ms-counter-val-pending { color: var(--warning); }
+
+/* Progress bar */
+.ms-prog-row {
+  display: flex; justify-content: space-between;
+  font-size: 10.5px; color: var(--text-secondary); margin-bottom: 5px;
+}
+.ms-prog-pct { font-weight: 700; color: var(--accent-gold); }
+.ms-prog-track {
+  height: 4px; border-radius: 99px; overflow: hidden;
+  background: var(--card-light-border); margin-bottom: 13px;
+}
+.ms-prog-fill {
+  height: 100%; border-radius: 99px; width: 0;
+  background: linear-gradient(90deg, var(--accent-gold), rgba(201,149,42,0.5));
+  transition: width 900ms cubic-bezier(0.22,1,0.36,1);
+}
+
+/* Latest chip */
+.ms-latest { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+.ms-latest-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.ms-latest-text { font-size: 11.5px; color: var(--text-secondary); }
+
+/* Actions */
+.ms-actions { display: flex; gap: 8px; margin-top: auto; }
+.ms-actions .btn { flex: 1; justify-content: center; font-size: 12px; }
+.ms-review-n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); font-size: 9.5px; font-weight: 800; margin-left: 3px;
+}
+
+/* Dark mode */
+[data-theme="dark"] .ms-card { background: #1c1e24; border-color: rgba(255,255,255,0.06); }
+[data-theme="dark"] .ms-top  { background: #13141e; }
+[data-theme="dark"] .ms-counter { border-color: rgba(255,255,255,0.06); }
+[data-theme="dark"] .ms-pill { background: #1c1e24; border-color: rgba(255,255,255,0.08); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% set ns = namespace(total_pending=0) %}
+{% for row in rows %}{% set ns.total_pending = ns.total_pending + row.counts.pending %}{% endfor %}
+
+<!-- Header -->
+<div class="ms-hdr" id="msHeader">
+  <div>
+    <div class="ms-hdr-title">My Students</div>
+    <div class="ms-hdr-sub">{{ rows|length }} student{{ 's' if rows|length != 1 }} assigned to you</div>
+  </div>
+  {% if rows %}
+  <div class="ms-pills">
+    <div class="ms-pill">
+      <span class="ms-pill-val">{{ rows|length }}</span> Total
+    </div>
+    {% if ns.total_pending > 0 %}
+    <div class="ms-pill ms-pill-pending">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <span class="ms-pill-val">{{ ns.total_pending }}</span> Pending
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Student grid -->
+<div class="grid grid-3">
+  {% for row in rows %}
+  <div class="ms-card card-tilt {{ 'ms-has-pending' if row.counts.pending > 0 }}">
+
+    <div class="ms-top">
+      <div class="ms-av ms-av-{{ loop.index0 % 5 }}">{{ row.student.full_name[0]|upper }}</div>
+      <div class="ms-top-info">
+        <div class="ms-name">{{ row.student.full_name }}</div>
+        <div class="ms-project">{{ row.project.title }}</div>
+      </div>
+      {{ mini_ring(row.percent, size=50, stroke=4) }}
+    </div>
+
+    <div class="ms-body">
+
+      <div class="ms-counters">
+        <div class="ms-counter">
+          <div class="ms-counter-val ms-counter-val-total">{{ row.counts.total }}</div>
+          <div class="ms-counter-lab">Total</div>
+        </div>
+        <div class="ms-counter">
+          <div class="ms-counter-val ms-counter-val-done">{{ row.counts.approved }}</div>
+          <div class="ms-counter-lab">Done</div>
+        </div>
+        <div class="ms-counter">
+          <div class="ms-counter-val ms-counter-val-pending">{{ row.counts.pending }}</div>
+          <div class="ms-counter-lab">Pending</div>
+        </div>
+      </div>
+
+      <div class="ms-prog-row">
+        <span>Progress</span>
+        <span class="ms-prog-pct">{{ row.percent }}%</span>
+      </div>
+      <div class="ms-prog-track">
+        <div class="ms-prog-fill" data-target="{{ row.percent }}"></div>
+      </div>
+
+      <div class="ms-latest">
+        {% if row.latest %}
+        <div class="ms-latest-dot" style="background:{{ 'var(--success)' if row.latest.status == 'approved' else ('var(--danger)' if row.latest.status == 'rejected' else 'var(--warning)') }};"></div>
+        <span class="ms-latest-text">Ch.{{ row.latest.chapter_number }} &middot; {{ row.latest.status|title }}</span>
+        {% else %}
+        <div class="ms-latest-dot" style="background:var(--card-light-border);"></div>
+        <span class="ms-latest-text">No submissions yet</span>
+        {% endif %}
+      </div>
+
+      <div class="ms-actions">
+        <a href="{{ url_for('supervisor.student_detail', student_id=row.student.id) }}" class="btn btn-outline btn-sm">View all</a>
+        {% if row.counts.pending > 0 %}
+        <a href="{{ url_for('supervisor.review', submission_id=row.latest.id) if row.latest and row.latest.status == 'pending' else url_for('supervisor.student_detail', student_id=row.student.id) }}" class="btn btn-primary btn-sm">
+          Review<span class="ms-review-n">{{ row.counts.pending }}</span>
+        </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+  {% else %}
+  <div style="grid-column:1/-1;text-align:center;padding:72px 0;color:var(--text-secondary);font-size:14px;">
+    No students assigned to you yet.
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const { animate, stagger } = anime;
+
+  animate('#msHeader', { opacity: [0, 1], translateY: [-10, 0], duration: 400, ease: 'outCubic' });
+
+  animate('.ms-card', {
+    opacity:    [0, 1],
+    translateY: [22, 0],
+    scale:      [0.97, 1],
+    duration:   560,
+    ease:       'outBack(1.08)',
+    delay:      stagger(70, { start: 60 })
+  });
+
+  // Animate progress fills after card entrance
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('.ms-prog-fill').forEach(el => {
+      el.style.width = (el.dataset.target || 0) + '%';
+    });
+  }));
+});
+</script>
+{% endblock %}

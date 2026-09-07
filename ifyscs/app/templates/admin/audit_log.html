@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+
+{% block extra_css %}
+<style>
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden; }
+}
+.audit-card .audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+/* Lock the select to its closed width — long options like
+   "unauthorized_super_admin_access" must not stretch the layout */
+.audit-header select {
+  max-width: 160px;
+  width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .audit-header select {
+    max-width: 140px;
+    width: 140px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card audit-card">
+  <div class="audit-header">
+    <h3>Audit log</h3>
+    <form method="GET" style="display:flex;gap:8px;">
+      <select name="action" onchange="this.form.submit()" style="padding:8px 10px;border-radius:8px;border:1px solid var(--card-light-border);font-size:13px;">
+        <option value="">All actions</option>
+        {% for a in actions %}
+        <option value="{{ a }}" {{ 'selected' if action_filter == a }}>{{ a }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+  <div class="table-scroll mt-24">
+    <table>
+      <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Detail</th><th>IP</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="text-muted" style="white-space:nowrap;">{{ log.timestamp.strftime('%b %d, %Y %H:%M') }}</td>
+          <td style="white-space:nowrap;">{{ log.user.full_name if log.user else 'System' }}</td>
+          <td style="white-space:nowrap;"><span class="badge badge-pending">{{ log.action }}</span></td>
+          <td class="text-muted" style="max-width:260px;">{{ log.detail or '' }}</td>
+          <td class="text-muted" style="white-space:nowrap;">{{ log.ip_address or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-muted">No audit entries yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

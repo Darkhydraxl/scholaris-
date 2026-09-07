@@ -1,0 +1,628 @@
+/* ===== Cards ===== */
+.card {
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  position: relative;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.card-dark {
+  background: var(--card-dark);
+  color: var(--text-on-dark-card);
+  border: none;
+}
+.card-dark .text-muted { color: var(--text-on-dark-card-muted); }
+
+.card-tilt { transition: transform 100ms ease-out; }
+
+/* ===== Stat card ===== */
+.stat-card { display: flex; flex-direction: column; gap: 14px; }
+.stat-icon-circle {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--soft-icon-bg);
+  color: var(--soft-icon-fg);
+  display: flex; align-items: center; justify-content: center;
+}
+.card-dark .stat-icon-circle { background: rgba(255,255,255,0.1); color: var(--text-on-dark-card); }
+.stat-icon-circle svg { width: 18px; height: 18px; }
+.stat-value { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+.stat-label { font-size: 13px; color: var(--text-secondary); }
+
+/* ===== Progress ring ===== */
+.progress-ring-wrap { display: flex; align-items: center; gap: 24px; }
+.progress-ring { position: relative; width: 168px; height: 168px; flex-shrink: 0; }
+.progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.progress-ring circle.track { stroke: var(--card-light-border); fill: none; }
+.card-dark .progress-ring circle.track { stroke: rgba(255,255,255,0.12); }
+.progress-ring circle.progress { stroke: var(--ring-accent); fill: none; stroke-linecap: round; transition: stroke-dashoffset 1s var(--ease-out); }
+.progress-ring-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.progress-ring-text .pct { font-size: 30px; font-weight: 800; }
+.progress-ring-text .lbl { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+
+.legend-dots { display: flex; flex-direction: column; gap: 10px; }
+.legend-dot-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ===== Progress bars ===== */
+.progress-bar-track {
+  height: 6px; border-radius: var(--radius-pill);
+  background: var(--card-light-border);
+  overflow: hidden;
+}
+.card-dark .progress-bar-track { background: rgba(255,255,255,0.12); }
+.progress-bar-fill {
+  height: 100%; border-radius: var(--radius-pill);
+  background: var(--ring-accent);
+  width: 0;
+  transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== Submission / kanban-style cards ===== */
+.task-card {
+  border-radius: 18px;
+  padding: 18px;
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  position: relative;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.task-card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.task-icon-badge {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--soft-icon-bg); color: var(--soft-icon-fg);
+  display: flex; align-items: center; justify-content: center;
+}
+.task-icon-badge svg { width: 16px; height: 16px; }
+.task-card-title { font-weight: 700; font-size: 14px; margin-top: 4px; }
+.task-card-meta { font-size: 12px; color: var(--text-secondary); }
+.task-card-bell {
+  position: absolute; right: 14px; bottom: 14px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--card-dark); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.task-card-bell svg { width: 13px; height: 13px; }
+
+.menu-trigger {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: none; background: transparent; color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.menu-trigger:hover { background: var(--soft-icon-bg); }
+
+.popover-menu {
+  position: absolute; top: 36px; right: 0;
+  background: var(--card-light);
+  border-radius: 14px;
+  box-shadow: var(--shadow-pop);
+  border: 1px solid var(--card-light-border);
+  padding: 6px;
+  min-width: 160px;
+  z-index: 20;
+  transform-origin: top right;
+  display: none;
+}
+.popover-menu.open { display: block; animation: popover-in 140ms var(--ease-spring) both; }
+.popover-menu button, .popover-menu a {
+  width: 100%;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; border-radius: 9px;
+  border: none; background: transparent;
+  font-size: 13px; cursor: pointer; text-align: left; color: var(--text-primary);
+}
+.popover-menu button:hover, .popover-menu a:hover { background: var(--soft-icon-bg); }
+.popover-menu svg { width: 14px; height: 14px; }
+
+/* Dashed "add" card */
+.add-card {
+  border-radius: 18px;
+  border: 1.5px dashed var(--card-light-border);
+  min-height: 150px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 200ms, color 200ms;
+}
+.add-card:hover { border-color: var(--ring-accent); color: var(--ring-accent); }
+.add-card .plus-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--soft-icon-bg); display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== Checklist ===== */
+.checklist-item { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 9px 0; border-bottom: 1px solid var(--card-light-border); }
+.checklist-item:last-child { border-bottom: none; }
+.checkbox {
+  width: 19px; height: 19px; border-radius: 50%;
+  border: 1.5px solid var(--card-light-border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 160ms, border-color 160ms;
+}
+.checkbox.checked { background: var(--ring-accent); border-color: var(--ring-accent); color: var(--active-pill-text); }
+.checkbox svg { width: 10px; height: 10px; }
+.checklist-item.done span { color: var(--text-secondary); }
+
+/* ===== Summary card (full width dark) ===== */
+.summary-card {
+  background: var(--card-dark);
+  color: var(--text-on-dark-card);
+  border-radius: 20px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.summary-card-title { font-weight: 700; font-size: 15px; }
+.summary-card-sub { font-size: 12px; color: var(--text-on-dark-card-muted); margin-top: 4px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+.mini-ring { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+.mini-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.mini-ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+
+/* ===== Badges ===== */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: var(--radius-pill);
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+}
+.badge-pending { background: rgba(243, 156, 18, 0.14); color: var(--warning); }
+.badge-approved { background: rgba(39, 174, 96, 0.14); color: var(--success); }
+.badge-rejected { background: rgba(231, 76, 60, 0.14); color: var(--danger); }
+
+/* ===== Chart card badge ===== */
+.chart-badge {
+  position: absolute; top: 22px; right: 22px;
+  background: var(--card-dark); color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: var(--radius-pill);
+}
+
+/* ===== Card header (icon button row, top-right of a card) ===== */
+.card-header-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+.card-header-row h3 { font-size: 15px; }
+.card-icon-btn {
+  width: 30px; height: 30px; border-radius: 9px;
+  border: none; background: var(--soft-icon-bg); color: var(--soft-icon-fg);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.card-dark .card-icon-btn { background: rgba(255,255,255,0.1); color: #fff; }
+.card-icon-btn svg { width: 14px; height: 14px; }
+.card-header-actions { display: flex; gap: 8px; }
+
+/* ===== Section header with a trailing link ("Open archive >", "View all") ===== */
+.section-header-row { display: flex; align-items: baseline; justify-content: space-between; }
+.section-link { font-size: 13px; font-weight: 600; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px; }
+.section-link:hover { color: var(--text-primary); }
+.section-link svg { width: 13px; height: 13px; }
+
+/* ===== Combined dark overview card (big numbers + mini stat circles) ===== */
+.overview-card {
+  display: flex; flex-direction: column; gap: 24px; padding: 28px;
+  position: relative; overflow: hidden;
+}
+
+/* ambient subtle glow */
+.ov-glow {
+  position: absolute;
+  width: 340px; height: 340px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 68%);
+  top: -110px; right: -90px; pointer-events: none;
+}
+
+/* subtle top-edge border */
+.overview-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 38%, rgba(255,255,255,0.06) 68%, transparent 100%);
+  pointer-events: none;
+}
+
+/* eyebrow label */
+.ov-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-on-dark-card-muted); margin: 0 0 2px;
+}
+
+/* pulsing live indicator */
+.ov-live {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 600; color: rgba(76,217,100,0.75);
+  flex-shrink: 0;
+}
+.ov-live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4cd964;
+  box-shadow: 0 0 0 0 rgba(76,217,100,0.55);
+  animation: ov-pulse 2.2s ease-in-out infinite;
+}
+@keyframes ov-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(76,217,100,0.5); }
+  55%       { box-shadow: 0 0 0 5px rgba(76,217,100,0); }
+}
+
+/* big number row */
+.overview-numbers { display: flex; align-items: center; gap: 20px; }
+.overview-numbers .num-group { display: flex; flex-direction: column; gap: 3px; }
+.overview-numbers .num-value { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: var(--text-on-dark-card); }
+.overview-numbers .num-frac { font-size: 15px; font-weight: 500; color: var(--text-on-dark-card-muted); line-height: 1; }
+.overview-numbers .num-label { font-size: 12px; color: var(--text-on-dark-card-muted); line-height: 1.35; margin-top: 1px; }
+.overview-numbers .num-divider { width: 1px; align-self: stretch; background: rgba(255,255,255,0.12); }
+
+/* progress bar */
+.overview-progress-bar {
+  height: 3px; border-radius: 999px; width: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.12) 100%);
+}
+
+/* mini stat tiles */
+.overview-mini-stats { display: flex; gap: 10px; }
+.overview-mini-stat {
+  flex: 1; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+  border-radius: 16px; padding: 14px 14px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
+  opacity: 0;
+}
+
+/* colored left-rail accent (Chromatic Language principle) */
+.overview-mini-stat::after {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%; width: 2.5px;
+  border-radius: 0 2px 2px 0;
+}
+.ov-stat-chapters::after { background: rgba(108,99,255,0.75); }
+.ov-stat-pending::after  { background: rgba(243,156,18,0.75); }
+.ov-stat-rejected::after { background: rgba(231,76,60,0.75); }
+
+/* icon circles — semantic color per status */
+.overview-mini-stat .mini-icon-circle {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.overview-mini-stat .mini-icon-circle svg { width: 15px; height: 15px; }
+.ov-stat-chapters .mini-icon-circle { background: rgba(108,99,255,0.18); color: #8b83ff; }
+.ov-stat-pending  .mini-icon-circle { background: rgba(243,156,18,0.18); color: #f5a623; }
+.ov-stat-rejected .mini-icon-circle { background: rgba(231,76,60,0.18);  color: #ff7b6b; }
+
+.overview-mini-stat .mini-value { font-size: 22px; font-weight: 800; line-height: 1; color: var(--text-on-dark-card); }
+.overview-mini-stat .mini-label { font-size: 11.5px; color: var(--text-on-dark-card-muted); font-weight: 500; }
+
+/* ===== Line/area chart card (legend dots, floating badge, day footer) ===== */
+.chart-legend { display: flex; gap: 16px; }
+.chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.chart-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.chart-day-footer { display: flex; justify-content: space-between; margin-top: 10px; padding: 0 4px; }
+.chart-day-footer span {
+  font-size: 11px; color: var(--text-secondary); font-weight: 600;
+  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.chart-day-footer span.is-today { background: var(--ring-accent); color: var(--active-pill-text); }
+.chart-day-footer span.is-selected:not(.is-today) { background: var(--card-light-border); color: var(--text-primary); }
+
+/* ===== Progress card action row (share + download) ===== */
+.progress-actions { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
+.icon-btn-outline {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--card-light-border); background: transparent; color: var(--text-primary);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+}
+.icon-btn-outline svg { width: 14px; height: 14px; }
+
+/* Colored task icon badge variants (sparing use of color, matching reference) */
+.task-icon-badge.coral { background: var(--accent-coral-bg); color: #c2554f; }
+.task-icon-badge.blue { background: var(--accent-blue-bg); color: #3c539c; }
+
+/* ===== Deadline Progress Cards (reference-style split card) ===== */
+.deadline-progress-card {
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+  margin-bottom: 10px;
+}
+.deadline-progress-card:last-child { margin-bottom: 0; }
+
+.dlpc-top {
+  background: #fff;
+  padding: 14px 16px 12px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+[data-theme="dark"] .dlpc-top { background: #1e2028; }
+
+.dlpc-icon {
+  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+  background: rgba(84,160,255,0.1);
+  display: flex; align-items: center; justify-content: center; color: #54a0ff;
+}
+.dlpc-icon svg { width: 22px; height: 22px; }
+
+.dlpc-meta { flex: 1; min-width: 0; }
+.dlpc-header-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 4px; gap: 8px; }
+.dlpc-active-badge {
+  font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+  background: rgba(39,174,96,0.12); color: #27ae60; white-space: nowrap;
+}
+.dlpc-days-group { display: flex; align-items: center; gap: 6px; }
+.dlpc-days-num { font-size: 22px; font-weight: 800; color: #15161a; line-height: 1; }
+[data-theme="dark"] .dlpc-days-num { color: #f4f5f7; }
+.dlpc-days-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: #8c909a; line-height: 1.3; }
+.dlpc-chevron-btn {
+  width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer;
+  background: #54a0ff; color: #fff;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.dlpc-chevron-btn svg { width: 10px; height: 10px; }
+.dlpc-title { font-size: 15px; font-weight: 700; color: #15161a; }
+[data-theme="dark"] .dlpc-title { color: #f4f5f7; }
+.dlpc-subtitle { font-size: 12px; color: #8c909a; margin-top: 1px; }
+
+.dlpc-bottom {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 45%, #1a2535 100%);
+  padding: 14px 16px;
+  overflow: hidden;
+  max-height: 160px;
+  opacity: 1;
+  transition:
+    max-height 360ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding    360ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity    240ms ease;
+}
+.dlpc-prog-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); margin-bottom: 8px;
+}
+.dlpc-prog-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.dlpc-prog-pct { font-size: 30px; font-weight: 800; color: #fff; line-height: 1; }
+.dlpc-prog-status { font-size: 12px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 4px; }
+.dlpc-prog-status.critical { color: #ff6b6b; }
+.dlpc-prog-status.warning  { color: #ffa502; }
+
+.dlpc-bar-row { display: flex; align-items: center; gap: 10px; }
+.dlpc-bar-track {
+  flex: 1; height: 8px; border-radius: 999px;
+  background: rgba(255,255,255,0.1); position: relative; overflow: visible;
+}
+.dlpc-bar-fill {
+  position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px;
+  background: linear-gradient(90deg, #00d2d3 0%, #54a0ff 55%, #ffa502 100%);
+  width: 0;
+  transition: width 1.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dlpc-bar-dot {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(84,160,255,0.5), 0 0 14px rgba(84,160,255,0.5);
+  left: 0; transition: left 1.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+.dlpc-fire-btn {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #f9ca24, #f0932b);
+  box-shadow: 0 0 18px rgba(240,147,43,0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; border: none; cursor: default;
+}
+
+/* ── Deadline card collapsed state ── */
+.dlpc-chevron-btn svg {
+  transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dlpc-collapsed .dlpc-chevron-btn svg { transform: rotate(180deg); }
+.dlpc-collapsed .dlpc-bottom {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+}
+
+/* refresh button spin */
+.card-icon-btn.spinning svg { animation: spin 0.65s ease-in-out; }
+
+/* ===== Forms ===== */
+.field { position: relative; margin-bottom: 22px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px 14px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--card-light-border);
+  background: var(--card-light);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  caret-color: var(--ring-accent);
+  transition: border-color 240ms cubic-bezier(0.4,0,0.2,1),
+              box-shadow    240ms cubic-bezier(0.4,0,0.2,1),
+              background    240ms cubic-bezier(0.4,0,0.2,1);
+}
+.field textarea { resize: vertical; min-height: 90px; padding-top: 16px; }
+.field label {
+  position: absolute; left: 14px; top: 16px;
+  font-size: 14px; color: var(--text-secondary);
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform 200ms cubic-bezier(0.4,0,0.2,1),
+              color       200ms cubic-bezier(0.4,0,0.2,1),
+              font-size   200ms cubic-bezier(0.4,0,0.2,1);
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--ring-accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--ring-accent) 18%, transparent);
+}
+.field input:focus ~ label,
+.field input:not(:placeholder-shown) ~ label,
+.field textarea:focus ~ label,
+.field textarea:not(:placeholder-shown) ~ label,
+.field select ~ label,
+.field.has-value label {
+  transform: translateY(-9px) scale(0.78);
+  color: var(--ring-accent);
+}
+
+/* ===== Modal ===== */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(13, 15, 19, 0.45);
+  backdrop-filter: blur(0px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms var(--ease-out), backdrop-filter 220ms var(--ease-out);
+}
+.modal-backdrop.open { opacity: 1; pointer-events: auto; backdrop-filter: blur(6px); }
+.modal-box {
+  background: var(--card-light);
+  border-radius: 24px;
+  padding: 28px;
+  width: 100%; max-width: 480px;
+  max-height: 86vh; overflow-y: auto;
+  box-shadow: var(--shadow-pop);
+  transform: scale(0.85);
+  opacity: 0;
+  transition: transform 280ms var(--ease-spring), opacity 200ms var(--ease-out);
+}
+.modal-backdrop.open .modal-box { transform: scale(1); opacity: 1; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-close { border: none; background: var(--soft-icon-bg); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* ===== Upload dropzone ===== */
+.dropzone {
+  border: 2px dashed var(--card-light-border);
+  border-radius: 20px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  transition: border-color 200ms, background 200ms;
+  cursor: pointer;
+}
+.dropzone.dragover { border-color: var(--ring-accent); background: rgba(21, 22, 26, 0.05); animation: dash-pulse 1s ease-in-out infinite; }
+.dropzone-check { width: 56px; height: 56px; margin: 0 auto 12px; }
+
+/* ===== Toasts ===== */
+.toast-stack { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 200; }
+.toast {
+  background: var(--card-dark); color: #fff;
+  border-radius: 14px; padding: 14px 16px;
+  min-width: 260px; max-width: 340px;
+  box-shadow: var(--shadow-pop);
+  position: relative; overflow: hidden;
+  transform: translateX(120%);
+  opacity: 0;
+}
+.toast.show { animation: toast-in 320ms var(--ease-out) forwards; }
+.toast.hide { animation: toast-out 220ms var(--ease-out) forwards; }
+.toast-title { font-weight: 700; font-size: 13px; }
+.toast-msg { font-size: 12px; color: var(--text-on-dark-card-muted); margin-top: 2px; }
+.toast-progress { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--ring-accent); width: 100%; transform-origin: left; }
+.toast.show .toast-progress { animation: toast-shrink 4s linear forwards; }
+.toast-success .toast-progress { background: var(--success); }
+.toast-error .toast-progress { background: var(--danger); }
+
+/* ===== Session warning modal text ===== */
+.session-warning-time { font-size: 32px; font-weight: 800; text-align: center; margin: 12px 0; }
+
+/* ===== Overview bar — mobile responsiveness ===== */
+@media (max-width: 768px) {
+  /* Dashboard top row: ensure cards don't overflow when stacked */
+  .overview-card { padding: 20px; gap: 18px; }
+
+  /* Big numbers — slightly smaller on narrow screens */
+  .overview-numbers { gap: 14px; }
+  .overview-numbers .num-value { font-size: 28px; }
+  .overview-numbers .num-label { font-size: 11px; max-width: 80px; }
+
+  /* Three mini-stat boxes — switch to CSS grid so they share width evenly */
+  .overview-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .overview-mini-stat {
+    min-width: 0;
+    padding: 12px 10px;
+    gap: 10px;
+    border-radius: 14px;
+  }
+  .overview-mini-stat .mini-icon-circle { width: 30px; height: 30px; }
+  .overview-mini-stat .mini-icon-circle svg { width: 13px; height: 13px; }
+  .overview-mini-stat .mini-value { font-size: 20px; }
+  .overview-mini-stat .mini-label { font-size: 11px; }
+
+  /* Card header row — prevent icon buttons from pushing title off-screen */
+  .card-header-row { flex-wrap: wrap; gap: 8px; }
+
+  /* Deadline progress cards — tighten on mobile */
+  .dlpc-top { padding: 12px 14px 10px; gap: 10px; }
+  .deadline-progress-card:not(.dlpc-collapsed) .dlpc-bottom { padding: 12px 14px; }
+  .dlpc-prog-pct { font-size: 26px; }
+  .dlpc-days-num { font-size: 18px; }
+  .dlpc-icon { width: 40px; height: 40px; border-radius: 10px; }
+  .dlpc-icon svg { width: 18px; height: 18px; }
+}
+
+@media (max-width: 420px) {
+  .overview-card { padding: 16px; gap: 14px; }
+  .overview-numbers .num-value { font-size: 24px; }
+  .overview-mini-stats { gap: 7px; }
+  .overview-mini-stat { padding: 10px 8px; gap: 8px; border-radius: 12px; }
+  .overview-mini-stat .mini-value { font-size: 18px; }
+}
+
+/* ===== PC / large-screen card enhancements ===== */
+@media (min-width: 1280px) {
+  .card { padding: 28px; }
+  .card-header-row { margin-bottom: 20px; }
+  .card-header-row h3 { font-size: 16px; }
+  .stat-value { font-size: 34px; }
+  .stat-icon-circle { width: 44px; height: 44px; }
+  .stat-icon-circle svg { width: 20px; height: 20px; }
+  .task-card { padding: 20px; }
+  .section-header-row { margin-bottom: 16px; }
+}
+
+@media (min-width: 1440px) {
+  .card { padding: 32px; }
+  .card-header-row { margin-bottom: 22px; }
+  .card-header-row h3 { font-size: 17px; }
+  .stat-value { font-size: 36px; }
+  .stat-label { font-size: 14px; }
+  .stat-icon-circle { width: 48px; height: 48px; border-radius: 14px; }
+  .stat-icon-circle svg { width: 22px; height: 22px; }
+  .task-card { padding: 22px; border-radius: 20px; }
+  .overview-card { padding: 32px; gap: 28px; }
+  .overview-numbers .num-value { font-size: 40px; }
+  .overview-mini-stat { padding: 16px 14px; }
+  .overview-mini-stat .mini-value { font-size: 24px; }
+}
+
+@media (min-width: 1920px) {
+  .card { padding: 36px; }
+  .card-header-row h3 { font-size: 18px; }
+  .stat-value { font-size: 40px; }
+  .task-card { padding: 26px; }
+}

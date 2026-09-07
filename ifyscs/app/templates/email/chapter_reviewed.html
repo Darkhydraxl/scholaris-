@@ -1,0 +1,21 @@
+{% extends "email/base_email.html" %}
+{% block email_body %}
+<h2 style="color:#13151A;margin:0 0 12px;">
+  Chapter {{ submission.chapter_number }} {{ verb }}
+</h2>
+<p style="color:#444;line-height:1.6;">
+  Your submission "<strong>{{ submission.chapter_title }}</strong>" has been
+  <strong style="color:{{ '#27AE60' if verb == 'approved' else '#E74C3C' }};">{{ verb }}</strong>
+  by your supervisor.
+</p>
+{% if submission.overall_comment %}
+<p style="color:#444;line-height:1.6;background:#f4f1ea;padding:12px 16px;border-radius:10px;">
+  {{ submission.overall_comment }}
+</p>
+{% endif %}
+<p style="margin-top:20px;">
+  <a href="#" style="background:#C9952A;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-size:13px;">
+    View submission
+  </a>
+</p>
+{% endblock %}

@@ -1,0 +1,89 @@
+<div class="topbar">
+  <div class="topbar-greeting">
+    <h1>Hi, {{ first_name(current_user.full_name) }}!</h1>
+    <p>
+      {% if current_user.role == 'student' %}
+        {% if request.endpoint == 'student.submit_chapter' %}Upload your latest chapter for review.
+        {% elif request.endpoint == 'student.submissions' %}Track the status of all your chapter submissions.
+        {% elif request.endpoint == 'student.annotation_viewer' %}Review feedback and annotations from your supervisor.
+        {% elif request.endpoint == 'student.meetings' %}View and join your scheduled meetings.
+        {% elif request.endpoint == 'notification.list_notifications' %}Stay up to date with your latest notifications.
+        {% elif request.endpoint == 'student.pending' %}You're almost there — waiting for supervisor assignment.
+        {% elif request.endpoint == 'auth.profile' %}Manage your account and preferences.
+        {% else %}Here's where your project stands today.
+        {% endif %}
+      {% elif current_user.role == 'supervisor' %}
+        {% if request.endpoint == 'supervisor.review_queue' %}Review and give feedback on submitted chapters.
+        {% elif request.endpoint == 'supervisor.my_students' %}Manage and track all your assigned students.
+        {% elif request.endpoint == 'supervisor.student_detail' %}Viewing a student's full project history.
+        {% elif request.endpoint == 'supervisor.feedback_history' %}Browse your past feedback and reviews.
+        {% elif request.endpoint == 'auth.profile' %}Manage your account and preferences.
+        {% elif request.endpoint == 'meeting.my_meetings' %}Manage your upcoming and past meetings.
+        {% elif request.endpoint == 'meeting.schedule' %}Set up a new meeting with your students.
+        {% elif request.endpoint == 'notification.list_notifications' %}Stay up to date with your latest notifications.
+        {% else %}Here's what your students are working on.
+        {% endif %}
+      {% else %}
+        {% if request.endpoint == 'admin.user_management' %}Manage all registered users in the system.
+        {% elif request.endpoint == 'admin.deadlines' %}Set and manage chapter submission deadlines.
+        {% elif request.endpoint == 'admin.broadcast' %}Send a notification to all users.
+        {% elif request.endpoint == 'admin.audit_log' %}Review the full system activity log.
+        {% elif request.endpoint == 'admin.progress_report' %}Download and view student progress reports.
+        {% elif request.endpoint == 'meeting.admin_all' %}Overview of all meetings across the system.
+        {% elif request.endpoint == 'notification.list_notifications' %}Stay up to date with your latest notifications.
+        {% elif request.endpoint == 'admin_auth.profile' %}Manage your account and preferences.
+        {% else %}Department overview at a glance.
+        {% endif %}
+      {% endif %}
+    </p>
+  </div>
+  <div class="topbar-actions">
+    {% block topbar_action %}
+      {% if current_user.role == 'student' %}
+      <a href="{{ url_for('student.submit_chapter') }}" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Submit Chapter
+      </a>
+      {% elif current_user.role == 'supervisor' %}
+      <a href="{{ url_for('meeting.schedule') }}" class="btn btn-outline" style="gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01"/></svg>
+        Schedule Meeting
+      </a>
+      <a href="{{ url_for('supervisor.review_queue') }}" class="btn btn-primary" style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Review Queue
+        {% if supervisor_pending_count > 0 %}
+        <span class="topbar-pending-badge">{{ supervisor_pending_count }}</span>
+        {% endif %}
+      </a>
+      {% elif current_user.role == 'admin' %}
+      <a href="{{ url_for('admin.broadcast') }}" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Broadcast
+      </a>
+      {% endif %}
+    {% endblock %}
+
+    <button class="theme-toggle-switch" id="themeToggleBtn" aria-label="Toggle dark mode">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+
+    <button class="icon-btn" id="notifBellBtn" aria-label="Notifications">
+      <svg id="notifBellIcon" class="{{ 'bell-has-unread' if unread_count and unread_count > 0 }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      {% if unread_count and unread_count > 0 %}
+      <span class="notif-badge" id="notifBadge">{{ unread_count if unread_count < 10 else '9+' }}</span>
+      {% endif %}
+    </button>
+
+    <a href="{{ profile_url }}" class="avatar" title="{{ current_user.full_name }}" style="overflow:hidden;padding:0;text-decoration:none;">
+      {% if current_user.avatar %}
+        <img src="{{ url_for('auth.serve_upload', filepath='uploads/avatars/' ~ current_user.avatar) }}"
+             alt="{{ current_user.full_name[0]|upper }}"
+             style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">
+      {% else %}
+        {{ current_user.full_name[0]|upper }}
+      {% endif %}
+    </a>
+  </div>
+</div>

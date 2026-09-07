@@ -1,0 +1,47 @@
+# Environment variables — never commit secrets
+.env
+*.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+ifyscs/instance/
+
+# Uploads (PDFs submitted by users)
+ifyscs/app/static/uploads/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flask / Werkzeug
+*.log
+
+# Node (framer-motion install at root)
+node_modules/

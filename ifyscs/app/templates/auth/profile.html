@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+{% block title %}Profile & Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page shell ──────────────────────────────────────── */
+.sp-page { max-width: 840px; }
+
+/* ── Identity header ─────────────────────────────────── */
+.sp-identity {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  margin-bottom: 24px;
+  opacity: 0;
+}
+
+/* Avatar upload widget */
+.sp-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px; height: 64px;
+  cursor: pointer;
+}
+.sp-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 23px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-gold);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  box-shadow: 0 0 0 4px rgba(201,149,42,0.18);
+  transition: filter 0.18s ease;
+  user-select: none;
+}
+.sp-avatar-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+.sp-avatar-cam {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.52);
+  display: flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  color: #fff;
+}
+.sp-avatar-cam svg { width: 20px; height: 20px; }
+.sp-avatar-wrap:hover .sp-avatar-cam  { opacity: 1; }
+.sp-avatar-wrap.sp-uploading .sp-avatar-cam {
+  opacity: 1;
+  background: rgba(0,0,0,0.68);
+}
+.sp-avatar-wrap.sp-uploading .sp-av-spinner { display: block; }
+.sp-avatar-wrap.sp-uploading .sp-av-cam-icon { display: none; }
+.sp-av-spinner {
+  display: none;
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: sp-spin 0.7s linear infinite;
+}
+@keyframes sp-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sp-av-spinner { animation: none; } }
+
+/* Success ring that pulses once after a successful upload */
+@keyframes sp-ring-in {
+  0%   { box-shadow: 0 0 0 0   rgba(74,222,128,0.7); }
+  60%  { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 4px rgba(201,149,42,0.18); }
+}
+.sp-avatar-wrap.sp-saved .sp-avatar {
+  animation: sp-ring-in 0.6s ease forwards;
+}
+.sp-identity-info { flex: 1; min-width: 0; }
+.sp-identity-name  { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 5px; }
+.sp-identity-meta  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sp-role-chip {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+  text-transform: capitalize; letter-spacing: 0.03em;
+}
+.sp-role-admin      { background: rgba(201,149,42,0.14); color: var(--accent-gold); }
+.sp-role-student    { background: rgba(26,39,68,0.12);   color: var(--accent-navy); }
+.sp-role-supervisor { background: rgba(39,174,96,0.13);  color: var(--success); }
+[data-theme="dark"] .sp-role-student { background: rgba(255,255,255,0.10); color: #9ab0e0; }
+.sp-identity-email { font-size: 13px; color: var(--text-secondary); }
+
+/* ── Card header with icon ───────────────────────────── */
+.sp-card-hdr {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--card-light-border);
+}
+.sp-card-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sp-icon-gold  { background: rgba(201,149,42,0.12); color: var(--accent-gold); }
+.sp-icon-slate { background: rgba(140,144,154,0.11); color: var(--text-secondary); }
+.sp-card-title { font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.sp-card-sub   { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+/* ── Section group label ─────────────────────────────── */
+.sp-group-label {
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text-secondary);
+  margin: 20px 0 10px;
+}
+.sp-group-label:first-child { margin-top: 0; }
+
+/* ── Password field: input + toggle button ───────────── */
+.sp-pw-wrap { position: relative; }
+.sp-pw-wrap .field input { padding-right: 44px; }
+.sp-pw-toggle {
+  position: absolute;
+  right: 13px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  padding: 4px; display: flex; align-items: center;
+  color: var(--text-secondary);
+  transition: color 150ms;
+}
+.sp-pw-toggle:hover { color: var(--text-primary); }
+.sp-pw-toggle .icon-eye-off { display: none; }
+.sp-pw-toggle.sp-revealed .icon-eye     { display: none; }
+.sp-pw-toggle.sp-revealed .icon-eye-off { display: block; }
+
+/* ── Full-width save btn ─────────────────────────────── */
+.sp-btn-row { margin-top: 6px; }
+
+/* ── Dark mode ───────────────────────────────────────── */
+[data-theme="dark"] .sp-identity {
+  background: var(--card-dark);
+  border-color: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .sp-icon-gold  { background: rgba(201,149,42,0.10); }
+[data-theme="dark"] .sp-icon-slate { background: rgba(255,255,255,0.06); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-page">
+
+  <!-- Identity header -->
+  <div class="sp-identity" id="spIdentity">
+    <div class="sp-avatar-wrap" id="spAvatarWrap" role="button" tabindex="0" aria-label="Change profile picture">
+      <input type="file" id="spAvatarInput" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="sp-avatar" id="spAvatar">
+        {% if current_user.avatar %}
+          <img src="{{ url_for('auth.serve_upload', filepath='uploads/avatars/' ~ current_user.avatar) }}"
+               alt="" class="sp-avatar-img">
+        {% else %}
+          {{ current_user.full_name[0]|upper if current_user.full_name else '?' }}
+        {% endif %}
+      </div>
+      <button type="button" class="sp-avatar-cam" aria-hidden="true" tabindex="-1">
+        <span class="sp-av-cam-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </span>
+        <span class="sp-av-spinner"></span>
+      </button>
+    </div>
+    <div class="sp-identity-info">
+      <div class="sp-identity-name">{{ current_user.full_name }}</div>
+      <div class="sp-identity-meta">
+        <span class="sp-role-chip sp-role-{{ current_user.role }}">{{ 'Administrator' if current_user.is_super_admin else current_user.role }}</span>
+        <span class="sp-identity-email">{{ current_user.email }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="align-items:flex-start;">
+
+    <!-- Account details -->
+    <div class="col card sp-form-card">
+      <div class="sp-card-hdr">
+        <div class="sp-card-icon sp-icon-gold">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="sp-card-title">Account details</div>
+          <div class="sp-card-sub">
+            {% if current_user.is_super_admin %}Only your display name can be updated — email is fixed for administrator accounts
+            {% else %}Update your name and email{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <input type="hidden" name="form_name" value="profile">
+
+        <div class="sp-group-label">Personal information</div>
+        <div class="field has-value">
+          {{ form.full_name(placeholder=" ") }}
+          <label>Full name</label>
+          {% for err in form.full_name.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+        <div class="field has-value">
+          {% if current_user.is_super_admin %}
+            {{ form.email(placeholder=" ", readonly=True, style="opacity:0.55;cursor:not-allowed;") }}
+          {% else %}
+            {{ form.email(placeholder=" ") }}
+          {% endif %}
+          <label>Email address</label>
+          {% if current_user.is_super_admin %}
+            <div class="form-hint">Administrator email cannot be changed.</div>
+          {% endif %}
+          {% for err in form.email.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        {% if false %}{# department field removed for all admins #}
+        <div class="sp-group-label">Academic</div>
+        <div class="field" style="padding-top:4px;">
+          <label style="position:static;transform:none;display:block;margin-bottom:6px;color:var(--text-secondary);font-size:13px;">Department</label>
+          {{ form.department() }}
+          {% for err in form.department.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="sp-btn-row">
+          <button type="submit" class="btn btn-primary js-submit-btn">
+            <span class="btn-spinner"></span>
+            <span class="btn-label" style="display:inline-flex;align-items:center;gap:7px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save changes
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Security / password -->
+    <div class="col card sp-form-card">
+      <div class="sp-card-hdr">
+        <div class="sp-card-icon sp-icon-slate">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="sp-card-title">Security</div>
+          <div class="sp-card-sub">Change your password to keep your account safe</div>
+        </div>
+      </div>
+
+      <form method="POST" novalidate>
+        {{ password_form.hidden_tag() }}
+        <input type="hidden" name="form_name" value="password">
+
+        <div class="sp-group-label">Password change</div>
+
+        <div class="sp-pw-wrap">
+          <div class="field">
+            {{ password_form.current_password(placeholder=" ") }}
+            <label>Current password</label>
+            {% for err in password_form.current_password.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+          </div>
+          <button type="button" class="sp-pw-toggle" aria-label="Show password">
+            <svg class="icon-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-eye-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+
+        <div class="sp-pw-wrap">
+          <div class="field">
+            {{ password_form.new_password(placeholder=" ") }}
+            <label>New password</label>
+            {% for err in password_form.new_password.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+          </div>
+          <button type="button" class="sp-pw-toggle" aria-label="Show password">
+            <svg class="icon-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-eye-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+
+        <div class="sp-pw-wrap">
+          <div class="field">
+            {{ password_form.confirm_new_password(placeholder=" ") }}
+            <label>Confirm new password</label>
+            {% for err in password_form.confirm_new_password.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+          </div>
+          <button type="button" class="sp-pw-toggle" aria-label="Show password">
+            <svg class="icon-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-eye-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+
+        <div class="sp-btn-row">
+          <button type="submit" class="btn btn-outline js-submit-btn">
+            <span class="btn-spinner"></span>
+            <span class="btn-label" style="display:inline-flex;align-items:center;gap:7px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Update password
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const { animate, stagger } = anime;
+
+  // ── Entrance ──────────────────────────────────────────────────────────────
+  animate('#spIdentity', {
+    opacity: [0, 1],
+    translateY: [-10, 0],
+    duration: 400,
+    ease: 'outCubic'
+  });
+
+  animate('.sp-form-card', {
+    opacity: [0, 1],
+    translateY: [16, 0],
+    duration: 520,
+    ease: 'outBack(1.05)',
+    delay: stagger(90, { start: 80 })
+  });
+
+  // ── Avatar: pick → instant preview → fetch save → done ──────────────────
+  const avatarWrap  = document.getElementById('spAvatarWrap');
+  const avatarInput = document.getElementById('spAvatarInput');
+  const avatarEl    = document.getElementById('spAvatar');
+  const getCsrf     = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
+  const toast       = (msg, type) => window.Scholaris?.showToast(msg, type);
+
+  // Stash the initials/old-photo HTML so we can revert on error
+  let avatarFallback = avatarEl.innerHTML;
+
+  function triggerPicker() { avatarInput.click(); }
+  avatarWrap.addEventListener('click', e => {
+    // Prevent double-trigger when the file input itself propagates a click
+    if (e.target === avatarInput) return;
+    triggerPicker();
+  });
+  avatarWrap.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerPicker(); }
+  });
+
+  avatarInput.addEventListener('change', async () => {
+    const file = avatarInput.files[0];
+    if (!file) return;
+
+    // 1. Show preview immediately
+    const dataUrl = await new Promise(res => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result);
+      r.readAsDataURL(file);
+    });
+    const imgTag = `<img src="${dataUrl}" alt="" class="sp-avatar-img">`;
+    avatarEl.innerHTML = imgTag;
+
+    // Mirror preview in topbar
+    const topbarAv = document.querySelector('a.avatar');
+    if (topbarAv) {
+      topbarAv.innerHTML = `<img src="${dataUrl}" alt=""
+        style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
+      topbarAv.style.padding = '0';
+    }
+
+    // 2. Upload
+    avatarWrap.classList.add('sp-uploading');
+    const fd = new FormData();
+    fd.append('avatar', file);
+
+    try {
+      const resp = await fetch('/profile/avatar', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrf() },
+        body: fd,
+      });
+
+      // Guard against non-JSON body (e.g. a 500 error page)
+      let data;
+      try { data = await resp.json(); }
+      catch { data = null; }
+
+      if (resp.ok && data?.url) {
+        // Update src to the permanent server URL so refreshes keep it
+        avatarEl.innerHTML = `<img src="${data.url}" alt="" class="sp-avatar-img">`;
+        if (topbarAv) topbarAv.innerHTML = `<img src="${data.url}" alt=""
+          style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
+        avatarFallback = avatarEl.innerHTML;
+        avatarWrap.classList.add('sp-saved');
+        setTimeout(() => avatarWrap.classList.remove('sp-saved'), 700);
+      } else {
+        // Revert on failure
+        avatarEl.innerHTML = avatarFallback;
+        if (topbarAv) topbarAv.innerHTML = avatarFallback;
+        const msg = data?.error || `Upload failed (HTTP ${resp.status}).`;
+        toast(msg, 'error');
+        console.error('[avatar upload]', resp.status, msg);
+      }
+    } catch (err) {
+      avatarEl.innerHTML = avatarFallback;
+      if (topbarAv) topbarAv.innerHTML = avatarFallback;
+      toast('Upload failed — check your connection.', 'error');
+      console.error('[avatar upload] network error', err);
+    } finally {
+      avatarWrap.classList.remove('sp-uploading');
+      avatarInput.value = '';
+    }
+  });
+
+  // ── Password visibility toggle ────────────────────────────────────────────
+  document.querySelectorAll('.sp-pw-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = btn.closest('.sp-pw-wrap').querySelector('input');
+      if (!input) return;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.classList.toggle('sp-revealed', !showing);
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    });
+  });
+});
+</script>
+{% endblock %}

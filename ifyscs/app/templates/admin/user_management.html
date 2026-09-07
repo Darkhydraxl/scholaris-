@@ -1,0 +1,690 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page header ────────────────────────────────────────── */
+.um-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.um-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+.um-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.um-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Stats strip ────────────────────────────────────────── */
+.um-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-radius: 16px;
+  padding: 16px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+.um-stat {
+  flex: 1;
+  text-align: center;
+}
+.um-stat-val {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.um-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.um-stat-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--card-light-border);
+  flex-shrink: 0;
+}
+
+/* ── Toolbar (tabs + search) ────────────────────────────── */
+.um-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.um-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-radius: 12px;
+  padding: 4px;
+}
+.um-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: background 160ms, color 160ms;
+}
+.um-tab:hover { color: var(--text-primary); }
+.um-tab-active {
+  background: var(--active-pill-bg);
+  color: var(--active-pill-text) !important;
+}
+.um-tab-count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.18);
+  line-height: 1.4;
+}
+.um-tab:not(.um-tab-active) .um-tab-count {
+  background: var(--card-light-border);
+  color: var(--text-secondary);
+}
+
+.um-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-radius: 10px;
+  padding: 7px 12px;
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.um-search-wrap:focus-within {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(201,149,42,0.12);
+}
+.um-search-wrap svg { color: var(--text-secondary); flex-shrink: 0; }
+.um-search {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: inherit;
+  width: 180px;
+}
+.um-search::placeholder { color: var(--text-secondary); }
+
+/* ── Table card ─────────────────────────────────────────── */
+.um-table-card { padding: 0; overflow: hidden; }
+.um-table-card .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── Avatar ─────────────────────────────────────────────── */
+.um-person {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.um-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  text-transform: uppercase;
+  overflow: hidden;
+  position: relative;
+}
+.um-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: auto;
+}
+.um-avatar-0 { background: var(--accent-gold); }
+.um-avatar-1 { background: var(--accent-navy); }
+.um-avatar-2 { background: var(--success); }
+.um-avatar-3 { background: var(--warning); color: #fff; }
+.um-avatar-4 { background: var(--ring-accent); }
+
+.um-name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+.um-email { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; white-space: nowrap; }
+
+/* ── Department chip ────────────────────────────────────── */
+.um-dept-chip {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--soft-icon-bg);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Assign form ────────────────────────────────────────── */
+.um-assign-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.um-select {
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--card-light-border);
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--card-light);
+  color: var(--text-primary);
+  min-width: 130px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 140ms;
+}
+.um-select:focus { border-color: var(--accent-gold); }
+.um-assign-btn {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid var(--card-light-border);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 140ms, border-color 140ms, color 140ms;
+}
+.um-assign-btn:hover {
+  background: var(--active-pill-bg);
+  border-color: var(--active-pill-bg);
+  color: var(--active-pill-text);
+}
+
+/* ── Student count (supervisors table) ──────────────────── */
+.um-student-count { display: flex; align-items: center; gap: 6px; }
+.um-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent-gold) 14%, transparent);
+  color: var(--accent-gold);
+  font-size: 13px;
+  font-weight: 700;
+}
+.um-count-label { font-size: 12px; color: var(--text-secondary); }
+
+/* ── Action buttons ─────────────────────────────────────── */
+.um-actions { text-align: right; white-space: nowrap; }
+.um-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid var(--card-light-border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 140ms, color 140ms, border-color 140ms;
+  margin-left: 5px;
+}
+.um-action-btn:hover {
+  background: var(--soft-icon-bg);
+  color: var(--text-primary);
+}
+.um-action-danger { color: var(--danger); border-color: rgba(231,76,60,.25); background: rgba(231,76,60,.04); }
+.um-action-danger:hover { background: rgba(231,76,60,.10); border-color: rgba(231,76,60,.5); color: var(--danger); }
+
+/* Row hover highlight */
+.um-table tbody tr { transition: background 120ms; }
+.um-table tbody tr:hover td { background: color-mix(in srgb, var(--accent-gold) 4%, transparent); }
+
+/* Search no-match state */
+.um-no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  display: none;
+}
+
+/* Dark mode */
+[data-theme="dark"] .um-stats,
+[data-theme="dark"] .um-tabs,
+[data-theme="dark"] .um-search-wrap {
+  background: var(--card-dark);
+  border-color: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .um-select { background: rgba(255,255,255,0.06); color: var(--text-on-dark-card); border-color: rgba(255,255,255,0.12); }
+[data-theme="dark"] .um-assign-btn { color: var(--text-on-dark-card); border-color: rgba(255,255,255,0.12); }
+[data-theme="dark"] .um-assign-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); }
+[data-theme="dark"] .um-action-btn { color: var(--text-on-dark-card-muted); border-color: rgba(255,255,255,0.1); }
+[data-theme="dark"] .um-action-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-on-dark-card); }
+[data-theme="dark"] .um-dept-chip { background: rgba(255,255,255,0.08); }
+[data-theme="dark"] .um-search { color: var(--text-on-dark-card); }
+[data-theme="dark"] .um-tab:hover { color: var(--text-on-dark-card); }
+[data-theme="dark"] .um-tab-count { background: rgba(255,255,255,0.1); }
+[data-theme="dark"] .um-table tbody tr:hover td { background: rgba(255,255,255,0.04); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="um-header">
+  <div>
+    <h2 class="um-title">User Management</h2>
+    <p class="um-subtitle">Manage students and supervisors across all departments</p>
+  </div>
+  {% if current_user.is_super_admin %}
+  <button class="btn btn-primary um-add-btn" id="openAddUserModalBtn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    Add User
+  </button>
+  {% endif %}
+</div>
+
+<!-- Stats strip -->
+<div class="um-stats" id="umStats" style="opacity:0;">
+  <div class="um-stat">
+    <div class="um-stat-val js-count-up" data-target="{{ students|length }}">0</div>
+    <div class="um-stat-label">Students</div>
+  </div>
+  <div class="um-stat-divider"></div>
+  <div class="um-stat">
+    <div class="um-stat-val js-count-up" data-target="{{ supervisors|length }}">0</div>
+    <div class="um-stat-label">Supervisors</div>
+  </div>
+  <div class="um-stat-divider"></div>
+  <div class="um-stat">
+    <div class="um-stat-val js-count-up" data-target="{{ (students|selectattr('is_active')|list|length) + (supervisors|selectattr('is_active')|list|length) }}">0</div>
+    <div class="um-stat-label">Active</div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="um-toolbar">
+  <div class="um-tabs">
+    <button class="um-tab um-tab-active" id="tabStudentsBtn" data-tab="students">
+      Students
+      <span class="um-tab-count">{{ students|length }}</span>
+    </button>
+    <button class="um-tab" id="tabSupervisorsBtn" data-tab="supervisors">
+      Supervisors
+      <span class="um-tab-count">{{ supervisors|length }}</span>
+    </button>
+  </div>
+  <div class="um-search-wrap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="um-search" id="umSearch" type="search" placeholder="Search name, department or email…" autocomplete="off">
+  </div>
+</div>
+
+<!-- Students table -->
+<div class="card um-table-card" id="studentsPanel">
+  <div class="table-scroll">
+    <table class="um-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Supervisor</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="studentsBody">
+        {% for s in students %}
+        <tr class="um-row" data-search="{{ s.full_name|lower }} {{ s.email|lower }} {{ (s.department or '')|lower }}" style="opacity:0;">
+          <td>
+            <div class="um-person">
+              <div class="um-avatar um-avatar-{{ loop.index0 % 5 }}">
+                {% if s.avatar %}
+                  <img src="{{ url_for('auth.serve_upload', filepath='uploads/avatars/' ~ s.avatar) }}" alt="">
+                {% else %}
+                  {{ s.full_name[0]|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <div class="um-name">{{ s.full_name }}</div>
+                <div class="um-email">{{ s.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="um-dept-chip">{{ s.department or '—' }}</span></td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.assign_supervisor') }}" class="um-assign-form">
+              {{ form.hidden_tag() }}
+              <input type="hidden" name="student_id" value="{{ s.id }}">
+              <select name="supervisor_id" class="um-select">
+                {% for sup in supervisors %}
+                <option value="{{ sup.id }}" {{ 'selected' if assignments.get(s.id) and assignments[s.id].id == sup.id }}>{{ sup.full_name }}</option>
+                {% endfor %}
+              </select>
+              <button class="um-assign-btn js-submit-btn" type="submit">{{ 'Reassign' if assignments.get(s.id) else 'Assign' }}</button>
+            </form>
+          </td>
+          <td><span class="badge {{ 'badge-approved' if s.is_active else 'badge-rejected' }}">{{ 'Active' if s.is_active else 'Inactive' }}</span></td>
+          <td class="um-actions">
+            <button class="um-action-btn um-edit-btn"
+              data-edit-id="{{ s.id }}"
+              data-edit-name="{{ s.full_name }}"
+              data-edit-email="{{ s.email }}"
+              data-edit-dept="{{ s.department or '' }}"
+              data-edit-role="{{ s.role }}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="um-action-btn"
+              data-confirm-url="{{ url_for('admin.toggle_active', user_id=s.id) }}"
+              data-confirm-title="{{ 'Deactivate' if s.is_active else 'Activate' }} {{ s.full_name }}?"
+              data-confirm-body="They will {{ 'lose' if s.is_active else 'regain' }} access to the system.">
+              {% if s.is_active %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              {% else %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+              {% endif %}
+              {{ 'Deactivate' if s.is_active else 'Activate' }}
+            </button>
+            <button class="um-action-btn um-action-danger"
+              data-confirm-url="{{ url_for('admin.delete_user', user_id=s.id) }}"
+              data-confirm-title="Permanently delete {{ s.full_name }}?"
+              data-confirm-body="This will remove their account, project, and all submissions. This cannot be undone.">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Remove
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="um-no-results" id="studentsNoResults">No students match your search.</div>
+  </div>
+</div>
+
+<!-- Supervisors table -->
+<div class="card um-table-card" id="supervisorsPanel" style="display:none;">
+  <div class="table-scroll">
+    <table class="um-table">
+      <thead>
+        <tr>
+          <th>Supervisor</th>
+          <th>Department</th>
+          <th>Students</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="supervisorsBody">
+        {% for sup in supervisors %}
+        <tr class="um-row" data-search="{{ sup.full_name|lower }} {{ sup.email|lower }} {{ (sup.department or '')|lower }}" style="opacity:0;">
+          <td>
+            <div class="um-person">
+              <div class="um-avatar um-avatar-{{ (loop.index0 + 2) % 5 }}">
+                {% if sup.avatar %}
+                  <img src="{{ url_for('auth.serve_upload', filepath='uploads/avatars/' ~ sup.avatar) }}" alt="">
+                {% else %}
+                  {{ sup.full_name[0]|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <div class="um-name">{{ sup.full_name }}</div>
+                <div class="um-email">{{ sup.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="um-dept-chip">{{ sup.department or '—' }}</span></td>
+          <td>
+            <div class="um-student-count">
+              <span class="um-count-badge">{{ student_count_by_supervisor.get(sup.id, 0) }}</span>
+              <span class="um-count-label">assigned</span>
+            </div>
+          </td>
+          <td><span class="badge {{ 'badge-approved' if sup.is_active else 'badge-rejected' }}">{{ 'Active' if sup.is_active else 'Inactive' }}</span></td>
+          <td class="um-actions">
+            <button class="um-action-btn um-edit-btn"
+              data-edit-id="{{ sup.id }}"
+              data-edit-name="{{ sup.full_name }}"
+              data-edit-email="{{ sup.email }}"
+              data-edit-dept="{{ sup.department or '' }}"
+              data-edit-role="{{ sup.role }}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="um-action-btn"
+              data-confirm-url="{{ url_for('admin.toggle_active', user_id=sup.id) }}"
+              data-confirm-title="{{ 'Deactivate' if sup.is_active else 'Activate' }} {{ sup.full_name }}?"
+              data-confirm-body="They will {{ 'lose' if sup.is_active else 'regain' }} access to the system.">
+              {% if sup.is_active %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              {% else %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+              {% endif %}
+              {{ 'Deactivate' if sup.is_active else 'Activate' }}
+            </button>
+            <button class="um-action-btn um-action-danger"
+              data-confirm-url="{{ url_for('admin.delete_user', user_id=sup.id) }}"
+              data-confirm-title="Permanently delete {{ sup.full_name }}?"
+              data-confirm-body="This will remove their account and unassign all their students. This cannot be undone.">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Remove
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="um-no-results" id="supervisorsNoResults">No supervisors match your search.</div>
+  </div>
+</div>
+
+<!-- Add user modal — super admin only -->
+{% if current_user.is_super_admin %}
+<div class="modal-backdrop" id="addUserModalBackdrop">
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3>Add user</h3>
+      <button class="modal-close" type="button" id="addUserModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form method="POST" action="{{ url_for('admin.create_user') }}">
+      {{ form.hidden_tag() }}
+      <div class="field">{{ form.full_name(placeholder=" ") }}<label>Full name</label></div>
+      <div class="field">{{ form.email(placeholder=" ") }}<label>Email</label></div>
+      <div class="field"><label style="position:static;transform:none;display:block;margin-bottom:6px;color:var(--text-secondary);font-size:13px;">Department</label>{{ form.department(style="padding-top:12px;") }}</div>
+      <div class="field"><label style="position:static;transform:none;display:block;margin-bottom:6px;color:var(--text-secondary);font-size:13px;">Role</label>{{ form.role(style="padding-top:12px;") }}</div>
+      <div class="field">{{ form.password(placeholder=" ") }}<label>Temporary password</label></div>
+      <button type="submit" class="btn btn-primary js-submit-btn" style="width:100%;justify-content:center;">
+        <span class="btn-spinner"></span><span class="btn-label">Create user</span>
+      </button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<!-- Edit user modal — available to all admins -->
+<div class="modal-backdrop" id="editUserModalBackdrop" data-action-base="{{ url_for('admin.edit_user', user_id=0) }}">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="editUserModalTitle">
+    <div class="modal-header">
+      <h3 id="editUserModalTitle">Edit user</h3>
+      <button class="modal-close" type="button" id="editUserModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="editUserForm" method="POST">
+      {{ form.hidden_tag() }}
+      <input type="hidden" name="role" id="editUserRole">
+      <div class="field">
+        <input type="text"  name="full_name" id="editUserName"  placeholder=" " autocomplete="off" required>
+        <label for="editUserName">Full name</label>
+      </div>
+      <div class="field">
+        <input type="email" name="email"     id="editUserEmail" placeholder=" " autocomplete="off" required>
+        <label for="editUserEmail">Email address</label>
+      </div>
+      <div class="field">
+        <label style="position:static;transform:none;display:block;margin-bottom:6px;color:var(--text-secondary);font-size:13px;">Department</label>
+        <select name="department" id="editUserDept" style="padding-top:12px;">
+          {% for val, label in form.department.choices %}
+          <option value="{{ val }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary js-submit-btn" style="width:100%;justify-content:center;">
+        <span class="btn-spinner"></span><span class="btn-label">Save changes</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { animate, stagger } = anime;
+
+    // ── Entrance animations ────────────────────────────────────────────────
+    const statsEl = document.getElementById('umStats');
+    animate(statsEl, { opacity: [0, 1], translateY: [-10, 0], duration: 400, ease: 'outCubic' });
+
+    function animateRows(panel) {
+      const rows = panel.querySelectorAll('.um-row');
+      if (!rows.length) return;
+      animate(rows, {
+        opacity:    [0, 1],
+        translateX: [-16, 0],
+        duration: 420,
+        ease: 'outCubic',
+        delay: stagger(45, { start: 60 }),
+        onComplete() { rows.forEach(r => { r.style.transform = ''; }); }
+      });
+    }
+    animateRows(document.getElementById('studentsPanel'));
+
+    // ── Tab switching ──────────────────────────────────────────────────────
+    const studentsBtn    = document.getElementById('tabStudentsBtn');
+    const supervisorsBtn = document.getElementById('tabSupervisorsBtn');
+    const studentsPanel    = document.getElementById('studentsPanel');
+    const supervisorsPanel = document.getElementById('supervisorsPanel');
+    let activeTab = 'students';
+
+    function showTab(tab) {
+      if (tab === activeTab) return;
+      activeTab = tab;
+      const isStudents = tab === 'students';
+
+      studentsBtn.classList.toggle('um-tab-active', isStudents);
+      supervisorsBtn.classList.toggle('um-tab-active', !isStudents);
+
+      const outPanel = isStudents ? supervisorsPanel : studentsPanel;
+      const inPanel  = isStudents ? studentsPanel    : supervisorsPanel;
+
+      animate(outPanel, { opacity: [1, 0], translateX: [0, isStudents ? 20 : -20], duration: 180, ease: 'inCubic',
+        onComplete() {
+          outPanel.style.display = 'none';
+          inPanel.style.display  = 'block';
+          animate(inPanel, { opacity: [0, 1], translateX: [isStudents ? -20 : 20, 0], duration: 260, ease: 'outCubic' });
+          animateRows(inPanel);
+          // re-apply any active search
+          applySearch(document.getElementById('umSearch').value);
+        }
+      });
+    }
+
+    studentsBtn.addEventListener('click',    () => showTab('students'));
+    supervisorsBtn.addEventListener('click', () => showTab('supervisors'));
+
+    // ── Search ─────────────────────────────────────────────────────────────
+    function applySearch(query) {
+      const q = query.trim().toLowerCase();
+      const panel   = activeTab === 'students' ? studentsPanel    : supervisorsPanel;
+      const noRes   = activeTab === 'students' ? document.getElementById('studentsNoResults') : document.getElementById('supervisorsNoResults');
+      const rows    = panel.querySelectorAll('.um-row');
+      let visible   = 0;
+      rows.forEach(row => {
+        const match = !q || row.dataset.search.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      noRes.style.display = (visible === 0 && q) ? 'block' : 'none';
+    }
+
+    document.getElementById('umSearch').addEventListener('input', e => applySearch(e.target.value));
+
+    // ── Add-user modal (super-admin only — elements may not exist for ordinary admins) ─
+    const openBtn  = document.getElementById('openAddUserModalBtn');
+    const addModal = document.getElementById('addUserModalBackdrop');
+    if (openBtn && addModal) {
+      openBtn.addEventListener('click', () => addModal.classList.add('open'));
+      document.getElementById('addUserModalClose').addEventListener('click', () => addModal.classList.remove('open'));
+      addModal.addEventListener('click', e => { if (e.target === addModal) addModal.classList.remove('open'); });
+    }
+
+    // ── Edit-user modal ────────────────────────────────────────────────────
+    const editModal = document.getElementById('editUserModalBackdrop');
+    const editForm  = document.getElementById('editUserForm');
+    const actionBase = editModal.dataset.actionBase; // e.g. /admin/users/0/edit
+
+    document.querySelectorAll('.um-edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('editUserName').value  = btn.dataset.editName;
+        document.getElementById('editUserEmail').value = btn.dataset.editEmail;
+        document.getElementById('editUserDept').value  = btn.dataset.editDept;
+        document.getElementById('editUserRole').value  = btn.dataset.editRole;
+        editForm.action = actionBase.replace('/0/', `/${btn.dataset.editId}/`);
+        editModal.classList.add('open');
+        document.getElementById('editUserName').focus();
+      });
+    });
+
+    document.getElementById('editUserModalClose').addEventListener('click', () => editModal.classList.remove('open'));
+    editModal.addEventListener('click', e => { if (e.target === editModal) editModal.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') editModal.classList.remove('open'); });
+  });
+</script>
+{% endblock %}

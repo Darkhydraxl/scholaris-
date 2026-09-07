@@ -1,0 +1,865 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+
+{% block auth_content %}
+<div class="asl-wrap">
+
+  <!-- ══════ Left panel: form + doodle background ══════ -->
+  <div class="asl-left">
+
+    <!-- Doodle frame — same icons as the app shell, colour-switched by theme -->
+    <svg class="asl-doodle-frame" xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 460 900" preserveAspectRatio="xMidYMid slice"
+         aria-hidden="true">
+      <defs><style>
+        .ld{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
+        .ldt{fill:currentColor;font-family:monospace;font-weight:bold;}
+      </style></defs>
+
+      <!-- TOP-LEFT: Math Book -->
+      <g transform="translate(10,10) scale(0.82)" opacity=".8">
+        <path class="ld" stroke-width="2.2" d="M0,55 C2,-5 25,-8 28,-2 L28,55"/>
+        <path class="ld" stroke-width="2.2" d="M28,55 C28,-5 50,-8 56,-2 L56,55"/>
+        <text class="ldt" x="5" y="20" font-size="10">MATH</text>
+        <line class="ld" stroke-width="1.2" x1="5" y1="30" x2="25" y2="30"/>
+        <line class="ld" stroke-width="1.2" x1="5" y1="38" x2="25" y2="38"/>
+        <line class="ld" stroke-width="1.2" x1="32" y1="30" x2="52" y2="30"/>
+        <line class="ld" stroke-width="1.2" x1="32" y1="38" x2="52" y2="38"/>
+      </g>
+
+      <!-- TOP-LEFT: Lightbulb -->
+      <g transform="translate(108,6) scale(0.74)" opacity=".8">
+        <circle class="ld" stroke-width="2.2" cx="20" cy="20" r="16"/>
+        <path class="ld" stroke-width="2" d="M13,34 Q13,40 20,40 Q27,40 27,34"/>
+        <line class="ld" stroke-width="2" x1="14" y1="40" x2="26" y2="40"/>
+        <line class="ld" stroke-width="2" x1="15" y1="44" x2="25" y2="44"/>
+        <line class="ld" stroke-width="2" x1="20" y1="1" x2="20" y2="-6"/>
+        <line class="ld" stroke-width="1.8" x1="38" y1="8" x2="44" y2="4"/>
+        <line class="ld" stroke-width="1.8" x1="2"  y1="8" x2="-4" y2="4"/>
+        <path class="ld" stroke-width="1.5" d="M15,26 L20,32 L25,26"/>
+      </g>
+
+      <!-- TOP-LEFT: Pencil -->
+      <g transform="translate(198,2) rotate(-10,6,40) scale(0.72)" opacity=".75">
+        <rect class="ld" stroke-width="2" x="0" y="8" width="12" height="55" rx="2"/>
+        <path class="ld" stroke-width="2" d="M0,63 L6,76 L12,63"/>
+        <rect class="ld" stroke-width="2" x="0" y="0" width="12" height="10" rx="2"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="58" x2="12" y2="58"/>
+      </g>
+
+      <!-- TOP-RIGHT: Protractor -->
+      <g transform="translate(282,5) scale(0.66)" opacity=".8">
+        <path class="ld" stroke-width="2.2" d="M0,38 A38,38 0 0,1 76,38"/>
+        <line class="ld" stroke-width="2" x1="0" y1="38" x2="76" y2="38"/>
+        <line class="ld" stroke-width="1.5" x1="38" y1="0" x2="38" y2="8"/>
+        <line class="ld" stroke-width="1.2" x1="57" y1="6" x2="54" y2="12"/>
+        <line class="ld" stroke-width="1.2" x1="19" y1="6" x2="22" y2="12"/>
+      </g>
+
+      <!-- TOP-RIGHT: Stacked Books -->
+      <g transform="translate(358,8) scale(0.68)" opacity=".82">
+        <rect class="ld" stroke-width="2" x="0" y="36" width="62" height="13" rx="2"/>
+        <rect class="ld" stroke-width="2" x="3" y="22" width="58" height="13" rx="2"/>
+        <rect class="ld" stroke-width="2" x="6" y="8"  width="54" height="13" rx="2"/>
+      </g>
+
+      <!-- TOP-RIGHT: Stars -->
+      <g transform="translate(392,74)" opacity=".72">
+        <text fill="currentColor" x="0"  y="18" font-size="18">★</text>
+        <text fill="currentColor" x="22" y="10" font-size="12">★</text>
+        <text fill="currentColor" x="38" y="22" font-size="9">★</text>
+      </g>
+
+      <!-- LEFT: Flask -->
+      <g transform="translate(8,160) scale(0.82)" opacity=".82">
+        <path class="ld" stroke-width="2.2" d="M10,0 L10,28 L0,55 Q0,68 18,68 Q36,68 36,55 L26,28 L26,0"/>
+        <line class="ld" stroke-width="2.5" x1="7" y1="0" x2="29" y2="0"/>
+        <circle class="ld" stroke-width="1.8" cx="14" cy="52" r="4"/>
+        <circle class="ld" stroke-width="1.5" cx="24" cy="44" r="3"/>
+        <circle class="ld" stroke-width="1.5" cx="17" cy="38" r="2.5"/>
+      </g>
+
+      <!-- LEFT: DNA -->
+      <g transform="translate(5,300) scale(0.74)" opacity=".8">
+        <path class="ld" stroke-width="2.2" d="M20,0 C8,12 32,24 20,36 C8,48 32,60 20,72 C8,84 32,96 20,108"/>
+        <path class="ld" stroke-width="2.2" d="M20,0 C32,12 8,24 20,36 C32,48 8,60 20,72 C32,84 8,96 20,108"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="18" x2="29" y2="18"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="36" x2="29" y2="36"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="54" x2="29" y2="54"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="72" x2="29" y2="72"/>
+        <line class="ld" stroke-width="1.8" x1="11" y1="90" x2="29" y2="90"/>
+      </g>
+
+      <!-- LEFT: Calculator -->
+      <g transform="translate(6,476) scale(0.68)" opacity=".82">
+        <rect class="ld" stroke-width="2.2" x="0" y="0" width="48" height="62" rx="5"/>
+        <rect class="ld" stroke-width="1.8" x="5" y="6"  width="38" height="13" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="5"  y="25" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="19" y="25" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="33" y="25" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="5"  y="37" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="19" y="37" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="33" y="37" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="5"  y="49" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="19" y="49" width="11" height="9" rx="2"/>
+        <rect class="ld" stroke-width="1.3" x="33" y="49" width="11" height="9" rx="2"/>
+      </g>
+
+      <!-- RIGHT: Ruler -->
+      <g transform="translate(432,140) scale(0.8)" opacity=".8">
+        <rect class="ld" stroke-width="2" x="0" y="0" width="14" height="78" rx="2"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="10" x2="8" y2="10"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="20" x2="8" y2="20"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="30" x2="8" y2="30"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="40" x2="8" y2="40"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="50" x2="8" y2="50"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="60" x2="8" y2="60"/>
+        <line class="ld" stroke-width="1.2" x1="0" y1="70" x2="8" y2="70"/>
+      </g>
+
+      <!-- RIGHT: Folder -->
+      <g transform="translate(378,306) scale(0.74)" opacity=".82">
+        <path class="ld" stroke-width="2.2" d="M0,14 Q0,10 4,10 L22,10 L27,2 L56,2 Q60,2 60,6 L60,52 Q60,56 56,56 L4,56 Q0,56 0,52 Z"/>
+      </g>
+
+      <!-- RIGHT: Marker -->
+      <g transform="translate(437,440) scale(0.78)" opacity=".8">
+        <rect class="ld" stroke-width="2" x="0" y="0" width="14" height="52" rx="7"/>
+        <path class="ld" stroke-width="2" d="M2,52 L7,66 L12,52"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="14" x2="14" y2="14"/>
+      </g>
+
+      <!-- RIGHT: Binder Clip -->
+      <g transform="translate(382,554) scale(0.7)" opacity=".8">
+        <rect class="ld" stroke-width="2" x="0" y="15" width="50" height="40" rx="5"/>
+        <path class="ld" stroke-width="2" d="M5,15 Q5,0 25,0 Q45,0 45,15"/>
+        <path class="ld" stroke-width="2" d="M10,0 L10,-16 L20,-16"/>
+        <path class="ld" stroke-width="2" d="M40,0 L40,-16 L30,-16"/>
+      </g>
+
+      <!-- BOTTOM-LEFT: ABC Board -->
+      <g transform="translate(10,800) scale(0.74)" opacity=".82">
+        <rect class="ld" stroke-width="2.5" x="0" y="0" width="62" height="46" rx="3"/>
+        <line class="ld" stroke-width="2" x1="8"  y1="46" x2="3"  y2="65"/>
+        <line class="ld" stroke-width="2" x1="54" y1="46" x2="59" y2="65"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="42" x2="62" y2="42"/>
+        <text class="ldt" x="7" y="24" font-size="13">ABC</text>
+        <text class="ldt" x="7" y="39" font-size="12">123</text>
+      </g>
+
+      <!-- BOTTOM-LEFT: Desk + Chair -->
+      <g transform="translate(68,808) scale(0.72)" opacity=".78">
+        <rect class="ld" stroke-width="2" x="0" y="18" width="50" height="6" rx="1"/>
+        <line class="ld" stroke-width="2" x1="5"  y1="24" x2="5"  y2="52"/>
+        <line class="ld" stroke-width="2" x1="45" y1="24" x2="45" y2="52"/>
+        <rect class="ld" stroke-width="2" x="58" y="26" width="28" height="5" rx="1"/>
+        <line class="ld" stroke-width="2" x1="58" y1="26" x2="58" y2="8"/>
+        <line class="ld" stroke-width="2" x1="58" y1="8"  x2="86" y2="8"/>
+        <line class="ld" stroke-width="2" x1="62" y1="31" x2="62" y2="52"/>
+        <line class="ld" stroke-width="2" x1="82" y1="31" x2="82" y2="52"/>
+      </g>
+
+      <!-- BOTTOM-LEFT: Graduation Cap -->
+      <g transform="translate(168,812) scale(0.68)" opacity=".82">
+        <path class="ld" stroke-width="2" d="M35,0 L70,18 L35,36 L0,18 Z"/>
+        <path class="ld" stroke-width="2" d="M15,18 Q15,42 35,46 Q55,42 55,18"/>
+        <line class="ld" stroke-width="2" x1="70" y1="18" x2="70" y2="42"/>
+        <circle class="ld" stroke-width="1.5" cx="70" cy="44" r="3"/>
+      </g>
+
+      <!-- BOTTOM-RIGHT: Globe -->
+      <g transform="translate(286,808) scale(0.66)" opacity=".82">
+        <circle class="ld" stroke-width="2.2" cx="28" cy="28" r="25"/>
+        <ellipse class="ld" stroke-width="1.5" cx="28" cy="28" rx="12" ry="25"/>
+        <line class="ld" stroke-width="1.5" x1="3"  y1="28" x2="53" y2="28"/>
+        <line class="ld" stroke-width="1"   x1="28" y1="3"  x2="28" y2="53"/>
+        <line class="ld" stroke-width="2"   x1="28" y1="53" x2="28" y2="64"/>
+        <line class="ld" stroke-width="2"   x1="18" y1="64" x2="38" y2="64"/>
+      </g>
+
+      <!-- BOTTOM-RIGHT: Bell -->
+      <g transform="translate(352,810) scale(0.68)" opacity=".8">
+        <path class="ld" stroke-width="2" d="M5,48 Q2,5 25,3 Q48,5 45,48 Z"/>
+        <circle class="ld" stroke-width="1.8" cx="25" cy="3"  r="4"/>
+        <circle class="ld" stroke-width="2"   cx="25" cy="52" r="4"/>
+        <line class="ld" stroke-width="1.5" x1="0" y1="48" x2="50" y2="48"/>
+        <text class="ldt" x="4" y="-3" font-size="9">HOME</text>
+      </g>
+
+      <!-- BOTTOM-RIGHT: Apple -->
+      <g transform="translate(406,818) scale(0.62)" opacity=".82">
+        <path class="ld" stroke-width="2.2" d="M22,12 Q8,10 5,28 Q2,44 10,52 Q16,60 22,56 Q28,60 34,52 Q42,44 39,28 Q36,10 22,12 Z"/>
+        <path class="ld" stroke-width="2"   d="M22,12 Q22,3 28,1 Q34,-2 33,5"/>
+        <path class="ld" stroke-width="1.5" d="M22,8 Q17,2 15,8"/>
+      </g>
+    </svg>
+
+    <button class="theme-toggle-switch" id="themeToggleBtn" aria-label="Toggle dark mode">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+
+    <div class="asl-glow" aria-hidden="true"></div>
+    <div class="asl-inner page-enter">
+
+      <!-- Brand -->
+      <div class="asl-brand sidebar-logo">
+        <svg class="logo-mark" viewBox="0 0 60 82" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="60" height="82" fill="#c8a47e"/>
+          <rect x="3" y="3" width="54" height="76" fill="none" stroke="#15100a" stroke-width="2"/>
+          <rect x="8" y="8" width="44" height="66" fill="none" stroke="#15100a" stroke-width="1.5"/>
+          <polygon points="9,9 51,9 51,21 9,39" fill="#15100a"/>
+          <polygon points="51,73 9,73 9,61 51,43" fill="#15100a"/>
+        </svg>
+        <span class="logo-name">Scholaris</span>
+      </div>
+
+      <p class="asl-eyebrow">Academic portal</p>
+      <h1 class="asl-heading" aria-label="Welcome back">
+        <span class="asl-hstack" aria-hidden="true">
+          <span class="asl-hbg">Welcome <em>back</em></span>
+          <span class="asl-hfill" id="loginHeadingFill">Welcome <em>back</em></span>
+        </span>
+      </h1>
+      <p class="asl-sub">Sign in to continue to your dashboard.</p>
+
+      <div class="asl-feature-pills">
+        <span class="asl-fp">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+          Chapter tracking
+        </span>
+        <span class="asl-fp">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          PDF review
+        </span>
+        <span class="asl-fp">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Live feedback
+        </span>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-list" id="flashMessages" data-flashes='{{ messages|tojson }}'></div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Form -->
+      <form method="POST" novalidate class="asl-form">
+        {{ form.hidden_tag() }}
+
+        <div class="asl-field">
+          {{ form.email(placeholder="Enter email", autocomplete="email", class="asl-input") }}
+          {% for err in form.email.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        <div class="asl-field">
+          <div class="asl-pw-wrap">
+            {{ form.password(placeholder="Password", autocomplete="current-password", class="asl-input", id="pwField") }}
+            <button type="button" class="asl-pw-eye" id="pwToggle" aria-label="Show password" tabindex="-1">
+              <svg id="eyeOpen"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="eyeClosed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"/></svg>
+            </button>
+          </div>
+          {% for err in form.password.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+        </div>
+
+        <label class="asl-remember">
+          {{ form.remember() }}<span>Remember me</span>
+        </label>
+
+        <button type="submit" class="asl-btn-primary js-submit-btn">
+          <span class="btn-spinner"></span>
+          <span class="flow-blob" aria-hidden="true"></span>
+          <span class="flow-arrow-left" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 7H2M2 7l4-4M2 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="btn-label">Sign in</span>
+          <span class="flow-arrow-right" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M12 7l-4-4M12 7l-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </form>
+
+      <div class="asl-or"><span>or sign in as</span></div>
+
+      <div class="asl-socials">
+        <button class="asl-social" type="button" title="Sign in as Student" data-email="t.ogundimu@scholaris.edu" data-tagline="Ready to make progress?">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3.33 2 8.67 2 12 0v-5"/></svg>
+          Student
+        </button>
+        <button class="asl-social" type="button" title="Sign in as Supervisor" data-email="a.okafor@scholaris.edu" data-tagline="Your students are waiting.">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Supervisor
+        </button>
+      </div>
+
+      <p class="asl-foot">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+    </div>
+  </div>
+
+  <!-- ══════ Right panel: doodle illustration ══════ -->
+  <div class="asl-right" aria-hidden="true">
+    <img src="{{ url_for('static', filename='img/login-doodle.jpg') }}" class="asl-doodle-img" alt="">
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,600;0,700;1,400;1,600&display=swap');
+
+/* ═══════════════════════════════════
+   Layout
+═══════════════════════════════════ */
+.asl-wrap {
+  display: flex;
+  min-height: 100vh;
+  background: #0c0c10;
+}
+
+/* ─── Left panel ─── */
+.asl-left {
+  width: 460px;
+  flex-shrink: 0;
+  /* dark mode default */
+  background: #0c0c10;
+  color: #c9952a;           /* drives the doodle SVG currentColor */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 52px;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Doodle SVG — fills the panel, sits behind the form */
+.asl-doodle-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+/* Form content sits above the SVG */
+.asl-left .theme-toggle-switch,
+.asl-inner { position: relative; z-index: 1; }
+
+.asl-left .theme-toggle-switch {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 10;
+}
+
+.asl-inner { width: 100%; }
+
+/* Brand logo */
+.asl-brand.sidebar-logo { padding: 0 0 34px !important; }
+.asl-brand .logo-mark   { width: 36px !important; height: 49px !important; }
+.asl-brand .logo-name   { color: #f0ede8 !important; font-size: 16px !important; }
+
+/* Heading + subtitle */
+.asl-heading {
+  font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #f0ede8;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.asl-heading em {
+  font-style: italic;
+  color: #c8a47e;
+}
+/* Fill-text animation */
+.asl-hstack { position: relative; display: block; }
+.asl-hbg    { display: block; opacity: 0.13; user-select: none; }
+.asl-hfill  {
+  position: absolute; inset: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden; pointer-events: none;
+}
+.asl-sub {
+  font-size: 13.5px;
+  color: rgba(240,237,232,0.52);
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* ─── Eyebrow label ─── */
+.asl-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(200,164,126,0.55);
+  margin-bottom: 12px;
+}
+.asl-eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ─── Feature trust-pills ─── */
+.asl-feature-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 14px 0 24px;
+}
+.asl-fp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 99px;
+  background: rgba(200,164,126,0.07);
+  border: 1px solid rgba(200,164,126,0.14);
+  color: rgba(240,237,232,0.46);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.asl-fp svg { flex-shrink: 0; color: rgba(200,164,126,0.6); }
+
+/* ─── Ambient glow orb ─── */
+.asl-glow {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,164,126,0.065) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Form ─── */
+.asl-form { display: flex; flex-direction: column; gap: 11px; }
+.asl-field { display: flex; flex-direction: column; gap: 4px; }
+
+.asl-input,
+.asl-wrap input[type="email"],
+.asl-wrap input[type="password"],
+.asl-wrap input[type="text"] {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.055) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 11px;
+  color: #f0ede8 !important;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 180ms ease, background 180ms ease;
+  box-sizing: border-box;
+}
+.asl-input::placeholder,
+.asl-wrap input::placeholder { color: rgba(240,237,232,0.28) !important; }
+.asl-input:focus,
+.asl-wrap input:focus {
+  border-color: rgba(200,164,126,0.58) !important;
+  background: rgba(200,164,126,0.045) !important;
+}
+
+/* Password eye toggle */
+.asl-pw-wrap { position: relative; }
+.asl-pw-wrap .asl-input { padding-right: 46px; }
+.asl-pw-eye {
+  position: absolute; top: 50%; right: 13px;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; padding: 0;
+  color: rgba(240,237,232,0.32);
+  display: flex; align-items: center;
+  transition: color 140ms;
+}
+.asl-pw-eye:hover { color: rgba(240,237,232,0.65); }
+.asl-pw-eye svg { width: 17px; height: 17px; }
+
+/* Remember me */
+.asl-remember {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px;
+  color: rgba(240,237,232,0.4);
+  cursor: pointer; user-select: none;
+  margin: 2px 0;
+}
+.asl-remember input[type="checkbox"] { width: 14px; height: 14px; accent-color: #c8a47e; cursor: pointer; }
+
+/* Primary button */
+.asl-btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: #c8a47e;
+  color: #15100a;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+  transition: background 150ms, transform 120ms, box-shadow 150ms;
+  box-shadow: 0 4px 18px rgba(200,164,126,0.28);
+  overflow: hidden;
+  position: relative;
+}
+.asl-btn-primary:hover  { background: #d4af8c; box-shadow: 0 6px 24px rgba(200,164,126,0.42); }
+.asl-btn-primary:active { transform: scale(0.99); }
+.asl-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* FlowButton animation */
+.asl-btn-primary .flow-blob {
+  position: absolute;
+  width: 300%; height: 300%;
+  left: -100%; top: -100%;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.13);
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+.asl-btn-primary:hover .flow-blob { transform: scale(1); }
+.asl-btn-primary .flow-arrow-left {
+  position: absolute; left: 18px; top: 50%;
+  transform: translateY(-50%) translateX(-140%);
+  opacity: 0; display: flex; align-items: center;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  z-index: 2; color: inherit;
+}
+.asl-btn-primary:hover .flow-arrow-left { transform: translateY(-50%) translateX(0); opacity: 1; }
+.asl-btn-primary .flow-arrow-right {
+  position: absolute; right: 18px; top: 50%;
+  transform: translateY(-50%) translateX(0);
+  opacity: 1; display: flex; align-items: center;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  z-index: 2; color: inherit;
+}
+.asl-btn-primary:hover .flow-arrow-right { transform: translateY(-50%) translateX(140%); opacity: 0; }
+.asl-btn-primary .btn-label {
+  position: relative; z-index: 2; display: inline-block;
+  transform: translateX(0);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.asl-btn-primary:hover .btn-label { transform: translateX(8px); }
+.asl-btn-primary .btn-spinner { position: relative; z-index: 2; }
+
+/* Inline spinner */
+.btn-spinner {
+  display: none;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(21,16,10,0.25);
+  border-top-color: #15100a;
+  border-radius: 50%;
+  animation: asl-spin 0.7s linear infinite;
+}
+.is-loading .btn-spinner { display: block; }
+.is-loading .btn-label   { opacity: 0.8; }
+@keyframes asl-spin { to { transform: rotate(360deg); } }
+
+/* Divider */
+.asl-or {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0 14px;
+  font-size: 11.5px;
+  color: rgba(240,237,232,0.25);
+  letter-spacing: 0.04em;
+}
+.asl-or::before, .asl-or::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* Social buttons */
+.asl-socials { display: flex; gap: 9px; }
+.asl-social {
+  flex: 1;
+  padding: 11px 8px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 11px;
+  color: rgba(240,237,232,0.68);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  transition: background 140ms, border-color 140ms, color 140ms;
+}
+.asl-social:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+  color: #f0ede8;
+}
+
+/* Footer */
+.asl-foot {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(240,237,232,0.36);
+}
+.asl-foot a { color: #c8a47e; font-weight: 600; text-decoration: none; }
+.asl-foot a:hover { text-decoration: underline; }
+
+/* Flash messages */
+.asl-wrap .flash-list { margin-bottom: 14px; }
+
+/* ═══════════════════════════════════
+   Light mode overrides
+═══════════════════════════════════ */
+[data-theme="light"] .asl-wrap { background: #f5e6b8; }
+
+[data-theme="light"] .asl-left {
+  background: #f5e6b8;          /* sandy parchment — matches the reference */
+  color: #b8956a;               /* sepia doodle colour */
+  border-right-color: rgba(160,110,60,0.18);
+}
+
+/* All text / form elements flip to dark on parchment */
+[data-theme="light"] .asl-brand .logo-name { color: #15100a !important; }
+[data-theme="light"] .asl-heading          { color: #15100a; }
+[data-theme="light"] .asl-sub              { color: rgba(21,16,10,0.5); }
+[data-theme="light"] .asl-eyebrow         { color: rgba(160,110,60,0.52); }
+[data-theme="light"] .asl-fp {
+  background: rgba(160,110,60,0.07);
+  border-color: rgba(160,110,60,0.15);
+  color: rgba(21,16,10,0.42);
+}
+[data-theme="light"] .asl-fp svg          { color: rgba(160,110,60,0.6); }
+[data-theme="light"] .asl-glow {
+  background: radial-gradient(circle, rgba(160,110,60,0.055) 0%, transparent 65%);
+}
+
+[data-theme="light"] .asl-input,
+[data-theme="light"] .asl-wrap input[type="email"],
+[data-theme="light"] .asl-wrap input[type="password"],
+[data-theme="light"] .asl-wrap input[type="text"] {
+  background: rgba(255,255,255,0.55) !important;
+  border-color: rgba(160,110,60,0.28) !important;
+  color: #15100a !important;
+}
+[data-theme="light"] .asl-input::placeholder,
+[data-theme="light"] .asl-wrap input::placeholder { color: rgba(21,16,10,0.32) !important; }
+[data-theme="light"] .asl-input:focus,
+[data-theme="light"] .asl-wrap input:focus {
+  border-color: rgba(160,110,60,0.55) !important;
+  background: rgba(255,255,255,0.75) !important;
+}
+
+[data-theme="light"] .asl-pw-eye       { color: rgba(21,16,10,0.32); }
+[data-theme="light"] .asl-pw-eye:hover { color: rgba(21,16,10,0.65); }
+[data-theme="light"] .asl-remember     { color: rgba(21,16,10,0.5); }
+
+[data-theme="light"] .asl-or           { color: rgba(21,16,10,0.3); }
+[data-theme="light"] .asl-or::before,
+[data-theme="light"] .asl-or::after    { background: rgba(21,16,10,0.12); }
+
+[data-theme="light"] .asl-social {
+  background: rgba(255,255,255,0.45);
+  border-color: rgba(160,110,60,0.25);
+  color: rgba(21,16,10,0.65);
+}
+[data-theme="light"] .asl-social:hover {
+  background: rgba(255,255,255,0.7);
+  border-color: rgba(160,110,60,0.45);
+  color: #15100a;
+}
+
+[data-theme="light"] .asl-foot         { color: rgba(21,16,10,0.4); }
+
+/* ═══════════════════════════════════
+   Right panel — doodle image
+═══════════════════════════════════ */
+.asl-right {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Left-edge blend: fades the busy image into the dark left panel */
+.asl-right::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    #0c0c10 0%,
+    rgba(12,12,16,0.62) 14%,
+    rgba(12,12,16,0.18) 34%,
+    transparent 54%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Top/bottom vignette for depth */
+.asl-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, transparent 22%),
+    linear-gradient(to top,    rgba(0,0,0,0.22) 0%, transparent 22%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.asl-doodle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  /* Boost colour richness and micro-contrast */
+  filter: saturate(1.14) contrast(1.06) brightness(0.96);
+  /* Crisp sub-pixel rendering on high-DPI screens */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Light mode: blend from parchment */
+[data-theme="light"] .asl-right::before {
+  background: linear-gradient(
+    to right,
+    #f5e6b8 0%,
+    rgba(245,230,184,0.62) 14%,
+    rgba(245,230,184,0.18) 34%,
+    transparent 54%
+  );
+}
+[data-theme="light"] .asl-right::after {
+  background:
+    linear-gradient(to bottom, rgba(245,230,184,0.3) 0%, transparent 22%),
+    linear-gradient(to top,    rgba(245,230,184,0.3) 0%, transparent 22%);
+}
+[data-theme="light"] .asl-doodle-img {
+  filter: saturate(1.08) contrast(1.04) brightness(1.0);
+}
+
+/* ═══════════════════════════════════
+   Responsive
+═══════════════════════════════════ */
+@media (max-width: 880px) {
+  .asl-wrap  { flex-direction: column; }
+  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .asl-right { flex: none; min-height: 220px; }
+  [data-theme="light"] .asl-left { border-bottom-color: rgba(160,110,60,0.18); }
+
+  /* On stacked layout the blend comes from the top (left panel is above) */
+  .asl-right::before {
+    background: linear-gradient(
+      to bottom,
+      #0c0c10 0%,
+      rgba(12,12,16,0.55) 18%,
+      transparent 50%
+    );
+  }
+  [data-theme="light"] .asl-right::before {
+    background: linear-gradient(
+      to bottom,
+      #f5e6b8 0%,
+      rgba(245,230,184,0.55) 18%,
+      transparent 50%
+    );
+  }
+}
+@media (max-width: 480px) {
+  .asl-left    { padding: 28px 20px; }
+  .asl-heading { font-size: 30px; }
+  .asl-feature-pills { margin: 10px 0 18px; }
+  .asl-socials { flex-direction: column; }
+  .asl-social  { padding: 12px; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+(function () {
+  // Staggered entrance for left panel elements
+  if (typeof anime !== 'undefined') {
+    var _a = anime, animate = _a.animate, stagger = _a.stagger;
+    animate('.asl-eyebrow',       { opacity:[0,1], translateY:[-6,0],  duration:400, ease:'outCubic',      delay:80  });
+    animate('.asl-heading',       { opacity:[0,1], translateY:[20,0],  duration:580, ease:'outBack(1.05)', delay:150 });
+    animate('.asl-sub',           { opacity:[0,1], translateY:[8,0],   duration:380, ease:'outCubic',      delay:260 });
+    animate('.asl-feature-pills', { opacity:[0,1], translateY:[8,0],   duration:360, ease:'outCubic',      delay:330 });
+    animate('.asl-fp',            { opacity:[0,1], scale:[0.93,1],     duration:300, ease:'outBack(1.1)',  delay:stagger(50,{start:360}) });
+    animate('.asl-form, .asl-or, .asl-socials, .asl-foot', {
+      opacity:[0,1], translateY:[8,0], duration:340, ease:'outCubic',
+      delay:stagger(35,{start:450})
+    });
+  }
+
+  /* Fill sweep on "Welcome back" — starts after entrance animation */
+  setTimeout(function () {
+    var fill = document.getElementById('loginHeadingFill');
+    if (!fill) return;
+    var prog = 0;
+    var id = setInterval(function () {
+      prog = Math.min(1, prog + Math.random() * 0.22);
+      fill.style.clipPath = 'inset(0 ' + (Math.round((1 - prog) * 1000) / 10) + '% 0 0)';
+      if (prog >= 1) clearInterval(id);
+    }, 480);
+  }, 730);
+
+  document.querySelectorAll('form').forEach(function (f) {
+    f.addEventListener('submit', function () {
+      var btn = f.querySelector('.js-submit-btn');
+      if (btn) { btn.classList.add('is-loading'); btn.disabled = true; }
+    });
+  });
+
+  var pw     = document.getElementById('pwField');
+  var tog    = document.getElementById('pwToggle');
+  var eOpen  = document.getElementById('eyeOpen');
+  var eClosed = document.getElementById('eyeClosed');
+  if (tog && pw) {
+    tog.addEventListener('click', function () {
+      var show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      eOpen.style.display   = show ? 'none' : '';
+      eClosed.style.display = show ? '' : 'none';
+    });
+  }
+
+  var aslSub     = document.querySelector('.asl-sub');
+  var defaultSub = aslSub ? aslSub.textContent : '';
+
+  document.querySelectorAll('.asl-social[data-email]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var emailField = document.querySelector('input[type="email"], input[name="email"]');
+      var pwField    = document.getElementById('pwField');
+      var submitBtn  = document.querySelector('.asl-form .js-submit-btn');
+      if (!emailField || !pwField) return;
+      emailField.value = btn.dataset.email;
+      pwField.value    = 'Password123!';
+      if (aslSub && btn.dataset.tagline) aslSub.textContent = btn.dataset.tagline;
+      if (submitBtn) submitBtn.focus();
+    });
+  });
+})();
+</script>
+{% endblock %}

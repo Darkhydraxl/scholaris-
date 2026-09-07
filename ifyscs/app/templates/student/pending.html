@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Awaiting Assignment{% endblock %}
+
+{% block content %}
+<div class="pending-shell">
+
+  <!-- Animated hourglass / waiting illustration -->
+  <div class="pending-icon-wrap">
+    <svg class="pending-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer ring -->
+      <circle cx="40" cy="40" r="36" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 4" class="pending-ring-spin"/>
+      <!-- Hourglass body -->
+      <g transform="translate(24, 16)">
+        <path d="M2 2h28M2 50h28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- top half -->
+        <path d="M4 4l10 14h4l10-14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <!-- bottom half -->
+        <path d="M4 48l10-14h4l10 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <!-- sand dots top -->
+        <circle cx="16" cy="10" r="2" fill="currentColor" class="sand-a"/>
+        <circle cx="11" cy="14" r="1.5" fill="currentColor" class="sand-b"/>
+        <circle cx="21" cy="14" r="1.5" fill="currentColor" class="sand-c"/>
+        <!-- sand bottom pile -->
+        <ellipse cx="16" cy="40" rx="6" ry="3" fill="currentColor" opacity=".35" class="sand-pile"/>
+      </g>
+    </svg>
+  </div>
+
+  <h2 class="pending-title">You're in the queue</h2>
+  <p class="pending-sub">
+    An administrator will assign you a supervisor shortly.<br>
+    Once assigned, you'll have full access to submit chapters, view feedback, and track your progress.
+  </p>
+
+  <div class="pending-steps">
+    <div class="ps-item ps-done">
+      <div class="ps-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <span>Account created</span>
+    </div>
+    <div class="ps-item ps-done">
+      <div class="ps-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <span>Logged in</span>
+    </div>
+    <div class="ps-item ps-active">
+      <div class="ps-dot ps-pulse"></div>
+      <span>Waiting for supervisor assignment</span>
+    </div>
+    <div class="ps-item ps-locked">
+      <div class="ps-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></div>
+      <span>Submit chapters &amp; track progress</span>
+    </div>
+  </div>
+
+  <div class="pending-footer">
+    <p>Seeing this by mistake? <a href="{{ url_for('auth.profile') }}">Check your profile</a> or <a href="{{ url_for('auth.logout') }}">sign out</a>.</p>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Shell ── */
+  .pending-shell {
+    max-width: 480px;
+    margin: 60px auto;
+    text-align: center;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── Icon ── */
+  .pending-icon-wrap {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--soft-icon-bg);
+    border-radius: 50%;
+    margin-bottom: 28px;
+    color: var(--accent-gold);
+  }
+  .pending-icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes sand-drop {
+    0%, 40% { opacity: 1; transform: translateY(0); }
+    80%, 100% { opacity: 0; transform: translateY(6px); }
+  }
+  @keyframes pile-grow {
+    0%, 40% { rx: 4; ry: 2; }
+    80%, 100% { rx: 6; ry: 3; }
+  }
+
+  .pending-ring-spin {
+    transform-origin: 40px 40px;
+    animation: spin-slow 8s linear infinite;
+    color: var(--accent-gold);
+    opacity: .4;
+  }
+  .sand-a { animation: sand-drop 3s ease-in-out infinite; }
+  .sand-b { animation: sand-drop 3s ease-in-out .4s infinite; }
+  .sand-c { animation: sand-drop 3s ease-in-out .8s infinite; }
+
+  /* ── Text ── */
+  .pending-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 12px;
+    letter-spacing: -.3px;
+  }
+  .pending-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin: 0 0 36px;
+  }
+
+  /* ── Progress steps ── */
+  .pending-steps {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--card-light);
+    border: 1.5px solid var(--card-light-border);
+    border-radius: 16px;
+    padding: 8px 20px;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+  .ps-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    position: relative;
+  }
+  .ps-item + .ps-item::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    width: 2px;
+    height: 14px;
+    background: var(--card-light-border);
+    transform: translateX(-50%);
+  }
+  .ps-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--soft-icon-bg);
+    color: var(--text-secondary);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Done state */
+  .ps-done .ps-dot {
+    background: rgba(39,174,96,.15);
+    color: var(--success);
+  }
+  .ps-done span { color: var(--text-primary); }
+
+  /* Active / waiting state */
+  .ps-active .ps-dot {
+    background: rgba(201,149,42,.15);
+  }
+  .ps-active span {
+    color: var(--accent-gold);
+    font-weight: 600;
+  }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0   rgba(201,149,42,.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(201,149,42,0);  }
+    100% { box-shadow: 0 0 0 0   rgba(201,149,42,0);  }
+  }
+  .ps-pulse {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    margin: auto;
+    animation: pulse-ring 1.6s ease-out infinite;
+  }
+  /* Locked state */
+  .ps-locked { opacity: .45; }
+
+  /* ── Footer ── */
+  .pending-footer {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .pending-footer a {
+    color: var(--accent-gold);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .pending-footer a:hover { text-decoration: underline; }
+
+  /* Dark mode */
+  [data-theme="dark"] .pending-icon-wrap { background: rgba(255,255,255,.07); }
+  [data-theme="dark"] .ps-item + .ps-item::before { background: rgba(255,255,255,.08); }
+
+  @media (max-width: 520px) {
+    .pending-shell { margin: 36px auto; }
+    .pending-title { font-size: 22px; }
+  }
+</style>
+{% endblock %}

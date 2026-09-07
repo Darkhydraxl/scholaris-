@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}All Meetings{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page header ────────────────────────────────── */
+.am-hdr { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+.am-hdr-left h1 { font-size:26px; font-weight:800; letter-spacing:-.02em; }
+.am-hdr-left p  { font-size:13.5px; color:var(--text-secondary); margin-top:4px; }
+
+/* ── Stats strip ─────────────────────────────────── */
+.am-stats {
+  display:flex; gap:0; background:var(--card-dark);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius-card); padding:16px 24px; margin-bottom:24px;
+  overflow:hidden; position:relative;
+}
+.am-stats::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.14) 40%,transparent);
+}
+.am-stat { flex:1; display:flex; align-items:center; gap:10px; padding:0 16px; }
+.am-stat:first-child { padding-left:0; }
+.am-stat:last-child  { padding-right:0; }
+.am-stat-divider { width:1px; height:28px; background:rgba(255,255,255,0.1); flex-shrink:0; }
+.am-stat-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.am-stat-icon svg { width:14px; height:14px; }
+.am-stat-total    .am-stat-icon { background:rgba(139,131,255,0.18); color:#8b83ff; }
+.am-stat-upcoming .am-stat-icon { background:rgba(59,130,246,0.18);  color:#60a5fa; }
+.am-stat-live     .am-stat-icon { background:rgba(76,217,100,0.18);  color:#4cd964; }
+.am-stat-done     .am-stat-icon { background:rgba(100,100,100,0.18); color:rgba(255,255,255,0.45); }
+.am-stat-value { font-size:20px; font-weight:800; letter-spacing:-.02em; line-height:1; color:var(--text-on-dark-card); }
+.am-stat-label { font-size:11px; color:var(--text-on-dark-card-muted); margin-top:3px; white-space:nowrap; }
+
+@media (max-width:640px) {
+  .am-stats { flex-wrap:wrap; gap:14px; padding:14px 16px; }
+  .am-stat  { flex:1 1 40%; padding:0; }
+  .am-stat-divider { display:none; }
+}
+
+/* ── Filter bar ─────────────────────────────────── */
+.am-toolbar {
+  display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;
+}
+.am-filter-tab {
+  display:inline-flex; align-items:center; gap:6px; padding:8px 16px;
+  border-radius:var(--radius-pill); border:1px solid var(--card-light-border);
+  background:var(--card-light); color:var(--text-secondary);
+  font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;
+  transition:background 160ms, color 160ms, border-color 160ms;
+}
+.am-filter-tab.active {
+  background:var(--ring-accent); color:var(--active-pill-text); border-color:var(--ring-accent);
+}
+.am-filter-tab:hover:not(.active) { background:var(--card-light-hover, var(--card-light)); color:var(--text-primary); }
+
+.am-search {
+  margin-left:auto;
+  display:flex; align-items:center; gap:8px;
+  background:var(--card-light); border:1px solid var(--card-light-border);
+  border-radius:var(--radius-pill); padding:8px 14px;
+  font-size:13px; color:var(--text-primary);
+}
+.am-search svg { width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+.am-search input {
+  border:none; background:transparent; outline:none; font-family:inherit;
+  font-size:13px; color:var(--text-primary); width:180px;
+}
+.am-search input::placeholder { color:var(--text-secondary); }
+
+/* ── Table ──────────────────────────────────────── */
+.am-table-wrap { overflow-x:auto; border-radius:var(--radius-card); border:1px solid var(--card-light-border); }
+table.am-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+.am-table thead tr { background:var(--card-light); }
+.am-table th {
+  text-align:left; padding:12px 16px; font-size:11px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--text-secondary);
+  border-bottom:1px solid var(--card-light-border); white-space:nowrap;
+}
+.am-table td {
+  padding:14px 16px; border-bottom:1px solid var(--card-light-border);
+  color:var(--text-primary); vertical-align:middle;
+}
+.am-table tbody tr:last-child td { border-bottom:none; }
+.am-table tbody tr:hover { background:var(--card-light); }
+
+/* cells */
+.am-title-cell { font-weight:600; max-width:220px; }
+.am-title-cell small { display:block; font-size:11.5px; color:var(--text-secondary); font-weight:400; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.am-sup-cell { font-weight:500; }
+.am-sup-cell small { display:block; font-size:11.5px; color:var(--text-secondary); font-weight:400; }
+
+/* status badges */
+.am-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:99px; white-space:nowrap;
+}
+.am-badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.am-badge-upcoming  { background:rgba(59,130,246,0.15);  color:#60a5fa; }
+.am-badge-live      { background:rgba(76,217,100,0.15);  color:#4cd964; }
+.am-badge-completed { background:rgba(100,100,100,0.14); color:var(--text-secondary); }
+.am-badge-cancelled { background:rgba(239,68,68,0.12);   color:#f87171; }
+.am-badge-live .am-badge-dot { animation:am-pulse 2s ease-in-out infinite; }
+@keyframes am-pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+/* platform pill */
+.am-platform {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:99px;
+  background:var(--soft-icon-bg); color:var(--text-secondary);
+}
+.am-platform svg { width:12px; height:12px; }
+
+/* join link */
+.am-join {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:600; color:var(--accent-navy);
+  text-decoration:none; padding:5px 10px; border-radius:99px;
+  border:1px solid var(--card-light-border);
+  transition:background 140ms, color 140ms;
+}
+.am-join:hover { background:var(--ring-accent); color:var(--active-pill-text); border-color:var(--ring-accent); }
+.am-join svg { width:11px; height:11px; }
+
+/* empty state */
+.am-empty { text-align:center; padding:64px 24px; color:var(--text-secondary); }
+.am-empty svg { margin-bottom:16px; opacity:0.4; }
+.am-empty h3 { font-size:18px; font-weight:700; color:var(--text-primary); margin-bottom:8px; }
+.am-empty p  { font-size:13.5px; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% set upcoming_list  = meetings | selectattr('computed_status', 'in', ['upcoming','live']) | list %}
+{% set live_list      = meetings | selectattr('computed_status', 'equalto', 'live') | list %}
+{% set completed_list = meetings | selectattr('computed_status', 'equalto', 'completed') | list %}
+{% set cancelled_list = meetings | selectattr('computed_status', 'equalto', 'cancelled') | list %}
+
+<div class="am-hdr">
+  <div class="am-hdr-left">
+    <h1>All Meetings</h1>
+    <p>Every meeting scheduled across all supervisors and students.</p>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="am-stats card card-dark">
+  <div class="am-stat am-stat-total">
+    <div class="am-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </div>
+    <div>
+      <div class="am-stat-value">{{ meetings|length }}</div>
+      <div class="am-stat-label">Total</div>
+    </div>
+  </div>
+  <div class="am-stat-divider"></div>
+  <div class="am-stat am-stat-upcoming">
+    <div class="am-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    </div>
+    <div>
+      <div class="am-stat-value">{{ upcoming_list|length }}</div>
+      <div class="am-stat-label">Upcoming</div>
+    </div>
+  </div>
+  <div class="am-stat-divider"></div>
+  <div class="am-stat am-stat-live">
+    <div class="am-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14"/><rect x="1" y="6" width="14" height="13" rx="2"/></svg>
+    </div>
+    <div>
+      <div class="am-stat-value">{{ live_list|length }}</div>
+      <div class="am-stat-label">Live now</div>
+    </div>
+  </div>
+  <div class="am-stat-divider"></div>
+  <div class="am-stat am-stat-done">
+    <div class="am-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    </div>
+    <div>
+      <div class="am-stat-value">{{ completed_list|length }}</div>
+      <div class="am-stat-label">Completed</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter + search -->
+<div class="am-toolbar">
+  <button class="am-filter-tab active" data-filter="all">All <span>({{ meetings|length }})</span></button>
+  <button class="am-filter-tab" data-filter="upcoming">Upcoming <span>({{ upcoming_list|length }})</span></button>
+  <button class="am-filter-tab" data-filter="completed">Completed <span>({{ completed_list|length }})</span></button>
+  <button class="am-filter-tab" data-filter="cancelled">Cancelled <span>({{ cancelled_list|length }})</span></button>
+
+  <div class="am-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" id="amSearchInput" placeholder="Search meetings…" autocomplete="off">
+  </div>
+</div>
+
+{% if meetings %}
+<div class="am-table-wrap" id="amTableWrap">
+  <table class="am-table" id="amTable">
+    <thead>
+      <tr>
+        <th>Meeting</th>
+        <th>Supervisor</th>
+        <th>Date & Time</th>
+        <th>Duration</th>
+        <th>Platform</th>
+        <th>Status</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody id="amTbody">
+      {% for m in meetings %}
+      {% set cs = m.computed_status %}
+      <tr data-status="{{ cs }}" data-search="{{ (m.title ~ ' ' ~ m.supervisor.full_name)|lower }}">
+        <td class="am-title-cell">
+          {{ m.title }}
+          {% if m.description %}<small>{{ m.description[:60] }}{% if m.description|length > 60 %}…{% endif %}</small>{% endif %}
+        </td>
+        <td class="am-sup-cell">
+          {{ m.supervisor.full_name }}
+          <small>{{ m.students|length }} student{{ 's' if m.students|length != 1 }}</small>
+        </td>
+        <td style="white-space:nowrap;">
+          {{ m.date.strftime('%b %d, %Y') }}<br>
+          <span style="font-size:12px;color:var(--text-secondary);">{{ m.time.strftime('%H:%M') }}</span>
+        </td>
+        <td>{{ m.duration_display }}</td>
+        <td>
+          <span class="am-platform">
+            {% if m.platform == 'google_meet' %}
+            <svg viewBox="0 0 24 24" fill="currentColor" style="color:#4285f4;"><path d="M21.8 11.2c0-.7-.1-1.3-.2-2H12v3.8h5.5c-.2 1.2-1 2.2-2 2.9v2.4h3.3c1.9-1.8 3-4.4 3-7.1z" fill="#4285F4"/><path d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.4c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.5C4.7 19.7 8.1 22 12 22z" fill="#34A853"/><path d="M6.4 14.1c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.6H3C2.4 8.9 2 10.4 2 12s.4 3.1 1 4.4l3.4-2.3z" fill="#FBBC05"/><path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 3.1 14.7 2 12 2 8.1 2 4.7 4.3 3 7.6l3.4 2.4C7.2 7.7 9.4 6 12 6z" fill="#EA4335"/></svg>
+            Google Meet
+            {% else %}
+            <svg viewBox="0 0 24 24" fill="#2D8CFF"><path d="M4.5 8.25h-.75A2.25 2.25 0 001.5 10.5v3a2.25 2.25 0 002.25 2.25h.75V8.25zM19.5 8.25h.75A2.25 2.25 0 0122.5 10.5v3a2.25 2.25 0 01-2.25 2.25h-.75V8.25zM16.5 6.75a6 6 0 00-9 0V17.25a6 6 0 009 0V6.75z"/></svg>
+            Zoom
+            {% endif %}
+          </span>
+        </td>
+        <td>
+          <span class="am-badge am-badge-{{ cs }}">
+            <span class="am-badge-dot"></span>
+            {{ cs | capitalize }}
+          </span>
+        </td>
+        <td>
+          {% if m.meeting_link and cs in ('upcoming','live') %}
+          <a href="{{ m.meeting_link }}" target="_blank" rel="noopener" class="am-join">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+            Join
+          </a>
+          {% elif m.meeting_link %}
+          <a href="{{ m.meeting_link }}" target="_blank" rel="noopener" class="am-join" style="opacity:0.5;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>
+            Link
+          </a>
+          {% else %}
+          <span style="color:var(--text-secondary);font-size:12px;">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="am-empty">
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  <h3>No meetings yet</h3>
+  <p>Meetings will appear here once supervisors start scheduling them.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var filterTabs  = document.querySelectorAll('.am-filter-tab');
+  var rows        = document.querySelectorAll('#amTbody tr');
+  var searchInput = document.getElementById('amSearchInput');
+  var currentFilter = 'all';
+
+  function applyFilters() {
+    var q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    rows.forEach(function (row) {
+      var statusOk = currentFilter === 'all'
+        || (currentFilter === 'upcoming' && (row.dataset.status === 'upcoming' || row.dataset.status === 'live'))
+        || row.dataset.status === currentFilter;
+      var searchOk = !q || (row.dataset.search || '').indexOf(q) !== -1;
+      row.style.display = (statusOk && searchOk) ? '' : 'none';
+    });
+  }
+
+  filterTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      filterTabs.forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      currentFilter = tab.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+  }
+})();
+</script>
+{% endblock %}

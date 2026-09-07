@@ -1,0 +1,632 @@
+{% extends "base.html" %}
+{% from "components/progress_ring.html" import ring, mini_ring %}
+{% from "components/card.html" import stat_card, add_card %}
+{% from "components/badge.html" import status_badge %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="row" style="align-items:stretch;">
+  <div class="card card-dark col overview-card card-tilt" style="flex:1.2;">
+    <!-- ambient glow -->
+    <div class="ov-glow" aria-hidden="true"></div>
+
+    <div class="card-header-row" style="position:relative;z-index:1;">
+      <div>
+        <p class="ov-eyebrow">FYP progress</p>
+        <h3 style="margin:0;">Overview</h3>
+      </div>
+      <div class="card-header-actions" style="align-items:center;gap:8px;">
+        <span class="ov-live" aria-label="Live data">
+          <span class="ov-live-dot"></span>Live
+        </span>
+        <button class="card-icon-btn menu-trigger" aria-label="More" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="overview-numbers" style="position:relative;z-index:1;">
+      <div class="num-group">
+        <div style="display:flex;align-items:baseline;gap:4px;">
+          <div class="num-value js-count-up" data-target="{{ project.submissions|length }}">0</div>
+          <span class="num-frac">/ 5</span>
+        </div>
+        <div class="num-label">Chapters submitted</div>
+      </div>
+      <div class="num-divider"></div>
+      <div class="num-group">
+        <div style="display:flex;align-items:baseline;gap:4px;">
+          <div class="num-value js-count-up" data-target="{{ counts.approved }}">0</div>
+          <span class="num-frac">approved</span>
+        </div>
+        <div class="num-label">Chapters signed off</div>
+      </div>
+    </div>
+
+    <div class="overview-progress-bar" style="position:relative;z-index:1;"></div>
+
+    <div class="overview-mini-stats" style="position:relative;z-index:1;">
+      <div class="overview-mini-stat ov-stat-chapters">
+        <span class="mini-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        </span>
+        <div class="mini-value js-count-up" data-target="5">0</div>
+        <div class="mini-label">Total chapters</div>
+      </div>
+      <div class="overview-mini-stat ov-stat-pending">
+        <span class="mini-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </span>
+        <div class="mini-value js-count-up" data-target="{{ counts.pending }}">0</div>
+        <div class="mini-label">Under review</div>
+      </div>
+      <div class="overview-mini-stat ov-stat-rejected">
+        <span class="mini-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        </span>
+        <div class="mini-value js-count-up" data-target="{{ counts.rejected }}">0</div>
+        <div class="mini-label">Need revision</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card col" style="flex:1;">
+    <div class="card-header-row">
+      <h3>Project Completion</h3>
+      <button class="card-icon-btn" aria-label="Trend" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+      </button>
+    </div>
+    <p class="text-muted" style="font-size:12px;margin-top:-10px;margin-bottom:14px;">
+      <span style="color:{{ 'var(--success)' if trend >= 0 else 'var(--danger)' }};font-weight:700;">{{ '+' if trend >= 0 }}{{ trend }}%</span> compared to last month
+    </p>
+    <div class="progress-ring-wrap">
+      {{ ring(percent, label="Complete", size=140, stroke=10) }}
+      <div class="legend-dots">
+        <div class="legend-dot-item"><span class="legend-dot" style="background:var(--success);"></span> Approved ({{ counts.approved }})</div>
+        <div class="legend-dot-item"><span class="legend-dot" style="background:var(--warning);"></span> Pending ({{ counts.pending }})</div>
+        <div class="legend-dot-item"><span class="legend-dot" style="background:var(--danger);"></span> Rejected ({{ counts.rejected }})</div>
+      </div>
+    </div>
+    <div class="progress-actions">
+      <button class="icon-btn-outline" aria-label="Share" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49"/></svg>
+      </button>
+      <a href="{{ url_for('student.submissions') }}" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">
+        View report
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-32" style="align-items:stretch;">
+  <div class="card col cl-card" style="flex:1;">
+    <div class="card-header-row">
+      <div>
+        <h3 style="margin-bottom:2px;">Chapter checklist</h3>
+        <span class="text-muted" style="font-size:12px;">{{ counts.approved }} of 5 approved</span>
+      </div>
+      <div class="card-header-actions" style="align-items:center;">
+        {{ mini_ring(percent, size=34, stroke=4) }}
+      </div>
+    </div>
+
+    <!-- progress track -->
+    <div class="cl-track"><div class="cl-track-fill" data-pct="{{ percent }}"></div></div>
+
+    <div class="cl-list">
+      {% set default_titles = {1:'Introduction',2:'Literature Review',3:'Research Methodology',4:'Implementation and Results',5:'Conclusion and Recommendations'} %}
+      {% for item in breakdown %}
+      {% set st = item.status or 'none' %}
+      <div class="cl-row cl-s-{{ st }}" data-chapter="{{ item.chapter_number }}">
+
+        <!-- coloured rail -->
+        <div class="cl-rail"></div>
+
+        <!-- animated checkbox -->
+        <div class="cl-box {% if st == 'approved' %}cl-box-done{% elif st == 'pending' %}cl-box-pending{% elif st == 'rejected' %}cl-box-rejected{% endif %}">
+          {% if st == 'approved' %}
+          <svg class="cl-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path class="cl-tick-path" d="M20 6L9 17l-5-5"/>
+          </svg>
+          {% elif st == 'pending' %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/></svg>
+          {% elif st == 'rejected' %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          {% else %}
+          <span class="cl-num-inner">{{ item.chapter_number }}</span>
+          {% endif %}
+        </div>
+
+        <!-- text body -->
+        <div class="cl-body">
+          <div class="cl-title">{{ item.submission.chapter_title if item.submission else default_titles.get(item.chapter_number,'') }}</div>
+          <div class="cl-sub">
+            Ch.{{ item.chapter_number }}
+            &nbsp;·&nbsp;
+            {% if st == 'approved' %}Approved
+            {% elif st == 'pending' %}Under review
+            {% elif st == 'rejected' %}Needs revision
+            {% else %}Not submitted{% endif %}
+          </div>
+        </div>
+
+        <!-- action -->
+        <div class="cl-end">
+          {% if st == 'approved' %}
+            <span class="cl-chip cl-chip-done">Done</span>
+          {% elif st == 'pending' %}
+            <a href="{{ url_for('student.submissions') }}" class="cl-chip cl-chip-pending">Review</a>
+          {% elif st == 'rejected' %}
+            <a href="{{ url_for('student.submit_chapter') }}" class="cl-chip cl-chip-rejected">Revise</a>
+          {% else %}
+            <a href="{{ url_for('student.submit_chapter') }}" class="cl-chip cl-chip-submit">Submit</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col" style="flex:1;display:flex;flex-direction:column;">
+    <h3 style="margin-bottom:14px;">Upcoming Deadlines</h3>
+    {% set chapter_titles = {1:'Introduction',2:'Literature Review',3:'Research Methodology',4:'Implementation & Results',5:'Conclusion & Recommendations'} %}
+    {% if deadline_cards %}
+      {% for item in deadline_cards %}
+      <div class="deadline-progress-card">
+        <div class="dlpc-top">
+          <div class="dlpc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/>
+            </svg>
+          </div>
+          <div class="dlpc-meta">
+            <div class="dlpc-header-row">
+              <span class="dlpc-active-badge">Active</span>
+              <div class="dlpc-days-group">
+                <div>
+                  <div class="dlpc-days-num">{{ item.days_left }}</div>
+                  <div class="dlpc-days-lbl">DAYS LEFT</div>
+                </div>
+                <button class="dlpc-chevron-btn" type="button" aria-label="Details">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="dlpc-title">Chapter {{ item.d.chapter_number }}</div>
+            <div class="dlpc-subtitle">{{ chapter_titles.get(item.d.chapter_number, '') }} &middot; Due {{ item.d.due_date.strftime('%b %d, %Y') }}</div>
+          </div>
+        </div>
+        <div class="dlpc-bottom">
+          <div class="dlpc-prog-label">Deadline Progress</div>
+          <div class="dlpc-prog-row">
+            <span class="dlpc-prog-pct">{{ item.pct }}%</span>
+            <span class="dlpc-prog-status {{ item.urgency }}">
+              {% if item.urgency == 'critical' %}Critical 🔥
+              {% elif item.urgency == 'warning' %}On track 📈
+              {% else %}Comfortable ✓{% endif %}
+            </span>
+          </div>
+          <div class="dlpc-bar-row">
+            <div class="dlpc-bar-track">
+              <div class="dlpc-bar-fill" data-pct="{{ item.pct }}"></div>
+              <div class="dlpc-bar-dot" data-pct="{{ item.pct }}"></div>
+            </div>
+            <div class="dlpc-fire-btn" aria-hidden="true">🔥</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="card card-dark" style="flex:1;display:flex;align-items:center;justify-content:center;">
+      <p class="text-muted">No upcoming deadlines.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="rs-section mt-32">
+
+  <!-- ── Recent submissions feed (dark card) ────────────────── -->
+  <div class="card card-dark rs-feed-card">
+    <div class="rs-feed-hdr">
+      <div>
+        <p class="rs-eyebrow">Chapter activity</p>
+        <div class="rs-feed-title">Recent Submissions</div>
+      </div>
+      <a href="{{ url_for('student.submissions') }}" class="rs-view-all">
+        View all
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+    </div>
+
+    <div class="rs-feed">
+      {% for s in recent_submissions %}
+      <a href="{{ url_for('student.annotation_viewer', submission_id=s.id) }}" class="rs-item" style="opacity:0;" aria-label="View {{ s.chapter_title }}">
+        <div class="rs-ch-badge rs-cb-{{ s.status }}">{{ s.chapter_number }}</div>
+        <div class="rs-item-meta">
+          <div class="rs-item-name">{{ s.chapter_title }}</div>
+          <div class="rs-item-sub">
+            Ch.{{ s.chapter_number }}&nbsp;<span class="rs-mid">·</span>&nbsp;{{ s.submitted_at.strftime('%b %d, %Y') }}
+          </div>
+        </div>
+        <span class="rs-chip rs-chip-{{ s.status }}">
+          {% if s.status == 'approved' %}
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          Approved
+          {% elif s.status == 'rejected' %}
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          Rejected
+          {% else %}
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="9"/><path d="M12 7v5"/></svg>
+          Pending
+          {% endif %}
+        </span>
+        <svg class="rs-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      {% else %}
+      <div class="rs-empty">No submissions yet — upload your first chapter to get started.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Submit CTA card ───────────────────────────────────── -->
+  <a href="{{ url_for('student.submit_chapter') }}" class="rs-cta-card" style="opacity:0;" aria-label="Submit a chapter">
+    <div class="rs-cta-glow" aria-hidden="true"></div>
+    <div class="rs-cta-inner">
+      <div class="rs-cta-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h4 class="rs-cta-title">Submit a Chapter</h4>
+      <p class="rs-cta-desc">Upload your latest chapter PDF for supervisor review and expert feedback.</p>
+      <span class="rs-cta-btn">
+        Upload PDF
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </div>
+  </a>
+
+</div>
+
+{% endblock %}
+{% block extra_css %}
+<style>
+/* ── Recent Submissions ───────────────────────────────── */
+.rs-section {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.rs-feed-card { flex: 1; min-width: 0; }
+
+.rs-feed-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.rs-eyebrow {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(201,149,42,0.65); margin-bottom: 3px;
+}
+.rs-feed-title { font-size: 15px; font-weight: 700; color: var(--text-on-dark-card); }
+
+.rs-view-all {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 12px; font-weight: 600;
+  color: var(--accent-gold); text-decoration: none;
+  flex-shrink: 0; transition: opacity 140ms;
+}
+.rs-view-all:hover { opacity: 0.7; }
+
+.rs-feed { display: flex; flex-direction: column; gap: 2px; }
+
+.rs-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px; border-radius: 12px;
+  text-decoration: none;
+  transition: background 140ms;
+  cursor: pointer;
+}
+.rs-item:hover { background: rgba(255,255,255,0.06); }
+
+/* Chapter badge circle */
+.rs-ch-badge {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0; color: #fff;
+}
+.rs-cb-approved { background: rgba(39,174,96,0.8);  box-shadow: 0 0 0 3px rgba(39,174,96,0.18); }
+.rs-cb-rejected { background: rgba(231,76,60,0.8);  box-shadow: 0 0 0 3px rgba(231,76,60,0.18); }
+.rs-cb-pending  { background: rgba(201,149,42,0.8); box-shadow: 0 0 0 3px rgba(201,149,42,0.18); }
+
+/* Item meta */
+.rs-item-meta { flex: 1; min-width: 0; }
+.rs-item-name {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-on-dark-card);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.rs-item-sub { font-size: 11px; color: var(--text-on-dark-card-muted); }
+.rs-mid { opacity: 0.45; }
+
+/* Status chips */
+.rs-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 700;
+  padding: 3px 9px; border-radius: 99px;
+  flex-shrink: 0; white-space: nowrap;
+}
+.rs-chip-approved { background: rgba(39,174,96,0.18);  color: #4cd964; }
+.rs-chip-rejected { background: rgba(231,76,60,0.18);  color: #ff6b6b; }
+.rs-chip-pending  { background: rgba(243,156,18,0.18); color: #ffd066; }
+
+/* Chevron arrow */
+.rs-arrow {
+  color: var(--text-on-dark-card-muted); flex-shrink: 0;
+  opacity: 0.35; transition: opacity 140ms, transform 140ms;
+}
+.rs-item:hover .rs-arrow { opacity: 1; transform: translateX(3px); }
+
+/* Empty state */
+.rs-empty {
+  font-size: 13px; color: var(--text-on-dark-card-muted);
+  padding: 20px 10px; text-align: center; line-height: 1.55;
+}
+
+/* ── Submit CTA card ──────────────────────────────────── */
+.rs-cta-card {
+  flex: 0 0 210px;
+  border-radius: 18px;
+  background: var(--accent-navy, #1a2744);
+  border: 1px solid rgba(201,149,42,0.2);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  text-decoration: none;
+  transition: transform 200ms cubic-bezier(.2,0,.2,1),
+              box-shadow 200ms cubic-bezier(.2,0,.2,1);
+}
+.rs-cta-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,.22), 0 0 0 1px rgba(201,149,42,0.32);
+}
+.rs-cta-glow {
+  position: absolute;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,149,42,0.2) 0%, transparent 68%);
+  top: -70px; right: -70px; pointer-events: none;
+}
+.rs-cta-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+  padding: 22px 20px; height: 100%; gap: 10px;
+}
+.rs-cta-icon {
+  width: 44px; height: 44px; border-radius: 14px;
+  background: rgba(201,149,42,0.14);
+  border: 1px solid rgba(201,149,42,0.24);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-gold, #c9952a); flex-shrink: 0;
+}
+.rs-cta-title {
+  font-size: 16px; font-weight: 700;
+  color: #f0ede8; line-height: 1.2; margin: 0;
+}
+.rs-cta-desc {
+  font-size: 11.5px; color: rgba(240,237,232,0.46);
+  line-height: 1.55; margin: 0; flex: 1;
+}
+.rs-cta-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-gold, #c9952a); color: #fff;
+  font-size: 12px; font-weight: 700;
+  padding: 8px 16px; border-radius: 99px;
+  transition: opacity 140ms; margin-top: auto;
+}
+.rs-cta-card:hover .rs-cta-btn { opacity: 0.88; }
+
+[data-theme="light"] .rs-cta-card {
+  background: #1a2744;
+  border-color: rgba(201,149,42,0.28);
+}
+
+@media (max-width: 700px) {
+  .rs-section { flex-direction: column; }
+  .rs-cta-card { flex: unset; min-height: 190px; }
+}
+
+/* ── Chapter Checklist ─────────────────────────────────── */
+.cl-card { overflow: hidden; }
+
+.cl-track {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--card-light-border);
+  margin: 0 0 20px;
+  overflow: hidden;
+}
+.cl-track-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--ring-accent);
+  width: 0;
+  transition: width 1.1s cubic-bezier(0.16,1,0.3,1);
+}
+
+.cl-list { display: flex; flex-direction: column; gap: 0; }
+
+.cl-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--card-light-border);
+  position: relative;
+  opacity: 0;
+  transform: translateX(-18px);
+}
+.cl-row:last-child { border-bottom: none; }
+
+/* coloured left rail */
+.cl-rail {
+  position: absolute;
+  left: -24px;
+  top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  transition: background 200ms;
+}
+.cl-s-approved .cl-rail  { background: var(--success); }
+.cl-s-pending  .cl-rail  { background: var(--warning); }
+.cl-s-rejected .cl-rail  { background: var(--danger); }
+.cl-s-none     .cl-rail  { background: var(--card-light-border); }
+
+/* checkbox circle */
+.cl-box {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--card-light-border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 220ms, border-color 220ms, box-shadow 220ms;
+}
+.cl-box-done     { background: var(--success);     border-color: var(--success);     color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 18%, transparent); }
+.cl-box-pending  { background: rgba(243,156,18,.12); border-color: var(--warning); color: var(--warning); }
+.cl-box-rejected { background: rgba(231,76,60,.12);  border-color: var(--danger);  color: var(--danger); }
+.cl-box svg      { width: 14px; height: 14px; }
+.cl-num-inner    { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+
+/* tick SVG draw */
+.cl-tick-path {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+}
+
+/* text */
+.cl-body   { flex: 1; min-width: 0; }
+.cl-title  { font-size: 13.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-sub    { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.cl-s-approved .cl-title { color: var(--text-secondary); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--text-secondary) 40%, transparent); }
+
+/* chips */
+.cl-chip {
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 99px;
+  white-space: nowrap; text-decoration: none;
+  display: inline-block;
+  transition: transform 120ms, box-shadow 120ms;
+}
+.cl-chip:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,.12); }
+.cl-chip-done     { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
+.cl-chip-pending  { background: color-mix(in srgb, var(--warning) 14%, transparent); color: var(--warning); }
+.cl-chip-rejected { background: color-mix(in srgb, var(--danger)  14%, transparent); color: var(--danger); }
+.cl-chip-submit   { background: var(--accent-gold, #c9952a); color: #fff; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // ── Overview mini-stats stagger entrance ──────────────────────────────
+    const { animate, stagger, createTimeline } = anime;
+
+    const miniStats = document.querySelectorAll('.overview-mini-stat');
+    if (miniStats.length) {
+      animate(miniStats, {
+        opacity:    [0, 1],
+        translateY: [14, 0],
+        scale:      [0.94, 1],
+        duration:   440,
+        ease:       'outBack(1.05)',
+        delay:      stagger(65, { start: 160 })
+      });
+    }
+
+    // ── Recent submissions entrance ────────────────────────────────────────
+
+    const rsItems = document.querySelectorAll('.rs-item');
+    if (rsItems.length) {
+      animate(rsItems, {
+        opacity:    [0, 1],
+        translateX: [14, 0],
+        duration:   400,
+        ease:       'outCubic',
+        delay:      stagger(55, { start: 80 })
+      });
+    }
+
+    const rsCta = document.querySelector('.rs-cta-card');
+    if (rsCta) {
+      animate(rsCta, {
+        opacity:    [0, 1],
+        translateY: [18, 0],
+        duration:   500,
+        ease:       'outBack(1.05)',
+        delay:      260
+      });
+    }
+
+    // ── Chapter checklist animations ───────────────────────────────────────
+
+    // Grow the track fill bar
+    const trackFill = document.querySelector('.cl-track-fill');
+    if (trackFill) {
+      const pct = parseFloat(trackFill.dataset.pct) || 0;
+      setTimeout(() => { trackFill.style.width = pct + '%'; }, 120);
+    }
+
+    // Staggered row entrance
+    const rows = document.querySelectorAll('.cl-row');
+    if (rows.length) {
+      animate(rows, {
+        opacity: [0, 1],
+        translateX: [-18, 0],
+        duration: 480,
+        ease: 'outCubic',
+        delay: stagger(70, { start: 80 }),
+        complete() {
+          rows.forEach(r => r.style.transform = '');
+        }
+      });
+    }
+
+    // Draw the checkmark path on approved items
+    document.querySelectorAll('.cl-tick-path').forEach((path, i) => {
+      animate(path, {
+        strokeDashoffset: [30, 0],
+        duration: 520,
+        ease: 'outCubic',
+        delay: 80 + i * 70 + 300
+      });
+    });
+
+    // ── Deadline card chevron collapse ────────────────────────────────────
+    document.querySelectorAll('.dlpc-chevron-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.deadline-progress-card').classList.toggle('dlpc-collapsed');
+      });
+    });
+
+    // ── Deadline progress bar animations ───────────────────────────────────
+    document.querySelectorAll('.dlpc-bar-fill').forEach(fill => {
+      const pct = parseFloat(fill.dataset.pct);
+      const dot = fill.closest('.dlpc-bar-track').querySelector('.dlpc-bar-dot');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        fill.style.width = pct + '%';
+        if (dot) dot.style.left = pct + '%';
+      }));
+    });
+
+  });
+</script>
+{% endblock %}

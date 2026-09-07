@@ -1,0 +1,552 @@
+{% extends "base.html" %}
+{% from "components/card.html" import stat_card %}
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<style>
+/* ── Chart card headers ─────────────────────────────── */
+.adm-chart-hdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.adm-chart-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.adm-chart-sub   { font-size: 12px; color: var(--text-secondary); }
+
+.adm-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px; font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 99px;
+  background: var(--card-dark); color: #fff;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.adm-live-badge::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4ade80;
+  animation: adm-pulse 2.2s ease-in-out infinite;
+}
+@keyframes adm-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.45); }
+  50%       { box-shadow: 0 0 0 5px rgba(74,222,128,0); }
+}
+
+.adm-donut-wrap { display: flex; justify-content: center; max-width: 210px; margin: 0 auto; }
+
+.adm-pie-legend { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--card-light-border); }
+.adm-pie-row    { display: flex; align-items: center; gap: 10px; cursor: default; }
+.adm-pie-dot    { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.adm-pie-label  { flex: 1; font-size: 13px; color: var(--text-secondary); }
+.adm-pie-count  { font-size: 14px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.adm-pie-pct    { font-size: 12px; color: var(--text-secondary); width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+.adm-chart-card { position: relative; }
+
+/* ══════════════════════════════════════════════════════
+   Department Overview — compact stat rail
+══════════════════════════════════════════════════════ */
+.dept-bar {
+  background: var(--card-dark);
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 24px;
+  opacity: 0;
+}
+.dept-bar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 38%, rgba(255,255,255,0.06) 68%, transparent);
+  pointer-events: none;
+}
+
+.dept-bar-hd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px 0;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-on-dark-card-muted);
+}
+.dept-bar-hd::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: rgba(255,255,255,0.07);
+}
+
+.dept-bar-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px 14px;
+}
+
+.dept-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  opacity: 0;
+  transition: background 0.18s ease;
+  cursor: default;
+}
+.dept-chip:hover { background: rgba(255,255,255,0.05); }
+
+.dept-chip-icon {
+  width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.dept-chip-icon svg { width: 14px; height: 14px; stroke: currentColor; }
+
+.dept-chip-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dept-chip-val {
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.025em; line-height: 1;
+  color: var(--text-on-dark-card);
+  font-variant-numeric: tabular-nums;
+}
+.dept-chip-lbl {
+  font-size: 11px; font-weight: 500;
+  color: var(--text-on-dark-card-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* Per-stat accent colours */
+.dept-chip--students    .dept-chip-icon { background: rgba(201,149,42,0.18); color: #e0a830; }
+.dept-chip--students    .dept-chip-val  { color: #e0a830; }
+.dept-chip--supervisors .dept-chip-icon { background: rgba(124,107,255,0.18); color: #9d94ff; }
+.dept-chip--supervisors .dept-chip-val  { color: #9d94ff; }
+.dept-chip--approved    .dept-chip-dot  { background: #27AE60; box-shadow: 0 0 0 3px rgba(39,174,96,0.22); }
+.dept-chip--approved    .dept-chip-val  { color: #4ade80; }
+.dept-chip--pending     .dept-chip-dot  { background: #F39C12; box-shadow: 0 0 0 3px rgba(243,156,18,0.22); }
+.dept-chip--pending     .dept-chip-val  { color: #fbbf24; }
+.dept-chip--rejected    .dept-chip-dot  { background: #E74C3C; box-shadow: 0 0 0 3px rgba(231,76,60,0.22); }
+.dept-chip--rejected    .dept-chip-val  { color: #f87171; }
+
+.dept-vsep {
+  width: 1px; height: 28px;
+  background: rgba(255,255,255,0.08);
+  flex-shrink: 0; margin: 0 4px;
+}
+.dept-vsep--divider {
+  height: 38px;
+  background: rgba(255,255,255,0.14);
+  margin: 0 10px;
+}
+
+/* Proportional submission track */
+.dept-track {
+  display: flex;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+}
+.dept-track-fill {
+  height: 100%; width: 0;
+  transition: width 1s cubic-bezier(0.16,1,0.3,1);
+}
+.dept-track-fill--approved { background: #27AE60; }
+.dept-track-fill--pending  { background: #F39C12; }
+.dept-track-fill--rejected { background: #E74C3C; }
+
+@media (max-width: 768px) {
+  .dept-bar-row  { flex-wrap: wrap; padding: 6px 10px 10px; }
+  .dept-chip     { flex: 0 1 calc(33.333% - 8px); min-width: 88px; }
+  .dept-vsep     { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dept-bar, .dept-chip { opacity: 1 !important; transform: none !important; }
+  .dept-track-fill { transition: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% set sub_total = approved_count + pending_count + rejected_count %}
+{% set approved_pct = ((approved_count / sub_total) * 100) | round(1) if sub_total > 0 else 0 %}
+{% set pending_pct  = ((pending_count  / sub_total) * 100) | round(1) if sub_total > 0 else 0 %}
+{% set rejected_pct = ((rejected_count / sub_total) * 100) | round(1) if sub_total > 0 else 0 %}
+
+<div class="dept-bar">
+  <div class="dept-bar-hd">Department Overview</div>
+  <div class="dept-bar-row">
+
+    <div class="dept-chip dept-chip--students">
+      <span class="dept-chip-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </span>
+      <div>
+        <div class="dept-chip-val js-count-up" data-target="{{ students_count }}">0</div>
+        <div class="dept-chip-lbl">Students</div>
+      </div>
+    </div>
+
+    <div class="dept-vsep"></div>
+
+    <div class="dept-chip dept-chip--supervisors">
+      <span class="dept-chip-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
+        </svg>
+      </span>
+      <div>
+        <div class="dept-chip-val js-count-up" data-target="{{ supervisors_count }}">0</div>
+        <div class="dept-chip-lbl">Supervisors</div>
+      </div>
+    </div>
+
+    <div class="dept-vsep dept-vsep--divider"></div>
+
+    <div class="dept-chip dept-chip--approved">
+      <span class="dept-chip-dot"></span>
+      <div>
+        <div class="dept-chip-val js-count-up" data-target="{{ approved_count }}">0</div>
+        <div class="dept-chip-lbl">Approved</div>
+      </div>
+    </div>
+
+    <div class="dept-vsep"></div>
+
+    <div class="dept-chip dept-chip--pending">
+      <span class="dept-chip-dot"></span>
+      <div>
+        <div class="dept-chip-val js-count-up" data-target="{{ pending_count }}">0</div>
+        <div class="dept-chip-lbl">Pending</div>
+      </div>
+    </div>
+
+    <div class="dept-vsep"></div>
+
+    <div class="dept-chip dept-chip--rejected">
+      <span class="dept-chip-dot"></span>
+      <div>
+        <div class="dept-chip-val js-count-up" data-target="{{ rejected_count }}">0</div>
+        <div class="dept-chip-lbl">Rejected</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="dept-track" aria-hidden="true">
+    <div class="dept-track-fill dept-track-fill--approved" data-pct="{{ approved_pct }}"></div>
+    <div class="dept-track-fill dept-track-fill--pending"  data-pct="{{ pending_pct }}"></div>
+    <div class="dept-track-fill dept-track-fill--rejected" data-pct="{{ rejected_pct }}"></div>
+  </div>
+</div>
+
+<div class="row mt-32" style="align-items:stretch;">
+
+  <!-- Submissions per Chapter — bar chart -->
+  <div class="card col adm-chart-card" style="flex:1.4;">
+    <div class="adm-chart-hdr">
+      <div>
+        <div class="adm-chart-title">Submissions per Chapter</div>
+        <div class="adm-chart-sub">Total across all students</div>
+      </div>
+      <span class="adm-live-badge">Live data</span>
+    </div>
+    <canvas id="barChart" height="240"></canvas>
+  </div>
+
+  <!-- Status Breakdown — donut chart -->
+  <div class="card col adm-chart-card" style="flex:1;">
+    <div class="adm-chart-hdr">
+      <div>
+        <div class="adm-chart-title">Status Breakdown</div>
+        <div class="adm-chart-sub">All chapter submissions</div>
+      </div>
+    </div>
+    <div class="adm-donut-wrap">
+      <canvas id="pieChart" height="200"></canvas>
+    </div>
+    <div id="pieLegend" class="adm-pie-legend"></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const { animate } = anime;
+  const chartData = {{ chart_data|safe }};
+
+  // ── Dept bar entrance ───────────────────────────────────────────────
+  animate('.dept-bar', {
+    opacity:    [0, 1],
+    translateY: [-8, 0],
+    duration: 400,
+    ease: 'outCubic',
+  });
+  animate('.dept-chip', {
+    opacity:    [0, 1],
+    translateX: [-10, 0],
+    duration: 340,
+    ease: 'outBack(1.1)',
+    delay: anime.stagger(45, { start: 100 }),
+  });
+
+  // Progress track fills in after chips appear
+  setTimeout(() => {
+    document.querySelectorAll('.dept-track-fill').forEach(el => {
+      el.style.width = (parseFloat(el.dataset.pct) || 0) + '%';
+    });
+  }, 420);
+
+  const style    = getComputedStyle(document.documentElement);
+  let muted    = style.getPropertyValue('--text-secondary').trim();
+  let textMain = style.getPropertyValue('--text-primary').trim();
+  const gridCol  = 'rgba(140,144,154,0.12)';
+
+  // ── Theme-aware tooltip palette ──────────────────────────────────────────
+  function resolveIsDark() {
+    return document.documentElement.getAttribute('data-theme') === 'dark'
+        || (!document.documentElement.getAttribute('data-theme')
+            && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  let isDark   = resolveIsDark();
+  let ttBg     = isDark ? 'rgba(14,16,26,0.97)' : '#ffffff';
+  let ttTitle  = isDark ? '#f0ede8' : '#15100a';
+  let ttBody   = isDark ? 'rgba(240,237,232,0.62)' : 'rgba(21,16,10,0.58)';
+  let ttBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+
+  // ── Centre-text plugin for the donut ──────────────────────────────────────
+  const centerTextPlugin = {
+    id: 'centerText',
+    afterDraw(chart) {
+      if (chart.config.type !== 'doughnut') return;
+      const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+      const { ctx, chartArea: { left, right, top, bottom } } = chart;
+      const cx = left + (right - left) / 2;
+      const cy = top  + (bottom - top)  / 2;
+      ctx.save();
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = textMain || '#15161a';
+      ctx.font      = '700 26px Inter,-apple-system,sans-serif';
+      ctx.fillText(total, cx, cy - 10);
+      ctx.fillStyle = muted || '#9a9a9a';
+      ctx.font      = '500 11px Inter,-apple-system,sans-serif';
+      ctx.fillText('total', cx, cy + 13);
+      ctx.restore();
+    }
+  };
+  Chart.register(centerTextPlugin);
+
+  // ── Submissions per Chapter — bar chart ────────────────────────────────────
+  const barCanvas = document.getElementById('barChart');
+  const barMax = Math.max(...chartData.bar.values, 1);
+  let barChart = new Chart(barCanvas, {
+    type: 'bar',
+    data: {
+      labels: chartData.bar.labels,
+      datasets: [
+        // faint track behind each bar
+        {
+          data: Array(chartData.bar.values.length).fill(barMax),
+          backgroundColor: isDark ? 'rgba(99,102,241,0.07)' : 'rgba(99,102,241,0.06)',
+          hoverBackgroundColor: isDark ? 'rgba(99,102,241,0.07)' : 'rgba(99,102,241,0.06)',
+          borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
+          borderSkipped: false,
+          maxBarThickness: 48,
+          barPercentage: 0.58,
+          categoryPercentage: 0.8,
+          borderWidth: 0,
+          order: 2,
+        },
+        // actual data bars
+        {
+          data: chartData.bar.values,
+          backgroundColor(ctx) {
+            const { chart } = ctx;
+            const { chartArea } = chart;
+            if (!chartArea) return 'rgba(99,102,241,0.88)';
+            const g = chart.ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            g.addColorStop(0, 'rgba(99,102,241,0.95)');
+            g.addColorStop(1, 'rgba(99,102,241,0.48)');
+            return g;
+          },
+          hoverBackgroundColor: 'rgba(129,140,248,1)',
+          borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
+          borderSkipped: false,
+          maxBarThickness: 48,
+          barPercentage: 0.58,
+          categoryPercentage: 0.8,
+          borderWidth: 0,
+          order: 1,
+        },
+      ],
+    },
+    options: {
+      grouped: false,
+      animation: {
+        duration: 560,
+        delay(ctx) { return ctx.datasetIndex === 0 ? 0 : ctx.dataIndex * 90; },
+        easing: 'easeOutQuart',
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          filter: item => item.datasetIndex === 1,
+          backgroundColor: ttBg,
+          titleColor:       ttTitle,
+          bodyColor:        ttBody,
+          borderColor:      ttBorder,
+          borderWidth:      1,
+          padding:          { x: 14, y: 10 },
+          cornerRadius:     10,
+          displayColors:    false,
+          callbacks: {
+            title: ctx => 'Chapter ' + ctx[0].label.replace('Ch ', ''),
+            label: ctx => `${ctx.parsed.y} submission${ctx.parsed.y !== 1 ? 's' : ''}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid:   { display: false },
+          border: { display: false },
+          ticks:  { color: muted, font: { size: 12, weight: '500' }, padding: 6 },
+        },
+        y: {
+          grid:         { color: isDark ? 'rgba(99,102,241,0.09)' : 'rgba(99,102,241,0.12)' },
+          border:       { display: false },
+          ticks:        { color: muted, precision: 0, font: { size: 11 }, maxTicksLimit: 5, padding: 8 },
+          beginAtZero:  true,
+        },
+      },
+    },
+  });
+
+  // ── Status Breakdown — donut chart ─────────────────────────────────────────
+  const PIE_COLORS  = ['#27AE60', '#F39C12', '#E74C3C'];
+  const PIE_LABELS  = chartData.pie.labels;
+  const PIE_VALUES  = chartData.pie.values;
+  const pieTotal    = PIE_VALUES.reduce((a, b) => a + b, 0);
+
+  let pieChart = new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: PIE_LABELS,
+      datasets: [{
+        data:            PIE_VALUES,
+        backgroundColor: PIE_COLORS,
+        borderWidth:     0,
+        hoverOffset:     8,
+      }],
+    },
+    options: {
+      cutout: '68%',
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#13141e',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.7)',
+          padding: 10,
+          cornerRadius: 10,
+          callbacks: {
+            label: ctx => {
+              const pct = pieTotal ? Math.round(ctx.parsed / pieTotal * 100) : 0;
+              return ` ${ctx.label}: ${ctx.parsed}  (${pct}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // ── Build custom donut legend ─────────────────────────────────────────────
+  const legendEl = document.getElementById('pieLegend');
+  PIE_LABELS.forEach((label, i) => {
+    const count = PIE_VALUES[i];
+    const pct   = pieTotal ? Math.round(count / pieTotal * 100) : 0;
+    const row   = document.createElement('div');
+    row.className = 'adm-pie-row';
+    row.innerHTML = `
+      <span class="adm-pie-dot" style="background:${PIE_COLORS[i]};"></span>
+      <span class="adm-pie-label">${label}</span>
+      <span class="adm-pie-count js-count-up" data-target="${count}">0</span>
+      <span class="adm-pie-pct">${pct}%</span>
+    `;
+    legendEl.appendChild(row);
+  });
+
+  // Re-run count-up on the dynamically added legend counts
+  if (window.Scholaris && window.Scholaris.runCountUp) {
+    window.Scholaris.runCountUp();
+  } else {
+    // Fallback — fire the same simple count-up used elsewhere
+    legendEl.querySelectorAll('.js-count-up').forEach(el => {
+      const target = +el.dataset.target;
+      let start = performance.now();
+      (function frame(now) {
+        const t = Math.min((now - start) / 900, 1);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(frame);
+        else el.textContent = target;
+      })(start);
+    });
+  }
+
+  // ── Chart card entrance ───────────────────────────────────────────────────
+  animate('.adm-chart-card', {
+    opacity:    [0, 1],
+    translateY: [14, 0],
+    duration: 560,
+    ease: 'outBack(1.05)',
+    delay: anime.stagger(100, { start: 60 })
+  });
+
+  // ── Live theme switching — no page reload needed ──────────────────────────
+  window.addEventListener('themechange', () => {
+    const s = getComputedStyle(document.documentElement);
+    muted    = s.getPropertyValue('--text-secondary').trim();
+    textMain = s.getPropertyValue('--text-primary').trim();
+    isDark   = resolveIsDark();
+    ttBg     = isDark ? 'rgba(14,16,26,0.97)' : '#ffffff';
+    ttTitle  = isDark ? '#f0ede8' : '#15100a';
+    ttBody   = isDark ? 'rgba(240,237,232,0.62)' : 'rgba(21,16,10,0.58)';
+    ttBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+
+    barChart.options.scales.x.ticks.color        = muted;
+    barChart.options.scales.y.ticks.color        = muted;
+    barChart.options.scales.y.grid.color         = isDark ? 'rgba(99,102,241,0.09)' : 'rgba(99,102,241,0.12)';
+    barChart.options.plugins.tooltip.backgroundColor = ttBg;
+    barChart.options.plugins.tooltip.titleColor      = ttTitle;
+    barChart.options.plugins.tooltip.bodyColor       = ttBody;
+    barChart.options.plugins.tooltip.borderColor     = ttBorder;
+    barChart.data.datasets[0].backgroundColor        = isDark ? 'rgba(99,102,241,0.07)' : 'rgba(99,102,241,0.06)';
+    barChart.data.datasets[0].hoverBackgroundColor   = isDark ? 'rgba(99,102,241,0.07)' : 'rgba(99,102,241,0.06)';
+    barChart.update('none');
+
+    pieChart.options.plugins.tooltip.backgroundColor = ttBg;
+    pieChart.options.plugins.tooltip.titleColor      = ttTitle;
+    pieChart.options.plugins.tooltip.bodyColor       = ttBody;
+    pieChart.update('none');
+  });
+});
+</script>
+{% endblock %}

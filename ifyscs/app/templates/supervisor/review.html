@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% from "components/badge.html" import status_badge %}
+{% block title %}Review Submission{% endblock %}
+{% block content %}
+<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:18px;">
+  <div>
+    <h3>{{ submission.project.student.full_name }} &middot; Chapter {{ submission.chapter_number }}: {{ submission.chapter_title }}</h3>
+    <p class="text-muted" style="margin-top:4px;">{{ status_badge(submission.status) }}</p>
+  </div>
+</div>
+
+<div class="rv-cols">
+  <div class="card rv-pdf-col">
+    <div id="pdfToolbar" class="row" style="justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--card-light-border);">
+      <div class="row" style="gap:8px;align-items:center;">
+        <button class="icon-btn" id="pdfPrevPage" aria-label="Previous page">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span class="text-muted" style="font-size:13px;">Page <span id="pdfPageNum">1</span> / <span id="pdfPageCount">-</span></span>
+        <button class="icon-btn" id="pdfNextPage" aria-label="Next page">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+      <div class="row" style="gap:10px;align-items:center;">
+        <span class="text-muted rv-ann-hint" id="annotateHint" style="font-size:12px;display:none;"></span>
+        <button class="btn btn-outline btn-sm" id="annotateToggleBtn" type="button" style="gap:6px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Annotate
+        </button>
+      </div>
+    </div>
+    <div id="pdfViewerWrap" class="rv-viewer-wrap">
+      <div id="pdfPageContainer" style="position:relative;">
+        <canvas id="pdfCanvas"></canvas>
+        <div id="pdfTextLayer" class="pdf-text-layer"></div>
+        <div id="annotationOverlay" class="annotation-overlay"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rv-side-col">
+    <div class="card">
+      <h3 style="font-size:15px;margin-bottom:14px;">Annotations</h3>
+      <div id="annotationList" style="display:flex;flex-direction:column;gap:12px;max-height:320px;overflow:auto;">
+        <p class="text-muted" id="annotationListEmpty">No comments yet — click or drag on the PDF to add one.</p>
+      </div>
+    </div>
+
+    <form method="POST" class="card" id="reviewForm">
+      {{ form.csrf_token }}
+      {{ form.decision(id="decisionInput") }}
+      <h3 style="font-size:15px;">Overall feedback</h3>
+      <div class="field mt-24">
+        {{ form.overall_comment(placeholder=" ", id="overallCommentInput") }}
+        <label>Overall feedback (optional)</label>
+        {% for err in form.overall_comment.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+      </div>
+      <div class="row" style="gap:10px;">
+        <button type="submit" class="btn btn-danger js-submit-btn js-decision-btn" data-decision="rejected" style="flex:1;justify-content:center;">
+          <span class="btn-spinner"></span><span class="btn-label">Reject</span>
+        </button>
+        <button type="submit" class="btn btn-primary js-submit-btn js-decision-btn" data-decision="approved" style="flex:1;justify-content:center;">
+          <span class="btn-spinner"></span><span class="btn-label">Approve</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Annotation popover — position:fixed so it escapes all overflow/clipping containers -->
+<div id="annotationPopover" class="popover-menu" style="position:fixed;right:auto;top:auto;padding:14px;min-width:260px;z-index:500;">
+  <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Add comment</p>
+  <textarea id="annotationCommentInput" rows="3" placeholder="Write your comment..." style="width:100%;border-radius:10px;border:1.5px solid var(--card-light-border);padding:8px;font-family:inherit;font-size:13px;resize:vertical;background:var(--card-light);color:var(--text-primary);box-sizing:border-box;"></textarea>
+  <div class="row" style="justify-content:flex-end;gap:8px;margin-top:10px;">
+    <button class="btn btn-outline btn-sm" id="annotationCancelBtn" type="button">Cancel</button>
+    <button class="btn btn-primary btn-sm" id="annotationSaveBtn" type="button">
+      <span class="btn-spinner"></span><span class="btn-label">Save</span>
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<style>
+  /* ── Two-column layout ── */
+  .rv-cols {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .rv-pdf-col {
+    flex: 1.6;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .rv-side-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .rv-viewer-wrap {
+    position: relative;
+    height: calc(100vh - 210px);
+    overflow: auto;          /* scrollable so large PDFs aren't clipped */
+    padding: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: var(--bg-mesh-1);
+  }
+  /* On mobile: stack columns, shrink PDF viewer to ~60 vh */
+  @media (max-width: 800px) {
+    .rv-cols      { flex-direction: column; }
+    .rv-pdf-col   { width: 100%; flex: unset; }
+    .rv-side-col  { width: 100%; flex: unset; }
+    .rv-viewer-wrap { height: max(260px, 58vh) !important; }
+    .rv-ann-hint  { display: none !important; } /* too tight in toolbar on mobile */
+    #annotationList { max-height: 180px !important; }
+  }
+
+  .pdf-text-layer { position:absolute;inset:0;line-height:1;opacity:.2; }
+  .pdf-text-layer span { position:absolute;white-space:pre;cursor:text;user-select:text;color:transparent; }
+  .annotation-overlay { position:absolute;inset:0;pointer-events:none; }
+  .annotation-highlight { position:absolute;background:rgba(243,211,80,.35);border-radius:3px;pointer-events:auto;cursor:pointer;transition:background .15s; }
+  .annotation-highlight:hover { background:rgba(243,211,80,.6); }
+  .annotation-highlight.resolved { background:rgba(39,174,96,.28); }
+  .annotation-highlight.resolved:hover { background:rgba(39,174,96,.5); }
+  @keyframes ann-pulse {
+    0%   { background:rgba(243,211,80,.35); box-shadow:none; outline:none; }
+    50%  { background:rgba(243,211,80,.95); box-shadow:0 0 0 5px rgba(243,211,80,.55),0 0 16px 2px rgba(243,211,80,.35); outline:2px solid rgba(201,149,42,.8); }
+    100% { background:rgba(243,211,80,.35); box-shadow:none; outline:none; }
+  }
+  @keyframes ann-pulse-resolved {
+    0%   { background:rgba(39,174,96,.28); box-shadow:none; outline:none; }
+    50%  { background:rgba(39,174,96,.95); box-shadow:0 0 0 5px rgba(39,174,96,.5),0 0 16px 2px rgba(39,174,96,.3); outline:2px solid rgba(39,174,96,.8); }
+    100% { background:rgba(39,174,96,.28); box-shadow:none; outline:none; }
+  }
+  .annotation-highlight.ann-pulsing          { animation:ann-pulse          480ms ease-in-out 3; }
+  .annotation-highlight.resolved.ann-pulsing  { animation:ann-pulse-resolved 480ms ease-in-out 3; }
+  /* Locked drag-selection rect — pulses amber while awaiting a comment */
+  @keyframes ann-sel-lock {
+    0%,100% { box-shadow:0 0 0 2px rgba(201,149,42,.5); }
+    50%     { box-shadow:0 0 0 5px rgba(201,149,42,.0), 0 0 14px 3px rgba(201,149,42,.4); }
+  }
+  .ann-sel-locked { animation:ann-sel-lock 1.4s ease-in-out infinite !important; }
+  /* prevent text selection highlight while dragging on PDF */
+  #pdfPageContainer { user-select:none; }
+  /* Mobile: larger tap targets; disable text-layer selection/interaction
+     (text-layer spans have user-select:text which overrides the parent
+      none — on touch devices this causes blue text selection to appear
+      when the user drags, even when annotation mode is off) */
+  @media (pointer: coarse) {
+    .annotation-highlight { min-width: 24px; min-height: 20px; }
+    #pdfTextLayer, #pdfTextLayer * {
+      user-select: none !important;
+      pointer-events: none !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.ScholarisPDF = {
+    url: "{{ url_for('auth.serve_upload', filepath=submission.file_path) }}",
+    submissionId: {{ submission.id }},
+    listUrl: "{{ url_for('annotation.list_annotations', submission_id=submission.id) }}",
+    saveUrl: "{{ url_for('annotation.save_annotation') }}",
+    resolveUrlBase: "{{ url_for('annotation.resolve_annotation', annotation_id=0) }}".replace('/0/resolve', ''),
+    csrfToken: "{{ csrf_token() }}",
+    mode: 'supervisor',
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="{{ url_for('static', filename='js/pdf-viewer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/annotations.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.js-decision-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('decisionInput').value = btn.dataset.decision;
+      });
+    });
+  });
+</script>
+{% endblock %}

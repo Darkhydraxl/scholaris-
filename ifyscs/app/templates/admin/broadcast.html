@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Broadcast{% endblock %}
+
+{% block extra_css %}
+<style>
+.bc-page { max-width: 580px; }
+
+.bc-page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.bc-icon-wrap {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent-gold) 12%, transparent);
+  border: 1px solid rgba(201,149,42,0.20);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent-gold);
+}
+.bc-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+.bc-page-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+.bc-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  background: rgba(243,156,18,0.09);
+  border: 1px solid rgba(243,156,18,0.22);
+  margin-bottom: 24px;
+}
+.bc-warn svg { color: var(--warning); flex-shrink: 0; margin-top: 1px; }
+.bc-warn-text { font-size: 13px; color: var(--text-primary); line-height: 1.5; }
+.bc-warn-text strong { color: var(--warning); font-weight: 600; }
+
+.bc-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.bc-divider {
+  height: 1px;
+  background: var(--card-light-border);
+  margin: 20px 0;
+}
+
+.bc-send-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 13px;
+  font-size: 14px;
+  gap: 9px;
+}
+
+[data-theme="dark"] .bc-icon-wrap { background: rgba(201,149,42,0.10); }
+[data-theme="dark"] .bc-warn { background: rgba(243,156,18,0.07); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bc-page" id="bcPage" style="opacity:0;">
+
+  <div class="bc-page-header">
+    <div class="bc-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="bc-page-title">Broadcast</div>
+      <div class="bc-page-sub">Send an in-app notification to every matched user instantly.</div>
+    </div>
+  </div>
+
+  <div class="bc-warn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>
+    </svg>
+    <div class="bc-warn-text">
+      <strong>High-impact action.</strong> This sends a notification to all matched users immediately — there is no undo.
+    </div>
+  </div>
+
+  <div class="card">
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="bc-section-label">Audience</div>
+      <div class="field">
+        <label style="position:static;transform:none;display:block;margin-bottom:6px;color:var(--text-secondary);font-size:13px;">Send to</label>
+        {{ form.target(style="padding-top:12px;") }}
+      </div>
+
+      <div class="bc-divider"></div>
+
+      <div class="bc-section-label">Message</div>
+      <div class="field">
+        {{ form.message(placeholder=" ") }}
+        <label>Write your message…</label>
+        {% for err in form.message.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+      </div>
+
+      <button type="submit" class="btn btn-primary js-submit-btn bc-send-btn">
+        <span class="btn-spinner"></span>
+        <span class="btn-label" style="display:inline-flex;align-items:center;gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Send broadcast
+        </span>
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { animate } = anime;
+    animate('#bcPage', {
+      opacity: [0, 1],
+      translateY: [16, 0],
+      duration: 500,
+      ease: 'outBack(1.1)'
+    });
+  });
+</script>
+{% endblock %}

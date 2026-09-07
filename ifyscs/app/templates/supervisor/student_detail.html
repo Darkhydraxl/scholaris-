@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% from "components/badge.html" import status_badge %}
+{% from "components/progress_ring.html" import ring %}
+{% block title %}{{ student.full_name }}{% endblock %}
+{% block content %}
+
+<!-- Back link -->
+<a href="{{ url_for('supervisor.my_students') }}" class="btn btn-outline btn-sm" style="margin-bottom:20px;">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  Back to My Students
+</a>
+
+<!-- Header card -->
+<div class="card card-dark sdc-header" style="margin-bottom:18px;">
+  <div class="sdc-body">
+    <div class="sdc-info">
+      <div class="sdc-name">{{ student.full_name }}</div>
+      <div class="sdc-dept">{{ student.department }}</div>
+      <div class="sdc-title">{{ project.title }}</div>
+    </div>
+    <div class="sdc-right">
+      <div class="sdc-stats">
+        <div class="sdc-stat">
+          <span class="sdc-num">{{ counts.total }}</span>
+          <span class="sdc-lbl">Total</span>
+        </div>
+        <div class="sdc-divider"></div>
+        <div class="sdc-stat">
+          <span class="sdc-num" style="color:#27ae60;">{{ counts.approved }}</span>
+          <span class="sdc-lbl">Approved</span>
+        </div>
+        <div class="sdc-divider"></div>
+        <div class="sdc-stat">
+          <span class="sdc-num" style="color:#f39c12;">{{ counts.pending }}</span>
+          <span class="sdc-lbl">Pending</span>
+        </div>
+        <div class="sdc-divider"></div>
+        <div class="sdc-stat">
+          <span class="sdc-num" style="color:#e74c3c;">{{ counts.rejected }}</span>
+          <span class="sdc-lbl">Rejected</span>
+        </div>
+      </div>
+      <div class="sdc-ring">{{ ring(percent, size=120, stroke=9) }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Submissions list -->
+<div class="card">
+  <h3 style="margin-bottom:18px;">Submission History</h3>
+  {% if submissions %}
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    {% for s in submissions %}
+    <div class="sd-row {{ 'sd-pending' if s.status == 'pending' }}">
+      <div class="sd-chapter">Ch. {{ s.chapter_number }}</div>
+      <div class="sd-meta">
+        <div class="sd-title">{{ s.chapter_title or 'Chapter ' ~ s.chapter_number }}</div>
+        <div class="sd-date text-muted">Submitted {{ s.submitted_at.strftime('%b %d, %Y') }}
+          {% if s.reviewed_at %}&middot; Reviewed {{ s.reviewed_at.strftime('%b %d, %Y') }}{% endif %}
+        </div>
+        {% if s.overall_comment %}
+        <div class="sd-comment text-muted">"{{ s.overall_comment[:120] }}{{ '...' if s.overall_comment|length > 120 }}"</div>
+        {% endif %}
+      </div>
+      <div class="sd-status">{{ status_badge(s.status) }}</div>
+      <div class="sd-action">
+        {% if s.status == 'pending' %}
+        <a href="{{ url_for('supervisor.review', submission_id=s.id) }}" class="btn btn-primary btn-sm">Review</a>
+        {% else %}
+        <a href="{{ url_for('supervisor.review', submission_id=s.id) }}" class="btn btn-outline btn-sm">View</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">No submissions yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
+{% block extra_css %}
+<style>
+.sd-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 14px;
+  border: 1px solid var(--card-light-border);
+  transition: background 140ms;
+}
+.sd-row:hover { background: var(--soft-icon-bg); }
+.sd-pending { border-color: rgba(243,156,18,0.35); background: rgba(243,156,18,0.04); }
+.sd-chapter {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: var(--accent-navy); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 12px;
+}
+.sd-meta  { flex: 1; min-width: 0; }
+.sd-title { font-weight: 600; font-size: 14px; }
+.sd-date  { font-size: 11px; margin-top: 2px; }
+.sd-comment { font-size: 11px; margin-top: 4px; font-style: italic; }
+.sd-status { flex-shrink: 0; }
+.sd-action { flex-shrink: 0; }
+@media (max-width: 600px) {
+  .sd-row    { flex-wrap: wrap; }
+  .sd-action { width: 100%; }
+  .sd-action .btn { width: 100%; justify-content: center; }
+}
+
+/* ── Student detail header card ── */
+.sdc-header { padding: 24px; }
+.sdc-body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.sdc-info { flex: 1; min-width: 180px; }
+.sdc-name { font-size: 22px; font-weight: 800; color: var(--text-on-dark-card); }
+.sdc-dept { font-size: 13px; color: var(--text-on-dark-card-muted); margin-top: 4px; }
+.sdc-title { font-size: 12px; color: var(--text-on-dark-card-muted); margin-top: 8px; line-height: 1.5; }
+
+.sdc-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.sdc-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.sdc-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 18px;
+}
+.sdc-stat:first-child { padding-left: 0; }
+.sdc-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+.sdc-num { font-size: 26px; font-weight: 800; color: var(--text-on-dark-card); line-height: 1; }
+.sdc-lbl { font-size: 11px; color: var(--text-on-dark-card-muted); margin-top: 3px; }
+
+.sdc-ring { flex-shrink: 0; }
+.sdc-ring .progress-ring { width: 120px !important; height: 120px !important; }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .sdc-body { gap: 18px; }
+  .sdc-right { gap: 14px; width: 100%; justify-content: space-between; }
+  .sdc-stats { flex: 1; justify-content: space-between; }
+  .sdc-stat { padding: 0 10px; }
+  .sdc-stat:first-child { padding-left: 0; }
+  .sdc-num { font-size: 22px; }
+  .sdc-ring .progress-ring { width: 100px !important; height: 100px !important; }
+  .sdc-ring .progress-ring-text .pct { font-size: 22px; }
+}
+
+@media (max-width: 480px) {
+  .sdc-name { font-size: 18px; }
+  .sdc-right { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .sdc-stats { width: 100%; }
+  .sdc-stat { padding: 0 8px; }
+  .sdc-num { font-size: 20px; }
+  .sdc-ring { align-self: center; }
+}
+</style>
+{% endblock %}

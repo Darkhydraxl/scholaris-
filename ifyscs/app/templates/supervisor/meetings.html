@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+{% block title %}My Meetings{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page header ───────────────────────────────── */
+.mt-hdr { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+.mt-hdr-left h1 { font-size:26px; font-weight:800; letter-spacing:-.02em; }
+.mt-hdr-left p  { font-size:13.5px; color:var(--text-secondary); margin-top:4px; }
+
+/* ── Stats strip ───────────────────────────────── */
+.mt-stats {
+  display:flex; gap:0; padding:16px 24px;
+  position:relative; overflow:hidden;
+}
+.mt-stats::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.16) 40%,rgba(255,255,255,0.06) 70%,transparent);
+}
+.mt-stat {
+  flex:1; display:flex; align-items:center; gap:11px;
+  padding:0 18px; opacity:0;
+}
+.mt-stat:first-child { padding-left:0; }
+.mt-stat:last-child  { padding-right:0; }
+.mt-stat-divider { width:1px; height:30px; background:rgba(255,255,255,0.1); flex-shrink:0; }
+.mt-stat-icon {
+  width:34px; height:34px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.mt-stat-icon svg { width:15px; height:15px; }
+.mt-stat-total    .mt-stat-icon { background:rgba(139,131,255,0.18); color:#8b83ff; }
+.mt-stat-upcoming .mt-stat-icon { background:rgba(59,130,246,0.18);  color:#60a5fa; }
+.mt-stat-live     .mt-stat-icon { background:rgba(76,217,100,0.18);  color:#4cd964; }
+.mt-stat-done     .mt-stat-icon { background:rgba(100,100,100,0.2);  color:rgba(255,255,255,0.5); }
+.mt-stat-value { font-size:20px; font-weight:800; letter-spacing:-.02em; line-height:1; color:var(--text-on-dark-card); }
+.mt-stat-label { font-size:11px; color:var(--text-on-dark-card-muted); margin-top:3px; white-space:nowrap; }
+@media (max-width:640px) {
+  .mt-stats { flex-wrap:wrap; gap:14px; padding:14px 16px; }
+  .mt-stat  { flex:1 1 40%; padding:0; }
+  .mt-stat-divider { display:none; }
+}
+
+/* ── Section labels ────────────────────────────── */
+.mt-section-label {
+  font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-secondary); margin:28px 0 12px;
+}
+
+/* ── Meeting cards ─────────────────────────────── */
+.mt-card {
+  display:flex; align-items:flex-start; gap:16px;
+  background:var(--card-light); border:1px solid var(--card-light-border);
+  border-left:3px solid transparent;
+  border-radius:var(--radius-card);
+  padding:18px 20px; margin-bottom:10px;
+  box-shadow:var(--shadow-card);
+  transition:transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  opacity:0;
+}
+.mt-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-pop); }
+.mt-card.is-live     { border-left-color:#4cd964; }
+.mt-card.is-upcoming { border-left-color:#60a5fa; }
+.mt-card.is-completed { opacity:.6 !important; }
+.mt-card.is-cancelled { opacity:.45 !important; filter:grayscale(0.3); }
+
+.mt-card-platform-icon {
+  width:42px; height:42px; border-radius:12px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.mt-card-platform-icon svg { width:20px; height:20px; }
+.mt-platform-google { background:rgba(66,133,244,0.14); color:#4285f4; }
+.mt-platform-zoom   { background:rgba(45,140,255,0.14); color:#2d8cff; }
+
+.mt-card-body { flex:1; min-width:0; }
+.mt-card-title { font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+.mt-card-meta  { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
+.mt-meta-pill  {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:600; color:var(--text-secondary);
+}
+.mt-meta-pill svg { width:12px; height:12px; flex-shrink:0; }
+.mt-card-desc { font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-top:4px; }
+.mt-card-students { font-size:11.5px; color:var(--text-secondary); margin-top:6px; }
+
+.mt-card-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; flex-shrink:0; }
+
+/* Status badges */
+.mt-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px;
+}
+.mt-badge-live     { background:rgba(76,217,100,0.18); color:#4cd964; }
+.mt-badge-upcoming { background:rgba(59,130,246,0.18); color:#60a5fa; }
+.mt-badge-completed{ background:rgba(100,100,100,0.15); color:var(--text-secondary); }
+.mt-badge-cancelled{ background:rgba(231,76,60,0.15);  color:#ff7b6b; }
+.mt-badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.mt-badge-live .mt-badge-dot { animation:mt-pulse 2s ease-in-out infinite; }
+@keyframes mt-pulse { 0%,100%{opacity:1;} 50%{opacity:.35;} }
+
+/* Action buttons */
+.mt-card-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+
+/* Empty state */
+.mt-empty { text-align:center; padding:64px 24px; }
+.mt-empty-icon { width:56px; height:56px; border-radius:16px; background:var(--soft-icon-bg); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+.mt-empty-icon svg { width:24px; height:24px; color:var(--text-secondary); }
+.mt-empty h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+.mt-empty p  { font-size:13.5px; color:var(--text-secondary); max-width:320px; margin:0 auto 20px; line-height:1.6; }
+
+/* Dark mode */
+[data-theme="dark"] .mt-card:hover { box-shadow:0 12px 36px rgba(0,0,0,0.5); }
+
+/* ── Mobile ────────────────────────────────────── */
+@media (max-width:640px) {
+  /* Header: stack button below title */
+  .mt-hdr { flex-direction:column; align-items:stretch; gap:12px; }
+  .mt-hdr-left h1 { font-size:20px; }
+  .mt-hdr-left p  { font-size:13px; }
+  .mt-hdr .btn    { width:100%; justify-content:center; }
+
+  /* Cards: allow right section to drop to its own row */
+  .mt-card { flex-wrap:wrap; padding:14px; gap:12px; }
+  .mt-card-platform-icon { width:36px; height:36px; border-radius:10px; }
+  .mt-card-platform-icon svg { width:17px; height:17px; }
+  .mt-card-title { font-size:14px; }
+
+  /* Right section spans full width, badge on left — actions on right */
+  .mt-card-right {
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    flex-basis:100%;
+  }
+
+  /* Action buttons sit comfortably side by side */
+  .mt-card-actions { justify-content:flex-end; flex-wrap:nowrap; }
+  .mt-card-actions .btn { font-size:12px; padding:7px 12px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="mt-hdr">
+  <div class="mt-hdr-left">
+    <h1>My Meetings</h1>
+    <p>{{ meetings|length }} meeting{{ 's' if meetings|length != 1 }} scheduled</p>
+  </div>
+  <a href="{{ url_for('meeting.schedule') }}" class="btn btn-primary">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    Schedule Meeting
+  </a>
+</div>
+
+<!-- Stats strip -->
+<div class="card card-dark mt-stats">
+  <div class="mt-stat mt-stat-total">
+    <div class="mt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </div>
+    <div>
+      <div class="mt-stat-value">{{ meetings|length }}</div>
+      <div class="mt-stat-label">Total</div>
+    </div>
+  </div>
+  <div class="mt-stat-divider"></div>
+  <div class="mt-stat mt-stat-upcoming">
+    <div class="mt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    </div>
+    <div>
+      <div class="mt-stat-value">{{ upcoming|length }}</div>
+      <div class="mt-stat-label">Upcoming</div>
+    </div>
+  </div>
+  <div class="mt-stat-divider"></div>
+  <div class="mt-stat mt-stat-live">
+    <div class="mt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </div>
+    <div>
+      <div class="mt-stat-value">{{ meetings | selectattr('computed_status','eq','live') | list | length }}</div>
+      <div class="mt-stat-label">Live now</div>
+    </div>
+  </div>
+  <div class="mt-stat-divider"></div>
+  <div class="mt-stat mt-stat-done">
+    <div class="mt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <div>
+      <div class="mt-stat-value">{{ past|length }}</div>
+      <div class="mt-stat-label">Completed</div>
+    </div>
+  </div>
+</div>
+
+{% if not meetings %}
+<!-- Empty state -->
+<div class="card mt-empty">
+  <div class="mt-empty-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  </div>
+  <h3>No meetings yet</h3>
+  <p>Schedule your first meeting with your students to get started.</p>
+  <a href="{{ url_for('meeting.schedule') }}" class="btn btn-primary">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    Schedule a Meeting
+  </a>
+</div>
+
+{% else %}
+
+{% macro meeting_card(m) %}
+{% set cs = m.computed_status %}
+<div class="mt-card is-{{ cs }}">
+  <!-- Platform icon -->
+  <div class="mt-card-platform-icon mt-platform-{{ 'google' if m.platform == 'google_meet' else 'zoom' }}">
+    {% if m.platform == 'google_meet' %}
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.8 11.2c0-.7-.1-1.3-.2-2H12v3.8h5.5c-.2 1.2-1 2.2-2 2.9v2.4h3.3c1.9-1.8 3-4.4 3-7.1z" fill="#4285F4"/><path d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.4c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.5C4.7 19.7 8.1 22 12 22z" fill="#34A853"/><path d="M6.4 14.1c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.6H3C2.4 8.9 2 10.4 2 12s.4 3.1 1 4.4l3.4-2.3z" fill="#FBBC05"/><path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 3.1 14.7 2 12 2 8.1 2 4.7 4.3 3 7.6l3.4 2.4C7.2 7.7 9.4 6 12 6z" fill="#EA4335"/></svg>
+    {% else %}
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 8.25h-.75A2.25 2.25 0 001.5 10.5v3a2.25 2.25 0 002.25 2.25h.75V8.25zM19.5 8.25h.75A2.25 2.25 0 0122.5 10.5v3a2.25 2.25 0 01-2.25 2.25h-.75V8.25zM16.5 6.75a6 6 0 00-9 0V17.25a6 6 0 009 0V6.75z" fill="#2D8CFF"/></svg>
+    {% endif %}
+  </div>
+
+  <!-- Body -->
+  <div class="mt-card-body">
+    <div class="mt-card-title">{{ m.title }}</div>
+    <div class="mt-card-meta">
+      <span class="mt-meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        {{ m.date.strftime('%a, %b %d %Y') }}
+      </span>
+      <span class="mt-meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        {{ m.time.strftime('%H:%M') }}
+      </span>
+      <span class="mt-meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>
+        {{ m.duration_display }}
+      </span>
+      <span class="mt-meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        {{ m.students|length }} student{{ 's' if m.students|length != 1 }}
+      </span>
+    </div>
+    {% if m.description %}
+    <div class="mt-card-desc">{{ m.description }}</div>
+    {% endif %}
+    {% if m.students %}
+    <div class="mt-card-students">
+      Students: {{ m.students | map(attribute='full_name') | join(', ') }}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right side -->
+  <div class="mt-card-right">
+    <!-- Status badge -->
+    <span class="mt-badge mt-badge-{{ cs }}">
+      <span class="mt-badge-dot"></span>
+      {% if cs == 'live' %}Live
+      {% elif cs == 'upcoming' %}Upcoming
+      {% elif cs == 'completed' %}Completed
+      {% else %}Cancelled{% endif %}
+    </span>
+
+    <!-- Actions -->
+    <div class="mt-card-actions">
+      {% if m.meeting_link and cs in ('upcoming', 'live') %}
+      <a href="{{ m.meeting_link }}" target="_blank" rel="noopener"
+         class="btn btn-primary" style="font-size:12.5px;padding:8px 14px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+        Join
+      </a>
+      {% endif %}
+      {% if cs in ('upcoming', 'live') %}
+      <form method="POST" action="{{ url_for('meeting.cancel', meeting_id=m.id) }}"
+            onsubmit="return confirm('Cancel this meeting? Students will be notified.')">
+        {{ csrf_token_field() if csrf_token_field is defined else '' }}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-outline" style="font-size:12.5px;padding:8px 14px;color:var(--danger);border-color:var(--danger);">
+          Cancel
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+<!-- Upcoming + Live meetings -->
+{% if upcoming %}
+<div class="mt-section-label">Upcoming &amp; Live</div>
+{% for m in upcoming | sort(attribute='date') %}
+{{ meeting_card(m) }}
+{% endfor %}
+{% endif %}
+
+<!-- Past meetings -->
+{% if past %}
+<div class="mt-section-label">Completed</div>
+{% for m in past %}
+{{ meeting_card(m) }}
+{% endfor %}
+{% endif %}
+
+<!-- Cancelled meetings -->
+{% if cancelled %}
+<div class="mt-section-label">Cancelled</div>
+{% for m in cancelled %}
+{{ meeting_card(m) }}
+{% endfor %}
+{% endif %}
+
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const { animate, stagger, utils } = anime;
+
+  /* 1 — Page header slides down */
+  animate('.sm-hdr, .mt-hdr', {
+    opacity: [0, 1], translateY: [-16, 0],
+    duration: 420, ease: 'outExpo',
+  });
+
+  /* 2 — Stats strip: each tile fans in from below with a bounce */
+  const stats = document.querySelectorAll('.mt-stat');
+  if (stats.length) {
+    animate(stats, {
+      opacity:    [0, 1],
+      translateY: [18, 0],
+      scale:      [0.92, 1],
+      duration:   480,
+      ease:       'outBack(1.4)',
+      delay:      stagger(70, { start: 120 }),
+    });
+  }
+
+  /* 3 — Section labels fade in */
+  animate('.mt-section-label', {
+    opacity:    [0, 1],
+    translateX: [-10, 0],
+    duration:   300,
+    ease:       'outCubic',
+    delay:      stagger(60, { start: 380 }),
+  });
+
+  /* 4 — Meeting cards glide up with a subtle scale */
+  const cards = document.querySelectorAll('.mt-card');
+  if (cards.length) {
+    animate(cards, {
+      opacity:    [0, 1],
+      translateY: [20, 0],
+      scale:      [0.97, 1],
+      duration:   420,
+      ease:       'outExpo',
+      delay:      stagger(65, { start: 320 }),
+    });
+  }
+
+  /* 5 — Count-up on stat values */
+  document.querySelectorAll('.mt-stat-value').forEach(el => {
+    const target = parseInt(el.textContent, 10);
+    if (isNaN(target) || target === 0) return;
+    const obj = { val: 0 };
+    animate(obj, {
+      val: target,
+      duration: 600,
+      ease: 'outExpo',
+      delay: 200,
+      onUpdate: () => { el.textContent = Math.round(obj.val); },
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}My Meetings{% endblock %}
+
+{% block extra_css %}
+<style>
+.sm-hdr { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+.sm-hdr h1 { font-size:26px; font-weight:800; letter-spacing:-.02em; }
+.sm-hdr p  { font-size:13.5px; color:var(--text-secondary); margin-top:4px; }
+@media (max-width:640px) { .sm-hdr { flex-direction:column; align-items:stretch; gap:10px; } .sm-hdr h1 { font-size:20px; } }
+
+/* Stats strip */
+.smt-stats { display:flex; gap:0; padding:16px 24px; position:relative; overflow:hidden; }
+.smt-stats::before { content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.16) 40%,rgba(255,255,255,0.06) 70%,transparent); }
+.smt-stat { flex:1; display:flex; align-items:center; gap:11px; padding:0 18px; opacity:0; }
+.smt-stat:first-child { padding-left:0; }
+.smt-stat:last-child  { padding-right:0; }
+.smt-stat-divider { width:1px; height:30px; background:rgba(255,255,255,0.1); flex-shrink:0; }
+.smt-stat-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.smt-stat-icon svg { width:15px; height:15px; }
+.smt-stat-total    .smt-stat-icon { background:rgba(139,131,255,0.18); color:#8b83ff; }
+.smt-stat-upcoming .smt-stat-icon { background:rgba(59,130,246,0.18);  color:#60a5fa; }
+.smt-stat-live     .smt-stat-icon { background:rgba(76,217,100,0.18);  color:#4cd964; }
+.smt-stat-done     .smt-stat-icon { background:rgba(100,100,100,0.2);  color:rgba(255,255,255,0.5); }
+.smt-stat-value { font-size:20px; font-weight:800; letter-spacing:-.02em; line-height:1; color:var(--text-on-dark-card); }
+.smt-stat-label { font-size:11px; color:var(--text-on-dark-card-muted); margin-top:3px; white-space:nowrap; }
+@media (max-width:640px) { .smt-stats { flex-wrap:wrap; gap:14px; padding:14px 16px; }
+  .smt-stat { flex:1 1 40%; padding:0; } .smt-stat-divider { display:none; } }
+
+/* Section labels */
+.smt-section-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-secondary); margin:28px 0 12px; }
+
+/* Meeting cards */
+.smt-card { display:flex; align-items:flex-start; gap:16px;
+  background:var(--card-light); border:1px solid var(--card-light-border);
+  border-left:3px solid transparent; border-radius:var(--radius-card);
+  padding:18px 20px; margin-bottom:10px; box-shadow:var(--shadow-card);
+  transition:transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out); opacity:0; }
+.smt-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-pop); }
+.smt-card.is-live     { border-left-color:#4cd964; }
+.smt-card.is-upcoming { border-left-color:#60a5fa; }
+.smt-card.is-completed { opacity:.6 !important; }
+.smt-card.is-cancelled { opacity:.45 !important; filter:grayscale(0.3); }
+
+.smt-platform-icon { width:42px; height:42px; border-radius:12px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; }
+.smt-platform-icon svg { width:20px; height:20px; }
+.smt-platform-google { background:rgba(66,133,244,0.14); }
+.smt-platform-zoom   { background:rgba(45,140,255,0.14); color:#2d8cff; }
+
+.smt-card-body { flex:1; min-width:0; }
+.smt-card-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.smt-card-meta  { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:6px; }
+.smt-meta-pill  { display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:600; color:var(--text-secondary); }
+.smt-meta-pill svg { width:12px; height:12px; }
+.smt-card-desc { font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin-top:4px; }
+.smt-card-supervisor { font-size:11.5px; color:var(--text-secondary); margin-top:4px; }
+
+.smt-card-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; flex-shrink:0; }
+
+/* Badges */
+.smt-badge { display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; }
+.smt-badge-live      { background:rgba(76,217,100,0.18); color:#4cd964; }
+.smt-badge-upcoming  { background:rgba(59,130,246,0.18); color:#60a5fa; }
+.smt-badge-completed { background:rgba(100,100,100,0.15); color:var(--text-secondary); }
+.smt-badge-cancelled { background:rgba(231,76,60,0.15);  color:#ff7b6b; }
+.smt-badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.smt-badge-live .smt-badge-dot { animation:smt-pulse 2s ease-in-out infinite; }
+@keyframes smt-pulse { 0%,100%{opacity:1;} 50%{opacity:.35;} }
+
+/* Empty state */
+.smt-empty { text-align:center; padding:64px 24px; }
+.smt-empty-icon { width:56px; height:56px; border-radius:16px; background:var(--soft-icon-bg);
+  display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+.smt-empty-icon svg { width:24px; height:24px; color:var(--text-secondary); }
+.smt-empty h3 { font-size:17px; font-weight:700; margin-bottom:6px; }
+.smt-empty p  { font-size:13.5px; color:var(--text-secondary); max-width:320px; margin:0 auto; line-height:1.6; }
+
+/* Mobile */
+@media (max-width:640px) {
+  .smt-card { flex-wrap:wrap; padding:14px; gap:12px; }
+  .smt-platform-icon { width:36px; height:36px; border-radius:10px; }
+  .smt-platform-icon svg { width:17px; height:17px; }
+  .smt-card-title { font-size:14px; }
+  .smt-card-right { flex-direction:row; align-items:center; justify-content:space-between; width:100%; flex-basis:100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sm-hdr">
+  <div>
+    <h1>My Meetings</h1>
+    <p>{{ meetings|length }} meeting{{ 's' if meetings|length != 1 }} with your supervisor</p>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="card card-dark smt-stats">
+  <div class="smt-stat smt-stat-total">
+    <div class="smt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </div>
+    <div>
+      <div class="smt-stat-value">{{ meetings|length }}</div>
+      <div class="smt-stat-label">Total</div>
+    </div>
+  </div>
+  <div class="smt-stat-divider"></div>
+  <div class="smt-stat smt-stat-upcoming">
+    <div class="smt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    </div>
+    <div>
+      <div class="smt-stat-value">{{ upcoming|length }}</div>
+      <div class="smt-stat-label">Upcoming</div>
+    </div>
+  </div>
+  <div class="smt-stat-divider"></div>
+  <div class="smt-stat smt-stat-live">
+    <div class="smt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </div>
+    <div>
+      <div class="smt-stat-value">{{ meetings | selectattr('computed_status','eq','live') | list | length }}</div>
+      <div class="smt-stat-label">Live now</div>
+    </div>
+  </div>
+  <div class="smt-stat-divider"></div>
+  <div class="smt-stat smt-stat-done">
+    <div class="smt-stat-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <div>
+      <div class="smt-stat-value">{{ past|length }}</div>
+      <div class="smt-stat-label">Completed</div>
+    </div>
+  </div>
+</div>
+
+{% if not meetings %}
+<div class="card smt-empty">
+  <div class="smt-empty-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  </div>
+  <h3>No meetings scheduled yet</h3>
+  <p>Your supervisor hasn't scheduled any meetings yet. Check back later.</p>
+</div>
+
+{% else %}
+
+{% macro meeting_card(m) %}
+{% set cs = m.computed_status %}
+<div class="smt-card is-{{ cs }}">
+  <div class="smt-platform-icon smt-platform-{{ 'google' if m.platform == 'google_meet' else 'zoom' }}">
+    {% if m.platform == 'google_meet' %}
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.8 11.2c0-.7-.1-1.3-.2-2H12v3.8h5.5c-.2 1.2-1 2.2-2 2.9v2.4h3.3c1.9-1.8 3-4.4 3-7.1z" fill="#4285F4"/><path d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.4c-.9.6-2.1 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3v2.5C4.7 19.7 8.1 22 12 22z" fill="#34A853"/><path d="M6.4 14.1c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.6H3C2.4 8.9 2 10.4 2 12s.4 3.1 1 4.4l3.4-2.3z" fill="#FBBC05"/><path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 3.1 14.7 2 12 2 8.1 2 4.7 4.3 3 7.6l3.4 2.4C7.2 7.7 9.4 6 12 6z" fill="#EA4335"/></svg>
+    {% else %}
+    <svg viewBox="0 0 24 24" fill="#2D8CFF"><path d="M4.5 8.25h-.75A2.25 2.25 0 001.5 10.5v3a2.25 2.25 0 002.25 2.25h.75V8.25zM19.5 8.25h.75A2.25 2.25 0 0122.5 10.5v3a2.25 2.25 0 01-2.25 2.25h-.75V8.25zM16.5 6.75a6 6 0 00-9 0V17.25a6 6 0 009 0V6.75z"/></svg>
+    {% endif %}
+  </div>
+
+  <div class="smt-card-body">
+    <div class="smt-card-title">{{ m.title }}</div>
+    <div class="smt-card-meta">
+      <span class="smt-meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        {{ m.date.strftime('%a, %b %d %Y') }}
+      </span>
+      <span class="smt-meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        {{ m.time.strftime('%H:%M') }}
+      </span>
+      <span class="smt-meta-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>
+        {{ m.duration_display }}
+      </span>
+    </div>
+    {% if m.description %}
+    <div class="smt-card-desc">{{ m.description }}</div>
+    {% endif %}
+    <div class="smt-card-supervisor">
+      Supervisor: {{ m.supervisor.full_name }}
+    </div>
+  </div>
+
+  <div class="smt-card-right">
+    <span class="smt-badge smt-badge-{{ cs }}">
+      <span class="smt-badge-dot"></span>
+      {% if cs == 'live' %}Live now
+      {% elif cs == 'upcoming' %}Upcoming
+      {% elif cs == 'completed' %}Completed
+      {% else %}Cancelled{% endif %}
+    </span>
+    {% if m.meeting_link and cs in ('upcoming', 'live') %}
+    <a href="{{ m.meeting_link }}" target="_blank" rel="noopener" class="btn btn-primary" style="font-size:12.5px;padding:8px 14px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+      Join
+    </a>
+    {% elif m.meeting_link and cs == 'completed' %}
+    <a href="{{ m.meeting_link }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="font-size:12px;opacity:.7;">
+      View link
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% if upcoming %}
+<div class="smt-section-label">Upcoming &amp; Live</div>
+{% for m in upcoming | sort(attribute='date') %}{{ meeting_card(m) }}{% endfor %}
+{% endif %}
+
+{% if past %}
+<div class="smt-section-label">Completed</div>
+{% for m in past %}{{ meeting_card(m) }}{% endfor %}
+{% endif %}
+
+{% if cancelled %}
+<div class="smt-section-label">Cancelled</div>
+{% for m in cancelled %}{{ meeting_card(m) }}{% endfor %}
+{% endif %}
+
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const { animate, stagger } = anime;
+  const stats = document.querySelectorAll('.smt-stat');
+  if (stats.length) animate(stats, { opacity:[0,1], translateY:[8,0], duration:340, ease:'outCubic', delay:stagger(55,{start:40}) });
+  const cards = document.querySelectorAll('.smt-card');
+  if (cards.length) animate(cards, { opacity:[0,1], translateY:[12,0], duration:380, ease:'outCubic', delay:stagger(60,{start:160}) });
+});
+</script>
+{% endblock %}

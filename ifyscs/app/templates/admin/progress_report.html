@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}Progress Report{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page header ─────────────────────────────────────── */
+.pr-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.pr-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 3px; }
+.pr-sub { font-size: 13px; color: var(--text-secondary); }
+
+/* ── Stats strip ─────────────────────────────────────── */
+.pr-stats {
+  display: flex;
+  align-items: center;
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-radius: 16px;
+  padding: 16px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  opacity: 0;
+}
+.pr-stat { flex: 1; text-align: center; }
+.pr-stat-val {
+  font-size: 28px; font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1;
+  color: var(--text-primary); margin-bottom: 4px;
+}
+.pr-stat-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.pr-stat-divider { width: 1px; height: 36px; background: var(--card-light-border); flex-shrink: 0; }
+
+/* ── Table card ─────────────────────────────────────── */
+.pr-card { padding: 0; overflow: hidden; }
+.pr-card .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── Person cell ─────────────────────────────────────── */
+.pr-person { display: flex; align-items: center; gap: 11px; }
+.pr-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: #fff; text-transform: uppercase;
+}
+.pr-av-0 { background: var(--accent-gold); }
+.pr-av-1 { background: var(--accent-navy); }
+.pr-av-2 { background: var(--success); }
+.pr-av-3 { background: var(--warning); }
+.pr-av-4 { background: var(--ring-accent); }
+.pr-name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+.pr-email { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; white-space: nowrap; }
+
+/* ── Stage chip ─────────────────────────────────────── */
+.pr-stage {
+  display: inline-block;
+  font-size: 11.5px; font-weight: 600;
+  padding: 4px 10px; border-radius: 99px;
+  background: color-mix(in srgb, var(--accent-navy) 10%, transparent);
+  color: var(--accent-navy);
+  white-space: nowrap;
+}
+[data-theme="dark"] .pr-stage {
+  background: rgba(255,255,255,0.10);
+  color: var(--text-on-dark-card-muted);
+}
+
+/* ── Progress cell ─────────────────────────────────── */
+.pr-prog-wrap { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+.pr-prog-pct {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-primary);
+  width: 36px; flex-shrink: 0; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Row hover */
+.pr-table tbody tr { transition: background 120ms; }
+.pr-table tbody tr:hover td { background: color-mix(in srgb, var(--accent-gold) 4%, transparent); }
+
+/* Empty state */
+.pr-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Supervisor sup-label */
+.pr-sup { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+.pr-sup svg { flex-shrink: 0; }
+
+/* Dark mode */
+[data-theme="dark"] .pr-stats {
+  background: var(--card-dark);
+  border-color: rgba(255,255,255,0.08);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% set done_count = rows|selectattr('percent', 'ge', 100)|list|length %}
+{% set ns = namespace(sum_pct=0) %}
+{% for row in rows %}{% set ns.sum_pct = ns.sum_pct + row.percent %}{% endfor %}
+{% set avg_pct = (ns.sum_pct / rows|length)|round|int if rows else 0 %}
+
+<!-- Page header -->
+<div class="pr-header">
+  <div>
+    <h2 class="pr-title">Progress Report</h2>
+    <p class="pr-sub">Overview of every student's project completion status</p>
+  </div>
+  <a href="{{ url_for('admin.export_progress_report') }}" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:7px;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 15V3M7 10l5 5 5-5M5 21h14"/></svg>
+    Export PDF
+  </a>
+</div>
+
+<!-- Stats strip -->
+<div class="pr-stats" id="prStats">
+  <div class="pr-stat">
+    <div class="pr-stat-val js-count-up" data-target="{{ rows|length }}">0</div>
+    <div class="pr-stat-label">Students</div>
+  </div>
+  <div class="pr-stat-divider"></div>
+  <div class="pr-stat">
+    <div class="pr-stat-val js-count-up" data-target="{{ avg_pct }}" data-suffix="%">0</div>
+    <div class="pr-stat-label">Avg completion</div>
+  </div>
+  <div class="pr-stat-divider"></div>
+  <div class="pr-stat">
+    <div class="pr-stat-val js-count-up" data-target="{{ done_count }}">0</div>
+    <div class="pr-stat-label">Fully done</div>
+  </div>
+</div>
+
+<!-- Progress table -->
+<div class="card pr-card">
+  {% if rows %}
+  <div class="table-scroll">
+    <table class="pr-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Stage</th>
+          <th style="min-width:200px;">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr class="pr-row" style="opacity:0;">
+          <td>
+            <div class="pr-person">
+              <div class="pr-avatar pr-av-{{ loop.index0 % 5 }}">{{ row.student.full_name[0]|upper }}</div>
+              <div>
+                <div class="pr-name">{{ row.student.full_name }}</div>
+                <div class="pr-sup">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  {{ row.supervisor.full_name }}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td><span class="pr-stage">{{ row.stage }}</span></td>
+          <td>
+            <div class="pr-prog-wrap">
+              <div class="progress-bar-track" style="flex:1;">
+                <div class="progress-bar-fill js-progress-bar" data-target="{{ row.percent }}"></div>
+              </div>
+              <span class="pr-prog-pct">{{ row.percent }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="pr-empty">No student data available yet.</div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { animate, stagger } = anime;
+
+    // Stats entrance
+    animate('#prStats', { opacity: [0, 1], translateY: [-10, 0], duration: 400, ease: 'outCubic' });
+
+    // Animate progress bars
+    document.querySelectorAll('.js-progress-bar').forEach(bar => {
+      const target = bar.dataset.target;
+      requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.width = `${target}%`; }));
+    });
+
+    // Staggered row entrance
+    const rows = document.querySelectorAll('.pr-row');
+    if (rows.length) {
+      animate(rows, {
+        opacity:    [0, 1],
+        translateX: [-14, 0],
+        duration: 420,
+        ease: 'outCubic',
+        delay: stagger(40, { start: 80 }),
+        onComplete() { rows.forEach(r => { r.style.transform = ''; }); }
+      });
+    }
+  });
+</script>
+{% endblock %}

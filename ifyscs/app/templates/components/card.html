@@ -1,0 +1,18 @@
+{% macro stat_card(label, value, icon_svg, dark=False, suffix='') -%}
+<div class="card stat-card card-tilt {{ 'card-dark' if dark }}">
+  <div class="stat-icon-circle">{{ icon_svg | safe }}</div>
+  <div>
+    <div class="stat-value js-count-up" data-target="{{ value }}" data-suffix="{{ suffix }}">0{{ suffix }}</div>
+    <div class="stat-label {{ '' if dark else 'text-muted' }}">{{ label }}</div>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro add_card(href, label) -%}
+<a href="{{ href }}" class="add-card">
+  <span class="plus-circle">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+  </span>
+  <span>{{ label }}</span>
+</a>
+{%- endmacro %}

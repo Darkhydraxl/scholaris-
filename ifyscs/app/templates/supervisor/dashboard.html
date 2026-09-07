@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% from "components/card.html" import stat_card %}
+{% from "components/progress_ring.html" import mini_ring %}
+{% from "components/badge.html" import status_badge %}
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Shared column header ────────────────────────────────── */
+.sd-col-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.sd-col-title      { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.sd-col-title-dark { font-size: 15px; font-weight: 700; color: var(--text-on-dark-card); }
+.sd-col-sub        { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+.sd-col-sub-dark   { font-size: 11.5px; color: var(--text-on-dark-card-muted); margin-top: 2px; }
+.sd-view-all {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 12px; font-weight: 600;
+  color: var(--accent-gold); text-decoration: none; flex-shrink: 0;
+  transition: opacity 140ms;
+}
+.sd-view-all:hover { opacity: 0.7; }
+.sd-view-all svg { width: 13px; height: 13px; }
+
+/* ── Cycling avatars ─────────────────────────────────────── */
+.sd-av {
+  border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: #fff; text-transform: uppercase;
+}
+.sd-av-0 { background: var(--accent-gold); }
+.sd-av-1 { background: #6c63ff; }
+.sd-av-2 { background: var(--success); }
+.sd-av-3 { background: #e06c75; }
+.sd-av-4 { background: #5ba0e0; }
+
+/* ── Assigned students list ──────────────────────────────── */
+.sd-students { display: flex; flex-direction: column; gap: 4px; }
+.sd-student-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 10px; border-radius: 12px;
+  transition: background 140ms;
+  opacity: 0;
+}
+.sd-student-row:hover {
+  background: color-mix(in srgb, var(--accent-gold) 5%, transparent);
+}
+.sd-av-student { width: 36px; height: 36px; font-size: 13px; }
+
+.sd-student-info { flex: 1; min-width: 0; }
+.sd-student-name {
+  font-size: 13.5px; font-weight: 700; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+}
+.sd-project-title {
+  font-size: 11px; color: var(--text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Progress bar widget */
+.sd-prog-wrap { flex-shrink: 0; width: 88px; }
+.sd-prog-track {
+  height: 4px; border-radius: 99px; overflow: hidden;
+  background: var(--card-light-border); margin-bottom: 3px;
+}
+.sd-prog-fill {
+  height: 100%; border-radius: 99px; width: 0;
+  background: linear-gradient(90deg, var(--accent-gold), rgba(201,149,42,0.45));
+  transition: width 900ms cubic-bezier(0.22,1,0.36,1);
+}
+.sd-prog-pct {
+  font-size: 10px; font-weight: 700;
+  color: var(--accent-gold); text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty state */
+.sd-empty { font-size: 13px; color: var(--text-secondary); padding: 10px 2px; }
+
+/* ── Recent activity list ────────────────────────────────── */
+.sd-activity { display: flex; flex-direction: column; gap: 2px; }
+.sd-activity-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 10px; border-radius: 12px;
+  text-decoration: none;
+  transition: background 140ms;
+  opacity: 0;
+}
+.sd-activity-item:hover { background: rgba(255,255,255,0.06); }
+.sd-av-activity { width: 34px; height: 34px; font-size: 12px; }
+
+.sd-act-meta { flex: 1; min-width: 0; }
+.sd-act-name {
+  font-size: 13px; font-weight: 600; color: var(--text-on-dark-card);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+}
+.sd-act-sub { font-size: 11px; color: var(--text-on-dark-card-muted); }
+
+/* Inline status chips — richer than the plain .badge on a dark bg */
+.sd-act-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 700;
+  padding: 3px 9px; border-radius: 99px; flex-shrink: 0; white-space: nowrap;
+}
+.sd-chip-approved { background: rgba(39,174,96,0.18); color: #4cd964; }
+.sd-chip-rejected { background: rgba(231,76,60,0.18);  color: #ff6b6b; }
+.sd-chip-pending  { background: rgba(243,156,18,0.18); color: #ffd066; }
+
+/* Dark-card empty text */
+.sd-empty-dark { font-size: 13px; color: var(--text-on-dark-card-muted); padding: 10px 2px; }
+
+/* ── Supervisor overview strip ───────────────────────────── */
+.sv-overview {
+  display: flex; align-items: center;
+  padding: 18px 24px; gap: 0;
+  position: relative; overflow: hidden;
+}
+.sv-overview::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16) 40%, rgba(255,255,255,0.06) 70%, transparent);
+  pointer-events: none;
+}
+
+.sv-ov-stat {
+  flex: 1; display: flex; align-items: center; gap: 12px;
+  padding: 0 20px;
+}
+.sv-ov-stat:first-child { padding-left: 0; }
+.sv-ov-stat:last-child  { padding-right: 0; }
+
+.sv-ov-divider {
+  width: 1px; height: 34px;
+  background: rgba(255,255,255,0.1); flex-shrink: 0;
+}
+
+.sv-ov-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.sv-ov-icon svg { width: 16px; height: 16px; }
+.sv-ov-students .sv-ov-icon { background: rgba(108,99,255,0.18); color: #8b83ff; }
+.sv-ov-pending  .sv-ov-icon { background: rgba(243,156,18,0.18);  color: #f5a623; }
+.sv-ov-approved .sv-ov-icon { background: rgba(39,174,96,0.18);   color: #4cd964; }
+.sv-ov-rejected .sv-ov-icon { background: rgba(231,76,60,0.18);   color: #ff7b6b; }
+
+.sv-ov-body { min-width: 0; }
+.sv-ov-value {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+  line-height: 1; color: var(--text-on-dark-card);
+  font-variant-numeric: tabular-nums;
+}
+.sv-ov-label {
+  font-size: 11px; color: var(--text-on-dark-card-muted);
+  margin-top: 3px; white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .sv-overview { flex-wrap: wrap; gap: 14px; padding: 16px 18px; }
+  .sv-ov-stat { flex: 1 1 40%; padding: 0; }
+  .sv-ov-divider { display: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Overview strip -->
+<div class="card card-dark sv-overview">
+  <div class="sv-ov-stat sv-ov-students" style="opacity:0;">
+    <div class="sv-ov-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    </div>
+    <div class="sv-ov-body">
+      <div class="sv-ov-value js-count-up" data-target="{{ students_count }}">0</div>
+      <div class="sv-ov-label">Students</div>
+    </div>
+  </div>
+
+  <div class="sv-ov-divider"></div>
+
+  <div class="sv-ov-stat sv-ov-pending" style="opacity:0;">
+    <div class="sv-ov-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    </div>
+    <div class="sv-ov-body">
+      <div class="sv-ov-value js-count-up" data-target="{{ pending_count }}">0</div>
+      <div class="sv-ov-label">Pending review</div>
+    </div>
+  </div>
+
+  <div class="sv-ov-divider"></div>
+
+  <div class="sv-ov-stat sv-ov-approved" style="opacity:0;">
+    <div class="sv-ov-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <div class="sv-ov-body">
+      <div class="sv-ov-value js-count-up" data-target="{{ approved_count }}">0</div>
+      <div class="sv-ov-label">Approved</div>
+    </div>
+  </div>
+
+  <div class="sv-ov-divider"></div>
+
+  <div class="sv-ov-stat sv-ov-rejected" style="opacity:0;">
+    <div class="sv-ov-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+    </div>
+    <div class="sv-ov-body">
+      <div class="sv-ov-value js-count-up" data-target="{{ rejected_count }}">0</div>
+      <div class="sv-ov-label">Rejected</div>
+    </div>
+  </div>
+</div>
+
+<!-- Two-column row -->
+<div class="row mt-32" style="align-items:flex-start;">
+
+  <!-- ── Assigned Students ── -->
+  <div class="card col" style="flex:1.2;">
+    <div class="sd-col-hdr">
+      <div>
+        <div class="sd-col-title">Assigned Students</div>
+        <div class="sd-col-sub">{{ student_rows|length }} student{{ 's' if student_rows|length != 1 }}</div>
+      </div>
+      <a href="{{ url_for('supervisor.my_students') }}" class="sd-view-all">
+        View all
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+    </div>
+
+    <div class="sd-students">
+      {% for row in student_rows %}
+      <div class="sd-student-row">
+        <div class="sd-av sd-av-student sd-av-{{ loop.index0 % 5 }}">{{ row.student.full_name[0]|upper }}</div>
+        <div class="sd-student-info">
+          <div class="sd-student-name">{{ row.student.full_name }}</div>
+          <div class="sd-project-title">{{ row.project.title }}</div>
+        </div>
+        <div class="sd-prog-wrap">
+          <div class="sd-prog-track">
+            <div class="sd-prog-fill js-progress-bar" data-target="{{ row.percent }}"></div>
+          </div>
+          <div class="sd-prog-pct">{{ row.approved_chapters }}/5 ch</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="sd-empty">No students assigned yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Recent Activity ── -->
+  <div class="card card-dark col" style="flex:0.8;">
+    <div class="sd-col-hdr">
+      <div>
+        <div class="sd-col-title-dark">Recent Activity</div>
+        <div class="sd-col-sub-dark">Latest chapter submissions</div>
+      </div>
+    </div>
+
+    <div class="sd-activity">
+      {% for s in recent_activity %}
+      <a href="{{ url_for('supervisor.review', submission_id=s.id) }}" class="sd-activity-item">
+        <div class="sd-av sd-av-activity sd-av-{{ loop.index0 % 5 }}">{{ s.project.student.full_name[0]|upper }}</div>
+        <div class="sd-act-meta">
+          <div class="sd-act-name">{{ s.project.student.full_name }}</div>
+          <div class="sd-act-sub">Ch.{{ s.chapter_number }} &middot; {{ s.submitted_at.strftime('%b %d') }}</div>
+        </div>
+        <span class="sd-act-chip sd-chip-{{ s.status }}">
+          {% if s.status == 'approved' %}
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          {% elif s.status == 'rejected' %}
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          {% else %}
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="9"/><path d="M12 7v5"/></svg>
+          {% endif %}
+          {{ s.status|title }}
+        </span>
+      </a>
+      {% else %}
+      <div class="sd-empty-dark">No recent activity.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const { animate, stagger } = anime;
+
+  // Overview strip entrance
+  const ovStats = document.querySelectorAll('.sv-ov-stat');
+  if (ovStats.length) {
+    animate(ovStats, {
+      opacity:    [0, 1],
+      translateY: [10, 0],
+      duration:   360,
+      ease:       'outCubic',
+      delay:      stagger(55, { start: 40 })
+    });
+  }
+
+  // Stagger student rows in
+  const studentRows = document.querySelectorAll('.sd-student-row');
+  if (studentRows.length) {
+    animate(studentRows, {
+      opacity:    [0, 1],
+      translateX: [-12, 0],
+      duration:   420,
+      ease:       'outCubic',
+      delay:      stagger(55, { start: 120 })
+    });
+  }
+
+  // Stagger activity items in
+  const actItems = document.querySelectorAll('.sd-activity-item');
+  if (actItems.length) {
+    animate(actItems, {
+      opacity:    [0, 1],
+      translateX: [12, 0],
+      duration:   420,
+      ease:       'outCubic',
+      delay:      stagger(55, { start: 160 })
+    });
+  }
+
+  // Animate progress fills
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('.js-progress-bar').forEach(bar => {
+      bar.style.width = (bar.dataset.target || 0) + '%';
+    });
+  }));
+});
+</script>
+{% endblock %}

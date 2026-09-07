@@ -1,0 +1,14 @@
+{% extends "email/base_email.html" %}
+{% block email_body %}
+<h2 style="color:#13151A;margin:0 0 12px;">Deadline approaching</h2>
+<p style="color:#444;line-height:1.6;">
+  Hi {{ first_name(user.full_name) }}, Chapter {{ deadline.chapter_number }} is due on
+  <strong>{{ deadline.due_date.strftime('%B %d, %Y') }}</strong> &mdash; that's
+  <strong style="color:#C9952A;">{{ days_left }} day(s)</strong> away, and we haven't seen a submission yet.
+</p>
+<p style="margin-top:20px;">
+  <a href="#" style="background:#C9952A;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-size:13px;">
+    Submit now
+  </a>
+</p>
+{% endblock %}

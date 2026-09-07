@@ -1,0 +1,97 @@
+/* All keyframes animate only transform/opacity for GPU acceleration. */
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popover-in {
+  from { opacity: 0; transform: scale(0.92) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(120%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(120%); }
+}
+@keyframes toast-shrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@keyframes bell-pulse {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  10% { transform: rotate(-12deg) scale(1.05); }
+  20% { transform: rotate(10deg) scale(1.05); }
+  30% { transform: rotate(-8deg) scale(1.02); }
+  40% { transform: rotate(0deg) scale(1); }
+}
+.bell-has-unread { animation: bell-pulse 2.4s ease-in-out infinite; transform-origin: top center; }
+
+@keyframes dash-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes badge-glow-pending {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
+  50% { box-shadow: 0 0 0 5px rgba(243, 156, 18, 0.12); }
+}
+@keyframes badge-glow-approved {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+  50% { box-shadow: 0 0 0 5px rgba(39, 174, 96, 0.12); }
+}
+@keyframes badge-glow-rejected {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+  50% { box-shadow: 0 0 0 5px rgba(231, 76, 60, 0.12); }
+}
+.badge-pending { animation: badge-glow-pending 2.6s ease-in-out infinite; }
+.badge-approved { animation: badge-glow-approved 2.6s ease-in-out infinite; }
+.badge-rejected { animation: badge-glow-rejected 2.6s ease-in-out infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.btn-spinner {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  animation: spin 650ms linear infinite;
+  display: none;
+}
+.btn-outline .btn-spinner { border-color: rgba(19,21,26,0.25); border-top-color: var(--text-primary); }
+.btn.is-loading .btn-spinner { display: inline-block; }
+.btn.is-loading .btn-label { opacity: 0.7; }
+
+@keyframes draw-check {
+  to { stroke-dashoffset: 0; }
+}
+.draw-checkmark path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+}
+.draw-checkmark.drawn path {
+  animation: draw-check 480ms var(--ease-out) forwards;
+}
+
+@keyframes sidebar-slide-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* sidebar active pill morph: handled via a single .nav-pill element whose transform/size
+   transitions with JS-set top/height read once then translated -- see main.js */
+.nav-pill {
+  position: absolute;
+  left: 0; right: 0;
+  border-radius: var(--radius-pill);
+  background: var(--active-pill-bg);
+  z-index: 0;
+  transition: transform 280ms var(--ease-spring), height 280ms var(--ease-spring);
+  pointer-events: none;
+}

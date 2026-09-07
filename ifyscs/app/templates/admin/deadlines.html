@@ -1,0 +1,1031 @@
+{% extends "base.html" %}
+{% block title %}Deadlines{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/flatpickr.min.css') }}">
+<style>
+/* ── Page header ─────────────────────────────────────── */
+.dl-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.dl-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 3px; }
+.dl-sub { font-size: 13px; color: var(--text-secondary); }
+
+/* ── Glass Calendar ──────────────────────────────────── */
+.gc-outer {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+}
+.gc-backdrop {
+  position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(135deg,
+    rgba(99,102,241,0.55) 0%,
+    rgba(168,85,247,0.45) 45%,
+    rgba(201,149,42,0.38) 100%);
+}
+[data-theme="light"] .gc-backdrop {
+  background: linear-gradient(135deg,
+    rgba(99,102,241,0.42) 0%,
+    rgba(168,85,247,0.35) 45%,
+    rgba(201,149,42,0.28) 100%);
+}
+.glass-cal {
+  position: relative; z-index: 1;
+  background: rgba(0,0,0,0.22);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 20px;
+  color: #fff;
+  font-family: inherit;
+}
+[data-theme="light"] .glass-cal {
+  background: rgba(255,255,255,0.28);
+  border-color: rgba(255,255,255,0.55);
+  color: #1a1208;
+}
+
+/* Tab strip */
+.gc-header { display: flex; align-items: center; justify-content: space-between; position: relative; }
+
+/* Settings panel */
+.gc-settings-panel {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 40;
+  width: 230px;
+  background: rgba(30,18,8,0.82); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.13); border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  transform-origin: top right;
+  transform: scale(0.92) translateY(-6px); opacity: 0; pointer-events: none;
+  transition: transform 160ms cubic-bezier(.22,1,.36,1), opacity 140ms ease;
+}
+.gc-settings-panel.gc-sp-open {
+  transform: scale(1) translateY(0); opacity: 1; pointer-events: auto;
+}
+[data-theme="light"] .gc-settings-panel {
+  background: rgba(255,255,255,0.88);
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+}
+.gc-sp-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 11px; border-radius: 9px; gap: 10px;
+  cursor: default;
+}
+.gc-sp-row:hover { background: rgba(255,255,255,0.07); }
+[data-theme="light"] .gc-sp-row:hover { background: rgba(0,0,0,0.05); }
+.gc-sp-label {
+  font-size: 13px; color: rgba(255,255,255,0.82); line-height: 1.3;
+}
+[data-theme="light"] .gc-sp-label { color: rgba(0,0,0,0.72); }
+.gc-sp-label small {
+  display: block; font-size: 11px; color: rgba(255,255,255,0.42); margin-top: 1px;
+}
+[data-theme="light"] .gc-sp-label small { color: rgba(0,0,0,0.38); }
+/* toggle switch */
+.gc-sp-toggle {
+  position: relative; width: 36px; height: 20px; flex-shrink: 0;
+  background: rgba(255,255,255,0.18); border-radius: 10px;
+  cursor: pointer; transition: background 180ms;
+  border: none; outline: none;
+}
+.gc-sp-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; transition: left 180ms cubic-bezier(.22,1,.36,1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+.gc-sp-toggle.on { background: #ec4899; }
+.gc-sp-toggle.on::after { left: 18px; }
+[data-theme="light"] .gc-sp-toggle { background: rgba(0,0,0,0.15); }
+[data-theme="light"] .gc-sp-toggle.on { background: #ec4899; }
+/* today btn inside panel */
+.gc-sp-today-btn {
+  width: 100%; text-align: center; padding: 8px 12px; border-radius: 9px;
+  border: none; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: background 150ms;
+}
+.gc-sp-today-btn:hover { background: rgba(255,255,255,0.18); }
+[data-theme="light"] .gc-sp-today-btn {
+  background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.72);
+}
+[data-theme="light"] .gc-sp-today-btn:hover { background: rgba(0,0,0,0.1); }
+.gc-sp-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 4px 6px; }
+[data-theme="light"] .gc-sp-divider { background: rgba(0,0,0,0.09); }
+.gc-tabs {
+  display: flex; align-items: center; gap: 2px;
+  background: rgba(0,0,0,0.22); border-radius: 10px; padding: 4px;
+}
+[data-theme="light"] .gc-tabs { background: rgba(0,0,0,0.10); }
+.gc-tab {
+  padding: 5px 14px; border-radius: 7px;
+  font-size: 11.5px; font-weight: 600; font-family: inherit;
+  border: none; cursor: pointer; background: transparent;
+  color: rgba(255,255,255,0.55); transition: all 180ms;
+}
+[data-theme="light"] .gc-tab { color: rgba(0,0,0,0.45); }
+.gc-tab.gc-tab-active {
+  background: #fff; color: #111; box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+[data-theme="light"] .gc-tab.gc-tab-active { background: #fff; color: #1a1208; }
+.gc-settings-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: none;
+  background: transparent; color: rgba(255,255,255,0.65);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 160ms;
+}
+.gc-settings-btn:hover { background: rgba(255,255,255,0.12); }
+[data-theme="light"] .gc-settings-btn { color: rgba(0,0,0,0.45); }
+[data-theme="light"] .gc-settings-btn:hover { background: rgba(0,0,0,0.08); }
+
+/* Month navigation */
+.gc-month-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 22px 0 18px;
+}
+.gc-month-name {
+  font-size: 36px; font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+}
+@keyframes gc-month-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gc-month-name.gc-animating {
+  animation: gc-month-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.gc-nav-btns { display: flex; align-items: center; gap: 6px; }
+.gc-nav-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: transparent; color: rgba(255,255,255,0.65);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 160ms;
+}
+.gc-nav-btn:hover { background: rgba(255,255,255,0.15); }
+[data-theme="light"] .gc-nav-btn { color: rgba(0,0,0,0.50); }
+[data-theme="light"] .gc-nav-btn:hover { background: rgba(0,0,0,0.08); }
+
+/* Horizontal day strip */
+.gc-strip-wrap {
+  overflow-x: auto; margin: 0 -20px; padding: 0 20px 6px;
+  scrollbar-width: none;
+}
+.gc-strip-wrap::-webkit-scrollbar { display: none; }
+.gc-strip { display: flex; gap: 14px; }
+.gc-day-col {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; flex-shrink: 0; cursor: pointer;
+}
+.gc-day-letter {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.45); text-transform: uppercase;
+}
+[data-theme="light"] .gc-day-letter { color: rgba(0,0,0,0.38); }
+.gc-day-btn {
+  position: relative; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: none;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  color: rgba(255,255,255,0.88); background: transparent;
+  cursor: pointer; transition: background 160ms, transform 120ms;
+  flex-shrink: 0;
+}
+.gc-day-btn:hover:not(.gc-day-selected) { background: rgba(255,255,255,0.18); }
+[data-theme="light"] .gc-day-btn { color: rgba(0,0,0,0.78); }
+[data-theme="light"] .gc-day-btn:hover:not(.gc-day-selected) { background: rgba(0,0,0,0.10); }
+.gc-day-btn.gc-day-selected {
+  background: linear-gradient(135deg, #ec4899, #f97316);
+  color: #fff; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(236,72,153,0.40);
+}
+.gc-today-dot {
+  position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #ec4899;
+}
+.gc-dl-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #c9952a;
+  box-shadow: 0 0 6px rgba(201,149,42,0.6);
+}
+
+/* Divider + footer */
+.gc-divider { height: 1px; background: rgba(255,255,255,0.16); margin: 18px 0 14px; }
+[data-theme="light"] .gc-divider { background: rgba(0,0,0,0.12); }
+.gc-footer { display: flex; align-items: center; justify-content: space-between; }
+.gc-note-btn {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 500; font-family: inherit;
+  color: rgba(255,255,255,0.65); border: none; background: transparent;
+  cursor: pointer; padding: 0; transition: color 160ms;
+}
+.gc-note-btn:hover { color: rgba(255,255,255,0.95); }
+[data-theme="light"] .gc-note-btn { color: rgba(0,0,0,0.50); }
+[data-theme="light"] .gc-note-btn:hover { color: rgba(0,0,0,0.85); }
+.gc-event-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 13px; border-radius: 9px; border: none;
+  background: rgba(0,0,0,0.22); color: #fff;
+  font-size: 12px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: background 160ms;
+}
+.gc-event-btn:hover { background: rgba(0,0,0,0.36); }
+[data-theme="light"] .gc-event-btn { background: rgba(0,0,0,0.12); color: #1a1208; }
+[data-theme="light"] .gc-event-btn:hover { background: rgba(0,0,0,0.20); }
+
+/* ── Deadline list ──────────────────────────────────── */
+.dl-list { display: flex; flex-direction: column; gap: 8px; }
+
+.dl-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--card-light-border);
+  background: var(--card-light);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.dl-item:hover {
+  border-color: rgba(201,149,42,0.30);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.dl-info { display: flex; align-items: center; gap: 12px; }
+.dl-badge {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--ring-accent); color: var(--active-pill-text);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.dl-chapter { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.dl-date { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; }
+.dl-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.dl-action-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; font-family: inherit;
+  border: 1px solid var(--card-light-border);
+  background: transparent; color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 140ms, color 140ms, border-color 140ms;
+}
+.dl-action-btn:hover { background: var(--soft-icon-bg); color: var(--text-primary); }
+.dl-action-danger { color: var(--danger); border-color: rgba(231,76,60,.22); background: rgba(231,76,60,.04); }
+.dl-action-danger:hover { background: rgba(231,76,60,.10); border-color: rgba(231,76,60,.45); color: var(--danger); }
+
+/* ── Form section label ─────────────────────────────── */
+.dl-section { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 14px; }
+.dl-divider { height: 1px; background: var(--card-light-border); margin: 22px 0; }
+
+/* ── Date field wrapper ─────────────────────────────── */
+.date-field { position: relative; margin-bottom: 22px; }
+.date-field input {
+  width: 100%; box-sizing: border-box;
+  padding: 16px 44px 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--card-light-border);
+  background: var(--card-light);
+  font-family: inherit; font-size: 14px;
+  color: var(--text-primary);
+  outline: none; cursor: pointer;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.date-field input:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(201,149,42,.12);
+}
+.date-field label {
+  position: absolute; left: 14px; top: 16px;
+  font-size: 14px; color: var(--text-secondary);
+  pointer-events: none; transform-origin: left top;
+  transition: transform 160ms, color 160ms;
+}
+.date-field input:focus ~ label,
+.date-field.has-val label {
+  transform: translateY(-9px) scale(0.78);
+  color: var(--accent-gold);
+}
+.date-field .cal-icon {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; color: var(--text-secondary);
+}
+
+/* ── Flatpickr — Scholaris adaptive calendar ── */
+.flatpickr-calendar.arrowTop::before, .flatpickr-calendar.arrowTop::after,
+.flatpickr-calendar.arrowBottom::before, .flatpickr-calendar.arrowBottom::after { display:none !important; }
+
+@keyframes fp-open {
+  from { opacity: 0; transform: scale(0.94) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.flatpickr-calendar.open { animation: fp-open 220ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+.flatpickr-calendar {
+  background: #13141e;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 20px;
+  box-shadow: 0 28px 64px rgba(0,0,0,.60), 0 2px 12px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.05);
+  font-family: inherit; padding: 0; width: 300px; overflow: hidden;
+}
+.flatpickr-calendar::before {
+  content: ''; display: block; height: 3px;
+  background: linear-gradient(90deg, transparent 8%, #c9952a 50%, transparent 92%);
+  opacity: .82;
+}
+.flatpickr-months {
+  background: transparent; position: relative !important;
+  padding: 16px 54px 12px; display: flex;
+  align-items: center; justify-content: center; min-height: 50px;
+}
+.flatpickr-month { background: transparent; color: #fff; fill: #fff; height: auto; line-height: 1; width: auto; }
+.flatpickr-current-month {
+  font-size: 13.5px; font-weight: 700; color: #fff; padding: 0;
+  position: static; width: auto; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 5px; letter-spacing: -.2px;
+}
+.flatpickr-current-month .cur-month { color: #fff; font-weight: 700; }
+.flatpickr-current-month .numInputWrapper { width: 46px; }
+.flatpickr-current-month .numInputWrapper input {
+  color: #fff; font-weight: 700; font-size: 13.5px;
+  padding: 0; border: none; background: transparent; box-shadow: none;
+}
+.flatpickr-current-month .numInputWrapper span { display: none; }
+.numInputWrapper:hover { background: transparent; }
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+}
+.fp-month-text { color: #fff; font-weight: 700; font-size: 13.5px; font-family: inherit; letter-spacing: -.2px; }
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: 28px; width: 28px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; background: rgba(255,255,255,.07);
+  fill: rgba(255,255,255,.6); color: rgba(255,255,255,.6);
+  transition: background 140ms, fill 140ms;
+}
+.flatpickr-months .flatpickr-prev-month { left: 14px; }
+.flatpickr-months .flatpickr-next-month { right: 14px; left: auto; }
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover { background: rgba(201,149,42,.22); fill: #c9952a; color: #c9952a; }
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg { width: 11px; height: 11px; }
+.flatpickr-weekdays { background: transparent; padding: 0 10px 4px; }
+.flatpickr-weekdaycontainer { display: grid; grid-template-columns: repeat(7,1fr); }
+span.flatpickr-weekday { background: transparent; color: rgba(255,255,255,.3); font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; line-height: 26px; text-align: center; }
+.flatpickr-days { width: 100%; padding: 0 10px 14px; box-sizing: border-box; }
+.dayContainer { width: 100%; min-width: 100%; max-width: 100%; }
+.flatpickr-day {
+  background: transparent; border: none; border-radius: 9px;
+  color: rgba(255,255,255,.82); font-size: 12.5px; font-weight: 500;
+  height: 32px; max-width: 40px; margin: 1px; line-height: 32px;
+  transition: background 120ms, color 120ms, transform 130ms, box-shadow 130ms;
+}
+.flatpickr-day:hover, .flatpickr-day:focus {
+  background: rgba(201,149,42,.18); border: none; color: #e0b448; outline: none;
+  transform: scale(1.1);
+}
+.flatpickr-day.today {
+  background: rgba(201,149,42,.18); border: 1.5px solid rgba(201,149,42,.48);
+  color: #d4a843; font-weight: 700;
+}
+.flatpickr-day.today:hover { background: rgba(201,149,42,.30); border-color: rgba(201,149,42,.68); }
+.flatpickr-day.selected, .flatpickr-day.selected:hover, .flatpickr-day.selected:focus {
+  background: linear-gradient(135deg, #c9952a, #e0b44a); border: none; color: #fff; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(201,149,42,.55); transform: scale(1.1);
+}
+.flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
+.flatpickr-day.flatpickr-disabled { color: rgba(255,255,255,.15); pointer-events: none; }
+
+/* Light mode */
+[data-theme="light"] .flatpickr-calendar,
+:root:not([data-theme="dark"]) .flatpickr-calendar {
+  background: #fffdf9;
+  border: 1px solid rgba(201,149,42,.22);
+  box-shadow: 0 12px 40px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06), 0 0 0 1px rgba(201,149,42,.06);
+}
+[data-theme="light"] .flatpickr-calendar::before,
+:root:not([data-theme="dark"]) .flatpickr-calendar::before {
+  background: linear-gradient(90deg, transparent 8%, rgba(201,149,42,.45) 50%, transparent 92%);
+}
+[data-theme="light"] .flatpickr-months .flatpickr-prev-month,
+[data-theme="light"] .flatpickr-months .flatpickr-next-month,
+:root:not([data-theme="dark"]) .flatpickr-months .flatpickr-prev-month,
+:root:not([data-theme="dark"]) .flatpickr-months .flatpickr-next-month {
+  background: rgba(0,0,0,.06); fill: rgba(0,0,0,.45); color: rgba(0,0,0,.45);
+}
+[data-theme="light"] .flatpickr-months .flatpickr-prev-month:hover,
+[data-theme="light"] .flatpickr-months .flatpickr-next-month:hover,
+:root:not([data-theme="dark"]) .flatpickr-months .flatpickr-prev-month:hover,
+:root:not([data-theme="dark"]) .flatpickr-months .flatpickr-next-month:hover {
+  background: rgba(201,149,42,.15); fill: #a07820; color: #a07820;
+}
+[data-theme="light"] .fp-month-text,
+[data-theme="light"] .flatpickr-current-month, [data-theme="light"] .flatpickr-current-month .cur-month,
+[data-theme="light"] .flatpickr-current-month .numInputWrapper input,
+:root:not([data-theme="dark"]) .fp-month-text,
+:root:not([data-theme="dark"]) .flatpickr-current-month, :root:not([data-theme="dark"]) .flatpickr-current-month .cur-month,
+:root:not([data-theme="dark"]) .flatpickr-current-month .numInputWrapper input { color: #1a1208; }
+[data-theme="light"] span.flatpickr-weekday,
+:root:not([data-theme="dark"]) span.flatpickr-weekday { color: rgba(0,0,0,.35); }
+[data-theme="light"] .flatpickr-day,
+:root:not([data-theme="dark"]) .flatpickr-day { color: rgba(0,0,0,.76); }
+[data-theme="light"] .flatpickr-day:hover, [data-theme="light"] .flatpickr-day:focus,
+:root:not([data-theme="dark"]) .flatpickr-day:hover, :root:not([data-theme="dark"]) .flatpickr-day:focus {
+  background: rgba(201,149,42,.13); color: #a07820;
+}
+[data-theme="light"] .flatpickr-day.today,
+:root:not([data-theme="dark"]) .flatpickr-day.today {
+  background: rgba(201,149,42,.14); border-color: rgba(201,149,42,.38); color: #a07820;
+}
+[data-theme="light"] .flatpickr-day.today:hover,
+:root:not([data-theme="dark"]) .flatpickr-day.today:hover { background: rgba(201,149,42,.24); }
+[data-theme="light"] .flatpickr-day.selected, [data-theme="light"] .flatpickr-day.selected:hover,
+:root:not([data-theme="dark"]) .flatpickr-day.selected, :root:not([data-theme="dark"]) .flatpickr-day.selected:hover {
+  background: linear-gradient(135deg, #c9952a, #e0b44a); color: #fff;
+}
+[data-theme="light"] .flatpickr-day.flatpickr-disabled,
+:root:not([data-theme="dark"]) .flatpickr-day.flatpickr-disabled { color: rgba(0,0,0,.18); }
+[data-theme="dark"] .date-field input {
+  background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); color: #f4f5f7;
+}
+
+/* Dark mode */
+[data-theme="dark"] .dl-item {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .dl-action-btn { color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.10); }
+[data-theme="dark"] .dl-action-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-on-dark-card); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="dl-header">
+  <div>
+    <h2 class="dl-title">Deadlines</h2>
+    <p class="dl-sub">Set and manage chapter submission deadlines for {{ month_name }}</p>
+  </div>
+</div>
+
+<div class="row" style="align-items:flex-start;">
+
+  <!-- Glass Calendar -->
+  <div class="col gc-outer" style="flex:1.4;" id="calendarCard">
+    <div class="gc-backdrop"></div>
+    <div class="glass-cal">
+      <!-- Header -->
+      <div class="gc-header">
+        <div class="gc-tabs">
+          <button class="gc-tab gc-tab-active">Monthly</button>
+          <button class="gc-tab" id="gcWeeklyTab">Weekly</button>
+        </div>
+        <button class="gc-settings-btn" id="gcSettingsBtn" aria-label="Settings" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+
+        <!-- Settings panel -->
+        <div class="gc-settings-panel" id="gcSettingsPanel" role="dialog" aria-label="Calendar settings">
+          <!-- Go to today -->
+          <button class="gc-sp-today-btn" id="gcGoToday">Go to today</button>
+
+          <div class="gc-sp-divider"></div>
+
+          <!-- Show deadline markers -->
+          <div class="gc-sp-row">
+            <span class="gc-sp-label">
+              Deadline markers
+              <small>Gold dots on deadline days</small>
+            </span>
+            <button class="gc-sp-toggle on" id="gcToggleDeadlines" aria-label="Toggle deadline markers" title="Toggle deadline markers"></button>
+          </div>
+
+          <!-- Start week on Monday -->
+          <div class="gc-sp-row">
+            <span class="gc-sp-label">
+              Week starts Monday
+              <small>Affects weekly view</small>
+            </span>
+            <button class="gc-sp-toggle" id="gcToggleWeekStart" aria-label="Toggle week start day" title="Toggle week start day"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month navigation -->
+      <div class="gc-month-nav">
+        <span class="gc-month-name" id="gcMonthName"></span>
+        <div class="gc-nav-btns">
+          <button class="gc-nav-btn" id="gcPrevMonth" aria-label="Previous month">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button class="gc-nav-btn" id="gcNextMonth" aria-label="Next month">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable day strip -->
+      <div class="gc-strip-wrap" id="gcStripWrap">
+        <div class="gc-strip" id="gcStrip"></div>
+      </div>
+
+      <!-- Divider -->
+      <div class="gc-divider"></div>
+
+      <!-- Footer -->
+      <div class="gc-footer">
+        <button class="gc-note-btn" onclick="document.getElementById('addDueDate').closest('.card').scrollIntoView({behavior:'smooth'})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span id="gcDeadlineCount">{{ deadlines|length }} deadline{{ 's' if deadlines|length != 1 else '' }}</span>
+        </button>
+        <button class="gc-event-btn" onclick="document.getElementById('rightPanel').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>document.getElementById('chapter_number').focus(),260)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          New Deadline
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seed data for JS -->
+  <script>
+    window.GC_DATA = {
+      year:  {{ today_year }},
+      month: {{ today_month }},
+      today: {{ today_day }},
+      deadlineDays: {{ deadlines_by_day.keys()|list|tojson }}
+    };
+  </script>
+
+  <!-- Right panel -->
+  <div class="col card" style="flex:1;" id="rightPanel">
+
+    <!-- Add deadline form -->
+    <div class="dl-section">Add deadline</div>
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="field">
+        {{ form.chapter_number(placeholder=" ") }}
+        <label>Chapter number</label>
+        {% for err in form.chapter_number.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+      </div>
+      <div class="date-field" id="addDateField">
+        {{ form.due_date(type="text", placeholder=" ", readonly=True, id="addDueDate", autocomplete="off") }}
+        <label for="addDueDate">Due date</label>
+        <svg class="cal-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        {% for err in form.due_date.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary js-submit-btn" style="width:100%;justify-content:center;">
+        <span class="btn-spinner"></span><span class="btn-label">Add deadline</span>
+      </button>
+    </form>
+
+    <div class="dl-divider"></div>
+
+    <!-- Deadline list -->
+    <div class="dl-section">All deadlines</div>
+    <div class="dl-list">
+      {% for d in deadlines %}
+      <div class="dl-item" style="opacity:0;">
+        <div class="dl-info">
+          <div class="dl-badge">{{ d.chapter_number }}</div>
+          <div>
+            <div class="dl-chapter">Chapter {{ d.chapter_number }}</div>
+            <div class="dl-date">{{ d.due_date.strftime('%b %d, %Y') }}</div>
+          </div>
+        </div>
+        <div class="dl-actions">
+          <button class="dl-action-btn js-edit-deadline"
+            data-id="{{ d.id }}"
+            data-chapter="{{ d.chapter_number }}"
+            data-date="{{ d.due_date.strftime('%Y-%m-%d') }}"
+            data-edit-url="{{ url_for('admin.edit_deadline', deadline_id=d.id) }}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </button>
+          <button class="dl-action-btn dl-action-danger"
+            data-confirm-url="{{ url_for('admin.delete_deadline', deadline_id=d.id) }}"
+            data-confirm-title="Delete this deadline?"
+            data-confirm-body="Chapter {{ d.chapter_number }} deadline will be removed.">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-muted" style="font-size:13px;">No deadlines set.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit deadline modal -->
+<div class="modal-backdrop" id="editDeadlineBackdrop">
+  <div class="modal-box" role="dialog" aria-modal="true" style="max-width:360px;">
+    <div class="modal-header">
+      <h3>Edit deadline</h3>
+      <button class="modal-close" type="button" id="editDeadlineClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form method="POST" id="editDeadlineForm">
+      {{ form.hidden_tag() }}
+      <div class="field">
+        <input type="number" name="chapter_number" id="editChapterNum" min="1" max="10" placeholder=" " class="asl-input" required>
+        <label>Chapter number</label>
+      </div>
+      <div class="date-field" id="editDateField">
+        <input type="text" name="due_date" id="editDueDate" placeholder=" " readonly autocomplete="off" required>
+        <label for="editDueDate">Due date</label>
+        <svg class="cal-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <button type="submit" class="btn btn-primary js-submit-btn" style="width:100%;justify-content:center;">
+        <span class="btn-spinner"></span><span class="btn-label">Save changes</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/flatpickr.min.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { animate, stagger } = anime;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── Glass Calendar ────────────────────────────────────────────────────
+    const GC = {
+      DAY_LETTERS: ['S','M','T','W','T','F','S'],
+      MONTHS: ['January','February','March','April','May','June',
+               'July','August','September','October','November','December'],
+      serverYear:  window.GC_DATA.year,
+      serverMonth: window.GC_DATA.month,   // 1-indexed
+      todayDay:    window.GC_DATA.today,
+      deadlineDays: new Set(window.GC_DATA.deadlineDays),
+
+      viewYear: 0, viewMonth: 0,           // 0-indexed month internally
+      selectedDay: 0,
+      mode: 'monthly',                     // 'monthly' | 'weekly'
+      showDeadlines: true,
+      startDay: 0,                         // 0=Sunday, 1=Monday
+
+      init() {
+        this.viewYear    = this.serverYear;
+        this.viewMonth   = this.serverMonth - 1;
+        this.selectedDay = this.todayDay;
+        this.render();
+      },
+
+      // ── helpers ────────────────────────────────────────────────────────
+      isRealCurrentMonth() {
+        const n = new Date();
+        return this.viewYear === n.getFullYear() && this.viewMonth === n.getMonth();
+      },
+      isServerMonth() {
+        return this.viewYear === this.serverYear && (this.viewMonth + 1) === this.serverMonth;
+      },
+      realToday() { return this.isRealCurrentMonth() ? this.todayDay : -1; },
+
+      // ── render ─────────────────────────────────────────────────────────
+      render() {
+        this.renderLabel();
+        if (this.mode === 'weekly') this.renderWeekly();
+        else                        this.renderMonthly();
+      },
+
+      renderLabel() {
+        const el = document.getElementById('gcMonthName');
+        if (this.mode === 'weekly') {
+          // Show "Week of Jan 5" style label
+          const selDate = new Date(this.viewYear, this.viewMonth, this.selectedDay);
+          const weekStart = new Date(selDate);
+          weekStart.setDate(selDate.getDate() - selDate.getDay()); // back to Sunday
+          el.textContent = 'Week of ' + this.MONTHS[weekStart.getMonth()].slice(0,3) + ' ' + weekStart.getDate();
+          el.style.fontSize = '22px';
+        } else {
+          el.textContent = this.MONTHS[this.viewMonth];
+          el.style.fontSize = '';
+        }
+        if (!reduced) {
+          el.classList.remove('gc-animating');
+          void el.offsetWidth;
+          el.classList.add('gc-animating');
+        }
+      },
+
+      // Monthly: full scrollable strip of every day in the month
+      renderMonthly() {
+        const wrap  = document.getElementById('gcStripWrap');
+        const strip = document.getElementById('gcStrip');
+        wrap.style.overflowX = 'auto';
+        strip.style.display  = 'flex';
+        strip.innerHTML = '';
+
+        const daysInMonth = new Date(this.viewYear, this.viewMonth + 1, 0).getDate();
+        const realToday   = this.realToday();
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          strip.appendChild(this._makeDay(d, realToday));
+        }
+        this._scrollToSelected();
+      },
+
+      // Weekly: 7-column fixed grid for the week containing selectedDay
+      renderWeekly() {
+        const wrap  = document.getElementById('gcStripWrap');
+        const strip = document.getElementById('gcStrip');
+        wrap.style.overflowX = 'visible';
+        strip.style.display  = 'grid';
+        strip.style.gridTemplateColumns = 'repeat(7,1fr)';
+        strip.style.gap = '6px';
+        strip.innerHTML = '';
+
+        // Find the start of the week containing selectedDay, honouring startDay setting
+        const selDate   = new Date(this.viewYear, this.viewMonth, this.selectedDay);
+        const offset    = (selDate.getDay() - this.startDay + 7) % 7;
+        const startDay  = new Date(selDate);
+        startDay.setDate(selDate.getDate() - offset);
+
+        const realToday = this.realToday();
+
+        for (let i = 0; i < 7; i++) {
+          const d    = new Date(startDay);
+          d.setDate(startDay.getDate() + i);
+          const day  = d.getDate();
+          const inCurrentView = d.getFullYear() === this.viewYear && d.getMonth() === this.viewMonth;
+          // Days outside the current view month are rendered muted
+          const col = this._makeDay(day, realToday, !inCurrentView, d);
+          col.style.flex = 'unset';
+          strip.appendChild(col);
+        }
+      },
+
+      // Build a day column element. otherMonth dims it; dateObj overrides the
+      // year/month used for selection comparison (needed in weekly cross-month days).
+      _makeDay(day, realToday, otherMonth = false, dateObj = null) {
+        const date   = dateObj || new Date(this.viewYear, this.viewMonth, day);
+        const dow    = date.getDay();
+        const isToday  = !otherMonth && day === realToday;
+        const isSel    = !otherMonth && day === this.selectedDay;
+        const hasDl    = !otherMonth && this.showDeadlines && this.isServerMonth() && this.deadlineDays.has(day);
+
+        const col = document.createElement('div');
+        col.className = 'gc-day-col';
+        if (otherMonth) col.style.opacity = '0.35';
+
+        const letter = document.createElement('span');
+        letter.className = 'gc-day-letter';
+        letter.textContent = this.DAY_LETTERS[dow];
+
+        const btn = document.createElement('button');
+        btn.className = 'gc-day-btn' + (isSel ? ' gc-day-selected' : '');
+        btn.textContent = day;
+        if (isToday && !isSel) {
+          const dot = document.createElement('span');
+          dot.className = 'gc-today-dot';
+          btn.appendChild(dot);
+        }
+        btn.addEventListener('click', () => {
+          if (!otherMonth) {
+            this.selectedDay = day;
+            this.render();
+            // Pre-fill the Add Deadline form with the clicked date
+            const picked = new Date(this.viewYear, this.viewMonth, day);
+            if (typeof addFp !== 'undefined') {
+              addFp.setDate(picked, true);
+              document.getElementById('addDateField').classList.add('has-val');
+            }
+            document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => document.getElementById('chapter_number').focus(), 260);
+          }
+        });
+
+        col.appendChild(letter);
+        col.appendChild(btn);
+
+        if (hasDl) {
+          const dlDot = document.createElement('span');
+          dlDot.className = 'gc-dl-dot';
+          dlDot.title = 'Deadline';
+          col.appendChild(dlDot);
+        }
+        return col;
+      },
+
+      _scrollToSelected() {
+        const strip  = document.getElementById('gcStrip');
+        const wrap   = document.getElementById('gcStripWrap');
+        const selBtn = strip.querySelector('.gc-day-selected');
+        if (!selBtn) return;
+        const col    = selBtn.parentElement;
+        const target = col.offsetLeft - wrap.clientWidth / 2 + col.offsetWidth / 2;
+        wrap.scrollTo({ left: Math.max(0, target), behavior: reduced ? 'instant' : 'smooth' });
+      },
+
+      prevMonth() {
+        if (this.mode === 'weekly') {
+          // Go back one week
+          const d = new Date(this.viewYear, this.viewMonth, this.selectedDay);
+          d.setDate(d.getDate() - 7);
+          this.viewYear    = d.getFullYear();
+          this.viewMonth   = d.getMonth();
+          this.selectedDay = d.getDate();
+        } else {
+          this.viewMonth--;
+          if (this.viewMonth < 0) { this.viewMonth = 11; this.viewYear--; }
+          this.selectedDay = 1;
+        }
+        this.render();
+      },
+
+      nextMonth() {
+        if (this.mode === 'weekly') {
+          // Go forward one week
+          const d = new Date(this.viewYear, this.viewMonth, this.selectedDay);
+          d.setDate(d.getDate() + 7);
+          this.viewYear    = d.getFullYear();
+          this.viewMonth   = d.getMonth();
+          this.selectedDay = d.getDate();
+        } else {
+          this.viewMonth++;
+          if (this.viewMonth > 11) { this.viewMonth = 0; this.viewYear++; }
+          this.selectedDay = 1;
+        }
+        this.render();
+      },
+
+      setMode(m) {
+        this.mode = m;
+        // Reset to today's context when switching
+        this.viewYear    = this.serverYear;
+        this.viewMonth   = this.serverMonth - 1;
+        this.selectedDay = this.todayDay;
+        this.render();
+      },
+
+      goToToday() {
+        this.viewYear    = this.serverYear;
+        this.viewMonth   = this.serverMonth - 1;
+        this.selectedDay = this.todayDay;
+        this.render();
+      },
+    };
+
+    GC.init();
+    document.getElementById('gcPrevMonth').addEventListener('click', () => GC.prevMonth());
+    document.getElementById('gcNextMonth').addEventListener('click', () => GC.nextMonth());
+
+    // Tab switching with real mode change
+    const tabs = document.querySelectorAll('.gc-tab');
+    tabs[0].addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('gc-tab-active'));
+      tabs[0].classList.add('gc-tab-active');
+      GC.setMode('monthly');
+    });
+    tabs[1].addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('gc-tab-active'));
+      tabs[1].classList.add('gc-tab-active');
+      GC.setMode('weekly');
+    });
+
+    // ── Settings panel ────────────────────────────────────────────────────
+    const settingsBtn   = document.getElementById('gcSettingsBtn');
+    const settingsPanel = document.getElementById('gcSettingsPanel');
+    const toggleDl      = document.getElementById('gcToggleDeadlines');
+    const toggleWk      = document.getElementById('gcToggleWeekStart');
+    const todayBtn      = document.getElementById('gcGoToday');
+
+    function openSettings() {
+      settingsPanel.classList.add('gc-sp-open');
+      settingsBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeSettings() {
+      settingsPanel.classList.remove('gc-sp-open');
+      settingsBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      settingsPanel.classList.contains('gc-sp-open') ? closeSettings() : openSettings();
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) closeSettings();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSettings(); });
+
+    // Go to today
+    todayBtn.addEventListener('click', () => {
+      GC.goToToday();
+      closeSettings();
+    });
+
+    // Toggle deadline markers
+    toggleDl.addEventListener('click', () => {
+      GC.showDeadlines = !GC.showDeadlines;
+      toggleDl.classList.toggle('on', GC.showDeadlines);
+      GC.render();
+    });
+
+    // Toggle week start (Sun ↔ Mon)
+    toggleWk.addEventListener('click', () => {
+      GC.startDay = GC.startDay === 0 ? 1 : 0;
+      toggleWk.classList.toggle('on', GC.startDay === 1);
+      if (GC.mode === 'weekly') GC.render();
+    });
+
+    // ── Deadline list slides in ───────────────────────────────────────────
+    if (!reduced) {
+      const items = document.querySelectorAll('.dl-item');
+      if (items.length) {
+        animate(items, {
+          opacity:    [0, 1],
+          translateX: [-16, 0],
+          scale:      [0.97, 1],
+          duration:   380,
+          ease:       'outCubic',
+          delay:      stagger(48, { start: 140 }),
+          onComplete() { items.forEach(i => { i.style.transform = ''; }); }
+        });
+      }
+    } else {
+      document.querySelectorAll('.dl-item').forEach(el => { el.style.opacity = '1'; });
+    }
+
+    // ── Flatpickr ──────────────────────────────────────────────────────────
+    const MONTH_NAMES = ['January','February','March','April','May','June',
+                         'July','August','September','October','November','December'];
+
+    function replaceMonthSelect(fp) {
+      const sel = fp.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+      if (!sel || sel._replaced) return;
+      sel._replaced = true;
+      const span = document.createElement('span');
+      span.className = 'fp-month-text';
+      const update = () => { span.textContent = MONTH_NAMES[fp.currentMonth] || ''; };
+      update();
+      sel.parentNode.insertBefore(span, sel);
+      sel.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:0;height:0;';
+      fp.calendarContainer.querySelectorAll('.flatpickr-prev-month, .flatpickr-next-month')
+        .forEach(btn => btn.addEventListener('click', () => requestAnimationFrame(update)));
+    }
+
+    const fpConfig = { dateFormat: 'Y-m-d', altInput: true, altFormat: 'F j, Y', disableMobile: true };
+    const fpReady = Object.assign({}, fpConfig, {
+      onReady(_, __, fp) { replaceMonthSelect(fp); },
+      onChange(dates, dateStr, fp) {
+        const visibleInput = fp.altInput || fp.input;
+        const wrap = visibleInput.closest('.date-field');
+        if (wrap) wrap.classList.toggle('has-val', dates.length > 0);
+      },
+    });
+
+    const addFp  = flatpickr('#addDueDate',  fpReady);
+    const editFp = flatpickr('#editDueDate', fpReady);
+
+    ['addDueDate', 'editDueDate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.value) el.closest('.date-field').classList.add('has-val');
+    });
+
+    // ── Edit modal ─────────────────────────────────────────────────────────
+    const backdrop     = document.getElementById('editDeadlineBackdrop');
+    const form         = document.getElementById('editDeadlineForm');
+    const chapterInput = document.getElementById('editChapterNum');
+    const closeBtn     = document.getElementById('editDeadlineClose');
+
+    document.querySelectorAll('.js-edit-deadline').forEach(btn => {
+      btn.addEventListener('click', () => {
+        form.action = btn.dataset.editUrl;
+        chapterInput.value = btn.dataset.chapter;
+        editFp.setDate(btn.dataset.date, true);
+        backdrop.classList.add('open');
+      });
+    });
+
+    closeBtn.addEventListener('click', () => backdrop.classList.remove('open'));
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) backdrop.classList.remove('open'); });
+  });
+</script>
+{% endblock %}

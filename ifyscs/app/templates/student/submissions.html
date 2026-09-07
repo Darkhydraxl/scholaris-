@@ -1,0 +1,538 @@
+{% extends "base.html" %}
+{% from "components/badge.html" import status_badge %}
+{% block title %}Submissions{% endblock %}
+
+{% set total_count = submissions | length %}
+{% set approved_count = submissions | selectattr('status', 'eq', 'approved') | list | length %}
+{% set pending_count = submissions | selectattr('status', 'eq', 'pending') | list | length %}
+
+{% block content %}
+<!-- ══════════════════════════ Hero strip ══════════════════════════ -->
+<div class="sub-hero" id="subHero" style="opacity:0;">
+  <div class="sub-hero-inner">
+    <div class="sub-hero-left">
+      <p class="sub-hero-eyebrow">Chapter Progress</p>
+      <h1 class="sub-hero-title">Submission History</h1>
+      <p class="sub-hero-subtitle">{{ project.title }}</p>
+    </div>
+    <div class="sub-hero-right">
+      <div class="sub-hero-stats">
+        <div class="sub-stat-pill">
+          <span class="sub-stat-value">{{ total_count }}</span>
+          <span class="sub-stat-label">Total</span>
+        </div>
+        <div class="sub-stat-pill sub-stat-approved">
+          <span class="sub-stat-value">{{ approved_count }}</span>
+          <span class="sub-stat-label">Approved</span>
+        </div>
+        <div class="sub-stat-pill sub-stat-pending">
+          <span class="sub-stat-value">{{ pending_count }}</span>
+          <span class="sub-stat-label">Pending</span>
+        </div>
+      </div>
+      <a href="{{ url_for('student.submit_chapter') }}" class="btn sub-hero-cta">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        Submit Chapter
+      </a>
+    </div>
+  </div>
+</div>
+
+{% if submissions %}
+<!-- ══════════════════════════ Timeline ══════════════════════════ -->
+<div class="sub-timeline" id="subTimeline">
+  <div class="sub-timeline-line" id="subTimelineLine" style="transform:scaleY(0);"></div>
+
+  {% for s in submissions %}
+  {% set status_class = 'approved' if s.status == 'approved' else ('rejected' if s.status == 'rejected' else 'pending') %}
+  <div class="sub-node sub-node-{{ status_class }}" style="opacity:0;">
+
+    <div class="sub-node-connector">
+      <div class="sub-node-dot-wrap">
+        {% if s.status == 'pending' %}<span class="sub-node-pulse" aria-hidden="true"></span>{% endif %}
+        <span class="sub-node-dot"></span>
+      </div>
+    </div>
+
+    <div class="sub-node-badge-wrap">
+      <div class="sub-node-badge">{{ '%02d'|format(s.chapter_number) }}</div>
+    </div>
+
+    <div class="sub-card-wrap">
+      <div class="sub-card">
+
+        <div class="sub-card-header">
+          <h3 class="sub-card-title">{{ s.chapter_title }}</h3>
+          <div class="sub-card-badge">{{ status_badge(s.status) }}</div>
+        </div>
+
+        <div class="sub-card-meta">
+          <span class="sub-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            Submitted {{ s.submitted_at.strftime('%b %d, %Y') }}
+          </span>
+          {% if s.reviewed_at %}
+          <span class="sub-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.4 2.4L16 9.5"/></svg>
+            Reviewed {{ s.reviewed_at.strftime('%b %d, %Y') }}
+          </span>
+          {% endif %}
+        </div>
+
+        {% if s.overall_comment %}
+        <div class="sub-feedback-preview">
+          <svg class="sub-quote-icon" width="18" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7 7c-2.2 0-4 1.8-4 4v6h6v-6H6.2C6.6 9.4 7.7 8.4 9 8V6c-.7 0-1.4.1-2 1zm10 0c-2.2 0-4 1.8-4 4v6h6v-6h-2.8c.4-1.6 1.5-2.6 2.8-3V6c-.7 0-1.4.1-2 1z"/>
+          </svg>
+          <div class="sub-feedback-preview-text">
+            <p>{{ s.overall_comment | truncate(80, True, '…', 0) }}</p>
+            <button type="button" class="sub-read-full js-view-feedback"
+              data-status="{{ s.status }}"
+              data-comment="{{ s.overall_comment }}"
+              data-chapter="Chapter {{ s.chapter_number }}: {{ s.chapter_title }}">
+              Read full feedback
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if s.status == 'rejected' %}
+        <a href="{{ url_for('student.annotation_viewer', submission_id=s.id) }}" class="btn sub-revise-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Revise &amp; Resubmit
+        </a>
+        {% endif %}
+
+        <div class="sub-card-footer">
+          <button type="button" class="sub-footer-btn js-view-feedback"
+            data-status="{{ s.status }}"
+            data-comment="{{ s.overall_comment or 'No feedback yet — this submission is still pending review.' }}"
+            data-chapter="Chapter {{ s.chapter_number }}: {{ s.chapter_title }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Feedback
+          </button>
+          <a href="{{ url_for('student.annotation_viewer', submission_id=s.id) }}" class="sub-footer-btn sub-footer-btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            View Annotations
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<!-- ══════════════════════════ Empty state ══════════════════════════ -->
+<div class="sub-empty">
+  <svg class="sub-empty-illustration" width="140" height="140" viewBox="0 0 140 140" fill="none" aria-hidden="true">
+    <rect id="subEmptyDocOutline" x="22" y="12" width="96" height="116" rx="12" fill="none" stroke="var(--text-secondary)" stroke-width="2.5"/>
+    <path d="M42 44h56M42 62h56M42 80h34" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+    <g class="sub-empty-check-wrap draw-checkmark">
+      <circle cx="106" cy="104" r="20" fill="var(--accent-gold)"/>
+      <path d="M97 104l6 6 12-13" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </svg>
+  <h2 class="sub-empty-title">No submissions yet</h2>
+  <p class="sub-empty-sub">Your chapter submission journey starts here. Upload your first chapter and this timeline will track every step from submission to approval.</p>
+  <a href="{{ url_for('student.submit_chapter') }}" class="btn btn-primary sub-empty-cta">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    Submit Your First Chapter
+  </a>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════ Feedback modal ══════════════════════════ -->
+<div class="modal-backdrop sub-feedback-modal-backdrop" id="feedbackModalBackdrop">
+  <div class="modal-box sub-feedback-modal" id="feedbackModalBox" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
+    <div class="modal-header sub-feedback-modal-header">
+      <div>
+        <p class="sub-feedback-modal-eyebrow">Supervisor Feedback</p>
+        <h3 id="feedbackModalTitle">Feedback</h3>
+      </div>
+      <button class="modal-close" type="button" id="feedbackModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sub-feedback-modal-status" id="feedbackModalStatusChip"></div>
+    <blockquote class="sub-feedback-modal-quote">
+      <svg class="sub-feedback-quote-mark" width="26" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M7 7c-2.2 0-4 1.8-4 4v6h6v-6H6.2C6.6 9.4 7.7 8.4 9 8V6c-.7 0-1.4.1-2 1zm10 0c-2.2 0-4 1.8-4 4v6h6v-6h-2.8c.4-1.6 1.5-2.6 2.8-3V6c-.7 0-1.4.1-2 1z"/>
+      </svg>
+      <p id="feedbackModalBody"></p>
+    </blockquote>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════ Hero strip ══════════════════════════ */
+.sub-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  padding: 34px 36px;
+  margin-bottom: 34px;
+  background: linear-gradient(135deg, var(--accent-navy) 0%, #2c3e7a 48%, var(--accent-gold) 145%);
+  box-shadow: var(--shadow-pop);
+  color: #ffffff;
+}
+[data-theme="dark"] .sub-hero {
+  background: linear-gradient(135deg, #0b1220 0%, #1a2744 50%, #3a2c11 145%);
+}
+.sub-hero::before {
+  content: "";
+  position: absolute;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%);
+  top: -140px; right: -60px;
+  pointer-events: none;
+}
+.sub-hero::after {
+  content: "";
+  position: absolute;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,149,42,0.35), transparent 70%);
+  bottom: -160px; left: 12%;
+  pointer-events: none;
+}
+.sub-hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.sub-hero-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 8px;
+}
+.sub-hero-title { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+.sub-hero-subtitle { font-size: 14.5px; color: rgba(255,255,255,0.78); margin-top: 6px; }
+
+.sub-hero-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.sub-hero-stats { display: flex; gap: 10px; }
+.sub-stat-pill {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(6px);
+  min-width: 78px;
+}
+.sub-stat-value { font-size: 24px; font-weight: 800; color: #fff; line-height: 1; }
+.sub-stat-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255,255,255,0.68); margin-top: 5px; }
+.sub-stat-approved .sub-stat-value { color: #8ff0b3; }
+.sub-stat-pending .sub-stat-value { color: #ffd873; }
+
+.sub-hero-cta {
+  background: rgba(255,255,255,0.95);
+  color: var(--accent-navy);
+  white-space: nowrap;
+}
+.sub-hero-cta:hover { background: #fff; }
+
+@media (max-width: 640px) {
+  .sub-hero { padding: 24px 20px; margin-bottom: 24px; }
+  .sub-hero-title { font-size: 24px; }
+  .sub-hero-inner { flex-direction: column; align-items: flex-start; }
+  .sub-hero-right { width: 100%; flex-direction: column; align-items: stretch; }
+  .sub-hero-stats { justify-content: space-between; }
+  .sub-stat-pill { flex: 1; min-width: 0; padding: 8px 6px; }
+  .sub-hero-cta { justify-content: center; }
+}
+
+/* ══════════════════════════ Timeline ══════════════════════════ */
+.sub-timeline { position: relative; }
+
+.sub-timeline-line {
+  position: absolute;
+  left: 20px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--accent-gold) 45%, var(--card-light-border)) 0%, var(--card-light-border) 55%);
+  transform-origin: top center;
+}
+
+.sub-node {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  padding-bottom: 26px;
+}
+.sub-node:last-child { padding-bottom: 0; }
+
+.sub-node-connector { width: 40px; flex-shrink: 0; display: flex; justify-content: center; padding-top: 26px; }
+.sub-node-dot-wrap { position: relative; width: 14px; height: 14px; }
+.sub-node-dot {
+  display: block; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text-secondary);
+  border: 3px solid var(--card-light);
+  box-shadow: 0 0 0 1px var(--card-light-border);
+  position: relative; z-index: 2;
+}
+.sub-node-approved .sub-node-dot { background: var(--success); }
+.sub-node-pending  .sub-node-dot { background: var(--warning); }
+.sub-node-rejected .sub-node-dot { background: var(--danger); }
+
+.sub-node-pulse {
+  position: absolute; inset: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--warning);
+  animation: sub-pulse-ring 1.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes sub-pulse-ring {
+  0%   { transform: scale(0.55); opacity: 0.85; }
+  70%  { transform: scale(1.9); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.sub-node-badge-wrap { width: 56px; flex-shrink: 0; padding-top: 4px; }
+.sub-node-badge {
+  width: 56px; height: 56px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; font-weight: 800; letter-spacing: -0.02em;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(19,21,26,0.18);
+}
+.sub-node-approved .sub-node-badge { background: linear-gradient(135deg,#1a9c4e 0%,#27ae60 55%,#52d68a 100%); }
+.sub-node-pending  .sub-node-badge { background: linear-gradient(135deg,#b7770d 0%,#e2a000 55%,#f5c842 100%); }
+.sub-node-rejected .sub-node-badge { background: linear-gradient(135deg,#b52a1c 0%,#e74c3c 55%,#ff7b6b 100%); }
+
+.sub-card-wrap { flex: 1; min-width: 0; }
+
+.sub-card {
+  background: var(--card-light);
+  border: 1px solid var(--card-light-border);
+  border-left: 3px solid var(--card-light-border);
+  border-radius: var(--radius-card);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-card);
+  transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-left-color 220ms var(--ease-out);
+}
+.sub-card:hover { transform: translateY(-4px); }
+.sub-node-approved .sub-card { border-left-color: var(--success); }
+.sub-node-pending  .sub-card { border-left-color: var(--warning); }
+.sub-node-rejected .sub-card { border-left-color: var(--danger); }
+.sub-node-approved .sub-card:hover { box-shadow: 0 14px 36px color-mix(in srgb, var(--success) 26%, transparent); }
+.sub-node-pending  .sub-card:hover { box-shadow: 0 14px 36px color-mix(in srgb, var(--warning) 26%, transparent); }
+.sub-node-rejected .sub-card:hover { box-shadow: 0 14px 36px color-mix(in srgb, var(--danger) 26%, transparent); }
+
+.sub-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.sub-card-title { font-size: 17px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+.sub-card-badge { flex-shrink: 0; margin-top: 2px; }
+
+.sub-card-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 14px; }
+.sub-meta-item { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
+.sub-meta-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+.sub-feedback-preview {
+  display: flex; gap: 10px;
+  background: var(--soft-icon-bg);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.sub-quote-icon { flex-shrink: 0; color: var(--text-secondary); opacity: 0.5; margin-top: 2px; }
+.sub-feedback-preview-text { min-width: 0; }
+.sub-feedback-preview-text p { font-size: 13px; color: var(--text-primary); line-height: 1.5; margin-bottom: 6px; word-break: break-word; }
+.sub-read-full {
+  border: none; background: none; padding: 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12.5px; font-weight: 700; color: var(--ring-accent);
+}
+.sub-read-full svg { transition: transform 160ms var(--ease-out); }
+.sub-read-full:hover svg { transform: translateX(3px); }
+
+.sub-revise-btn {
+  width: 100%; justify-content: center;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  border: 1.5px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.sub-revise-btn:hover {
+  background: color-mix(in srgb, var(--danger) 22%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+  color: var(--danger);
+  transform: translateY(-1px);
+}
+
+.sub-card-footer { display: flex; gap: 10px; padding-top: 14px; border-top: 1px solid var(--card-light-border); }
+.sub-footer-btn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; cursor: pointer; text-decoration: none;
+  padding: 9px 12px; border-radius: var(--radius-pill);
+  font-size: 12.5px; font-weight: 600;
+  background: var(--soft-icon-bg); color: var(--text-primary);
+  transition: background 140ms, transform 140ms;
+}
+.sub-footer-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+.sub-footer-btn:hover { background: var(--card-light-border); transform: translateY(-1px); }
+.sub-footer-btn-primary { background: var(--ring-accent); color: var(--active-pill-text); }
+.sub-footer-btn-primary:hover { background: var(--ring-accent); opacity: 0.88; }
+
+@media (max-width: 640px) {
+  .sub-timeline-line, .sub-node-connector { display: none; }
+  .sub-node { gap: 12px; padding-bottom: 16px; }
+  .sub-node-badge-wrap { width: 46px; padding-top: 0; }
+  .sub-node-badge { width: 44px; height: 44px; border-radius: 12px; font-size: 14px; }
+  .sub-card { padding: 16px; }
+  .sub-card-title { font-size: 15px; }
+  .sub-card-footer { flex-wrap: wrap; }
+}
+
+/* ══════════════════════════ Empty state ══════════════════════════ */
+.sub-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 72px 24px;
+  min-height: 46vh;
+}
+.sub-empty-illustration { margin-bottom: 22px; }
+.sub-empty-title { font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+.sub-empty-sub { font-size: 14px; color: var(--text-secondary); max-width: 380px; line-height: 1.65; margin-bottom: 24px; }
+.sub-empty-check-wrap { opacity: 0; transform: scale(0.5); transform-origin: 106px 104px; transition: opacity 280ms var(--ease-spring), transform 280ms var(--ease-spring); }
+.sub-empty-check-wrap.drawn { opacity: 1; transform: scale(1); }
+
+/* ══════════════════════════ Feedback modal ══════════════════════════ */
+.sub-feedback-modal { max-width: 520px; transition: none; }
+.sub-feedback-modal-header { align-items: flex-start; }
+.sub-feedback-modal-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; }
+.sub-feedback-modal-status { margin-bottom: 16px; }
+.sub-feedback-modal-quote {
+  margin: 0; padding: 18px 20px;
+  background: var(--soft-icon-bg);
+  border-left: 3px solid var(--ring-accent);
+  border-radius: 14px;
+}
+.sub-feedback-quote-mark { color: var(--text-secondary); opacity: 0.35; display: block; margin-bottom: 8px; }
+.sub-feedback-modal-quote p { font-size: 15px; line-height: 1.7; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sub-node-pulse { animation: none; opacity: 0; }
+  .sub-card:hover, .sub-hero-cta:hover, .sub-footer-btn:hover, .sub-revise-btn:hover { transform: none; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script defer src="{{ url_for('static', filename='js/anime.umd.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { animate, stagger, createTimeline } = anime;
+
+    /* ── Feedback modal, driven by anime.js spring entrance ────────────── */
+    const backdrop = document.getElementById('feedbackModalBackdrop');
+    const modalBox = document.getElementById('feedbackModalBox');
+    const title = document.getElementById('feedbackModalTitle');
+    const body = document.getElementById('feedbackModalBody');
+    const statusChip = document.getElementById('feedbackModalStatusChip');
+
+    function openFeedbackModal(chapter, comment, status) {
+      title.textContent = chapter;
+      body.textContent = comment;
+      if (statusChip) {
+        const label = status.charAt(0).toUpperCase() + status.slice(1);
+        statusChip.innerHTML = '<span class="badge badge-' + status + '">' + label + '</span>';
+      }
+      backdrop.classList.add('open');
+      animate(modalBox, {
+        scale: [0.8, 1],
+        opacity: [0, 1],
+        duration: 520,
+        ease: 'outBack(1.4)'
+      });
+    }
+
+    function closeFeedbackModal() {
+      if (!backdrop.classList.contains('open')) return;
+      animate(modalBox, {
+        scale: [1, 0.9],
+        opacity: [1, 0],
+        duration: 160,
+        ease: 'inCubic',
+        onComplete: () => backdrop.classList.remove('open')
+      });
+    }
+
+    document.querySelectorAll('.js-view-feedback').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openFeedbackModal(btn.dataset.chapter, btn.dataset.comment, btn.dataset.status);
+      });
+    });
+    document.getElementById('feedbackModalClose').addEventListener('click', closeFeedbackModal);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeFeedbackModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && backdrop.classList.contains('open')) closeFeedbackModal();
+    });
+
+    /* ── Page entrance: hero fades+slides down, then the timeline line
+       draws top-to-bottom, then cards cascade in from the right ────────── */
+    const hero = document.getElementById('subHero');
+    if (hero) {
+      animate(hero, {
+        opacity: [0, 1],
+        translateY: [-24, 0],
+        duration: 640,
+        ease: 'outCubic'
+      });
+    }
+
+    const timelineLine = document.getElementById('subTimelineLine');
+    if (timelineLine) {
+      animate(timelineLine, {
+        scaleY: [0, 1],
+        duration: 720,
+        ease: 'inOutQuad',
+        delay: 380
+      });
+    }
+
+    const nodes = document.querySelectorAll('.sub-node');
+    if (nodes.length) {
+      animate(nodes, {
+        opacity: [0, 1],
+        translateX: [46, 0],
+        duration: 580,
+        ease: 'outBack(1.15)',
+        delay: stagger(90, { start: 520 })
+      });
+    }
+
+    /* ── Empty state: dashed document outline draws itself, then the
+       gold check badge pops in with a spring ────────────────────────── */
+    const outline = document.getElementById('subEmptyDocOutline');
+    if (outline) {
+      const len = outline.getTotalLength();
+      outline.style.strokeDasharray = String(len);
+      outline.style.strokeDashoffset = String(len);
+      animate(outline, {
+        strokeDashoffset: [len, 0],
+        duration: 1300,
+        ease: 'inOutQuad',
+        delay: 200,
+        onComplete: () => { outline.style.strokeDasharray = '7 7'; }
+      });
+    }
+    const emptyCheck = document.querySelector('.sub-empty-check-wrap');
+    if (emptyCheck) {
+      setTimeout(() => emptyCheck.classList.add('drawn'), 1300);
+    }
+  });
+</script>
+{% endblock %}
