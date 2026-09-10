@@ -277,19 +277,6 @@
         </button>
       </form>
 
-      <div class="asl-or"><span>or sign in as</span></div>
-
-      <div class="asl-socials">
-        <button class="asl-social" type="button" title="Sign in as Student" data-email="t.ogundimu@scholaris.edu" data-tagline="Ready to make progress?">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3.33 2 8.67 2 12 0v-5"/></svg>
-          Student
-        </button>
-        <button class="asl-social" type="button" title="Sign in as Supervisor" data-email="a.okafor@scholaris.edu" data-tagline="Your students are waiting.">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Supervisor
-        </button>
-      </div>
-
       <p class="asl-foot">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
     </div>
   </div>
@@ -845,21 +832,6 @@
     });
   }
 
-  var aslSub     = document.querySelector('.asl-sub');
-  var defaultSub = aslSub ? aslSub.textContent : '';
-
-  document.querySelectorAll('.asl-social[data-email]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var emailField = document.querySelector('input[type="email"], input[name="email"]');
-      var pwField    = document.getElementById('pwField');
-      var submitBtn  = document.querySelector('.asl-form .js-submit-btn');
-      if (!emailField || !pwField) return;
-      emailField.value = btn.dataset.email;
-      pwField.value    = 'Password123!';
-      if (aslSub && btn.dataset.tagline) aslSub.textContent = btn.dataset.tagline;
-      if (submitBtn) submitBtn.focus();
-    });
-  });
 })();
 </script>
 {% endblock %}
