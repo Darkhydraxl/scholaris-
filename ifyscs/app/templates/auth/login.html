@@ -280,11 +280,11 @@
       <div class="asl-or"><span>or sign in as</span></div>
 
       <div class="asl-socials">
-        <button class="asl-social" type="button" title="Sign in as Student" onclick="document.querySelector('input[type=email]').focus()">
+        <button class="asl-social" type="button" title="Sign in as Student" data-tagline="Enter your student email and password to continue." data-sub="Student portal">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3.33 2 8.67 2 12 0v-5"/></svg>
           Student
         </button>
-        <button class="asl-social" type="button" title="Sign in as Supervisor" onclick="document.querySelector('input[type=email]').focus()">
+        <button class="asl-social" type="button" title="Sign in as Supervisor" data-tagline="Enter your supervisor email and password to continue." data-sub="Supervisor portal">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Supervisor
         </button>
@@ -829,6 +829,19 @@
     f.addEventListener('submit', function () {
       var btn = f.querySelector('.js-submit-btn');
       if (btn) { btn.classList.add('is-loading'); btn.disabled = true; }
+    });
+  });
+
+  var aslSub     = document.querySelector('.asl-sub');
+  var aslEyebrow = document.querySelector('.asl-eyebrow');
+  var defaultSub = aslSub ? aslSub.textContent : '';
+  var defaultEyebrow = aslEyebrow ? aslEyebrow.textContent : '';
+
+  document.querySelectorAll('.asl-social[data-tagline]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (aslSub && btn.dataset.tagline) aslSub.textContent = btn.dataset.tagline;
+      if (aslEyebrow && btn.dataset.sub) aslEyebrow.textContent = btn.dataset.sub;
+      document.querySelector('input[type="email"]').focus();
     });
   });
 
