@@ -318,14 +318,14 @@ DEPARTMENTS = [
 
 
 class LoginForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[DataRequired(), Email()], filters=[str.strip])
     password = PasswordField("Password", validators=[DataRequired()])
     remember = BooleanField("Remember me")
 
 
 class RegisterForm(FlaskForm):
     full_name = StringField("Full name", validators=[DataRequired(), Length(min=2, max=120)])
-    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)])
+    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[str.strip])
     department = SelectField("Department", choices=DEPARTMENTS, validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=8)])
     confirm_password = PasswordField(
@@ -343,7 +343,7 @@ class ChangePasswordForm(FlaskForm):
 
 class ProfileForm(FlaskForm):
     full_name = StringField("Full name", validators=[DataRequired(), Length(min=2, max=120)])
-    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)])
+    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[str.strip])
     department = SelectField("Department", choices=DEPARTMENTS, validators=[Optional()])
 
 
@@ -367,7 +367,7 @@ class ReviewSubmissionForm(FlaskForm):
 
 class UserForm(FlaskForm):
     full_name = StringField("Full name", validators=[DataRequired(), Length(min=2, max=120)])
-    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)])
+    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[str.strip])
     department = SelectField("Department", choices=DEPARTMENTS, validators=[Optional()])
     role = SelectField("Role", choices=[("student", "Student"), ("supervisor", "Supervisor")],
                         validators=[DataRequired()])
