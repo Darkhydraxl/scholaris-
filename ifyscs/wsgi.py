@@ -1,7 +1,16 @@
+import logging
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Ensure Flask app errors are visible in Render's log stream
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.WARNING,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 from app import create_app  # noqa: E402
 

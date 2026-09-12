@@ -112,6 +112,11 @@ def _register_blueprints(app):
         session["theme"] = "dark" if current == "light" else "light"
         return jsonify({"theme": session["theme"]})
 
+    @app.route("/health")
+    def health():
+        from flask import jsonify
+        return jsonify({"status": "ok"}), 200
+
     @app.route("/")
     def index():
         from flask_login import current_user
@@ -219,6 +224,16 @@ def _register_error_handlers(app):
     @app.errorhandler(404)
     def not_found(e):
         return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        import traceback, sys
+        app.logger.error("500 error:\n%s", traceback.format_exc())
+        print("500 error:", traceback.format_exc(), file=sys.stderr, flush=True)
+        try:
+            return render_template("errors/500.html"), 500
+        except Exception:
+            return "<h1>500 Internal Server Error</h1>", 500
 
 
 def _register_scheduler(app):
