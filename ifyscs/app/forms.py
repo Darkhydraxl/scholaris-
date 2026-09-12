@@ -6,6 +6,10 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional, NumberRange
 
+
+def _strip(value):
+    return value.strip() if value is not None else value
+
 DEPARTMENTS = [
     ("", "— Select department —"),
     ("ACCOUNTING", "ACCOUNTING"),
@@ -318,14 +322,14 @@ DEPARTMENTS = [
 
 
 class LoginForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()], filters=[str.strip])
+    email = StringField("Email", validators=[DataRequired(), Email()], filters=[_strip])
     password = PasswordField("Password", validators=[DataRequired()])
     remember = BooleanField("Remember me")
 
 
 class RegisterForm(FlaskForm):
     full_name = StringField("Full name", validators=[DataRequired(), Length(min=2, max=120)])
-    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[str.strip])
+    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[_strip])
     department = SelectField("Department", choices=DEPARTMENTS, validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=8)])
     confirm_password = PasswordField(
@@ -343,7 +347,7 @@ class ChangePasswordForm(FlaskForm):
 
 class ProfileForm(FlaskForm):
     full_name = StringField("Full name", validators=[DataRequired(), Length(min=2, max=120)])
-    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[str.strip])
+    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[_strip])
     department = SelectField("Department", choices=DEPARTMENTS, validators=[Optional()])
 
 
@@ -367,7 +371,7 @@ class ReviewSubmissionForm(FlaskForm):
 
 class UserForm(FlaskForm):
     full_name = StringField("Full name", validators=[DataRequired(), Length(min=2, max=120)])
-    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[str.strip])
+    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=120)], filters=[_strip])
     department = SelectField("Department", choices=DEPARTMENTS, validators=[Optional()])
     role = SelectField("Role", choices=[("student", "Student"), ("supervisor", "Supervisor")],
                         validators=[DataRequired()])
