@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service · Scholaris</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f7f5;
+      --surface: #ffffff;
+      --border: #e5e3df;
+      --text: #1a1916;
+      --text-muted: #6b6860;
+      --accent: #c9952a;
+      --accent-light: rgba(201,149,42,.10);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0d0e17;
+        --surface: #13141f;
+        --border: #23253a;
+        --text: #e8e6e1;
+        --text-muted: #8b8a82;
+        --accent: #c9952a;
+        --accent-light: rgba(201,149,42,.12);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0d0e17;
+      --surface: #13141f;
+      --border: #23253a;
+      --text: #e8e6e1;
+      --text-muted: #8b8a82;
+      --accent: #c9952a;
+      --accent-light: rgba(201,149,42,.12);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0 24px;
+    }
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: .01em;
+    }
+    .back-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 160ms;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    main {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
+    }
+    .meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc {
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+    .toc-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .toc a {
+      font-size: 13.5px;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 140ms;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    section {
+      margin-bottom: 44px;
+      scroll-margin-top: 24px;
+    }
+    h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    p {
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    p:last-child { margin-bottom: 0; }
+    ul, ol.content-list {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    li {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+    strong { color: var(--text); font-weight: 600; }
+
+    .callout {
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+    }
+    .callout p { margin: 0; color: var(--text); font-size: 13.5px; }
+
+    .contact-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .contact-box a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .contact-box a:hover { text-decoration: underline; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    footer a { color: inherit; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="{{ url_for('index') }}" class="logo-link">
+        <svg width="22" height="30" viewBox="0 0 60 82" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="60" height="82" fill="#c8a47e"/>
+          <rect x="3" y="3" width="54" height="76" fill="none" stroke="#15100a" stroke-width="2"/>
+          <rect x="8" y="8" width="44" height="66" fill="none" stroke="#15100a" stroke-width="1.5"/>
+          <polygon points="9,9 51,9 51,21 9,39" fill="#15100a"/>
+          <polygon points="51,73 9,73 9,61 51,43" fill="#15100a"/>
+        </svg>
+        Scholaris
+      </a>
+      <a href="{{ url_for('index') }}" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <p class="page-eyebrow">Legal</p>
+    <h1>Terms of Service</h1>
+    <p class="meta">Last updated: September 15, 2026 &nbsp;·&nbsp; Applies to <strong>Scholaris</strong> (scholariss.onrender.com)</p>
+
+    <nav class="toc" aria-label="Table of contents">
+      <div class="toc-title">Contents</div>
+      <ol>
+        <li><a href="#acceptance">Acceptance of Terms</a></li>
+        <li><a href="#who-can-use">Who Can Use Scholaris</a></li>
+        <li><a href="#your-responsibilities">Your Responsibilities</a></li>
+        <li><a href="#academic-integrity">Academic Integrity</a></li>
+        <li><a href="#google-integration">Google Account Integration</a></li>
+        <li><a href="#content">Your Content</a></li>
+        <li><a href="#availability">Service Availability</a></li>
+        <li><a href="#termination">Account Suspension</a></li>
+        <li><a href="#changes">Changes to These Terms</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ol>
+    </nav>
+
+    <section id="acceptance">
+      <h2>Acceptance of Terms</h2>
+      <p>By accessing or using Scholaris, you agree to be bound by these Terms of Service. If you do not agree, you may not use the platform.</p>
+      <p>These terms apply to all users of Scholaris — students, supervisors, and administrators.</p>
+    </section>
+
+    <section id="who-can-use">
+      <h2>Who Can Use Scholaris</h2>
+      <p>Scholaris is an academic platform restricted to authorised members of the institution. Access is granted by a department administrator. You may only use Scholaris with a valid account issued or approved by your institution.</p>
+      <p>You must not share your login credentials with anyone else or allow others to access your account.</p>
+    </section>
+
+    <section id="your-responsibilities">
+      <h2>Your Responsibilities</h2>
+      <p>When using Scholaris, you agree to:</p>
+      <ul>
+        <li>Provide accurate information when registering and keep your profile up to date.</li>
+        <li>Use the platform only for its intended academic purpose — submitting and reviewing Final Year Project work.</li>
+        <li>Not attempt to access accounts, data, or system areas you are not authorised to access.</li>
+        <li>Not attempt to disrupt, overload, or interfere with the platform's operation.</li>
+        <li>Not upload content that is illegal, harmful, or unrelated to your FYP.</li>
+      </ul>
+    </section>
+
+    <section id="academic-integrity">
+      <h2>Academic Integrity</h2>
+      <p>Scholaris is a tool to support the FYP process. All work submitted through the platform must comply with your institution's academic integrity and plagiarism policies.</p>
+      <div class="callout">
+        <p>Submitting work that is not your own, or misrepresenting your progress, may result in academic disciplinary action in addition to suspension of your Scholaris account.</p>
+      </div>
+    </section>
+
+    <section id="google-integration">
+      <h2>Google Account Integration</h2>
+      <p>Supervisors may optionally connect a Google account to generate Google Meet links for student meetings. By connecting your Google account, you authorise Scholaris to create calendar events on your behalf.</p>
+      <p>You can disconnect your Google account at any time from your profile settings. Disconnecting immediately revokes Scholaris's access to your Google account data.</p>
+      <p>Use of Google services through Scholaris is also governed by <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Google's Terms of Service</a>.</p>
+    </section>
+
+    <section id="content">
+      <h2>Your Content</h2>
+      <p>You retain ownership of the academic work you upload to Scholaris (chapter submissions, documents, files). By uploading content, you grant Scholaris a limited licence to store and display that content to your authorised supervisor and department administrators for the purpose of FYP evaluation.</p>
+      <p>We do not claim ownership of your work and will not use it for any purpose outside of the platform.</p>
+    </section>
+
+    <section id="availability">
+      <h2>Service Availability</h2>
+      <p>Scholaris is provided on a best-effort basis. We aim to keep the platform available during the academic year but do not guarantee uninterrupted access. Scheduled or unscheduled maintenance may cause temporary downtime.</p>
+      <p>We are not liable for any loss arising from unavailability of the service, including missed deadlines caused by platform outages. Always keep local copies of important work.</p>
+    </section>
+
+    <section id="termination">
+      <h2>Account Suspension</h2>
+      <p>A department administrator may suspend or deactivate your account if you violate these terms, breach academic integrity policies, or are no longer a member of the institution.</p>
+      <p>If your account is suspended, you will lose access to the platform and your submitted data. Contact your department administrator to appeal a suspension.</p>
+    </section>
+
+    <section id="changes">
+      <h2>Changes to These Terms</h2>
+      <p>We may update these Terms of Service from time to time. When we do, the "Last updated" date at the top of this page will change. Continued use of Scholaris after changes are posted constitutes acceptance of the updated terms.</p>
+      <p>Significant changes will be communicated via a platform notification.</p>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <div class="contact-box">
+        <p>Questions about these terms? Contact us at:</p>
+        <p style="margin-top: 12px;">
+          <strong>Scholaris</strong><br>
+          Email: <a href="mailto:scholarissedu@gmail.com">scholarissedu@gmail.com</a>
+        </p>
+        <p style="margin-top: 12px;">
+          See also our <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    &copy; {{ now.year }} Scholaris. All rights reserved.
+    &nbsp;·&nbsp;
+    <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+    &nbsp;·&nbsp;
+    <a href="{{ url_for('index') }}">Back to app</a>
+  </footer>
+
+  <script>
+    const stored = localStorage.getItem('theme') || document.cookie.match(/theme=([^;]+)/)?.[1];
+    if (stored === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    else if (stored === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  </script>
+</body>
+</html>

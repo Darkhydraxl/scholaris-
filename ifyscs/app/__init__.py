@@ -126,6 +126,11 @@ def _register_blueprints(app):
         from datetime import date
         return render_template("privacy_policy.html", now=date.today())
 
+    @app.route("/terms-of-service")
+    def terms_of_service():
+        from datetime import date
+        return render_template("terms_of_service.html", now=date.today())
+
     @app.route("/")
     def index():
         from flask_login import current_user
