@@ -121,6 +121,11 @@ def _register_blueprints(app):
     def google_site_verification():
         return "google-site-verification: googlefb49e7ecda978378.html", 200, {"Content-Type": "text/html; charset=utf-8"}
 
+    @app.route("/privacy-policy")
+    def privacy_policy():
+        from datetime import date
+        return render_template("privacy_policy.html", now=date.today())
+
     @app.route("/")
     def index():
         from flask_login import current_user

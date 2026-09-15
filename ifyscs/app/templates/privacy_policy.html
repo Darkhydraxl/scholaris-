@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy · Scholaris</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f7f5;
+      --surface: #ffffff;
+      --border: #e5e3df;
+      --text: #1a1916;
+      --text-muted: #6b6860;
+      --accent: #c9952a;
+      --accent-light: rgba(201,149,42,.10);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0d0e17;
+        --surface: #13141f;
+        --border: #23253a;
+        --text: #e8e6e1;
+        --text-muted: #8b8a82;
+        --accent: #c9952a;
+        --accent-light: rgba(201,149,42,.12);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0d0e17;
+      --surface: #13141f;
+      --border: #23253a;
+      --text: #e8e6e1;
+      --text-muted: #8b8a82;
+      --accent: #c9952a;
+      --accent-light: rgba(201,149,42,.12);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0 24px;
+    }
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: .01em;
+    }
+    .logo-link svg { flex-shrink: 0; }
+    .back-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 160ms;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    main {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
+    }
+    .meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc {
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+    .toc-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .toc a {
+      font-size: 13.5px;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 140ms;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    section {
+      margin-bottom: 44px;
+      scroll-margin-top: 24px;
+    }
+    h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    p {
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    p:last-child { margin-bottom: 0; }
+    ul, ol {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    li {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+    strong { color: var(--text); font-weight: 600; }
+
+    .callout {
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+    }
+    .callout p { margin: 0; color: var(--text); font-size: 13.5px; }
+
+    .contact-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .contact-box a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .contact-box a:hover { text-decoration: underline; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="{{ url_for('index') }}" class="logo-link">
+        <svg width="22" height="30" viewBox="0 0 60 82" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="60" height="82" fill="#c8a47e"/>
+          <rect x="3" y="3" width="54" height="76" fill="none" stroke="#15100a" stroke-width="2"/>
+          <rect x="8" y="8" width="44" height="66" fill="none" stroke="#15100a" stroke-width="1.5"/>
+          <polygon points="9,9 51,9 51,21 9,39" fill="#15100a"/>
+          <polygon points="51,73 9,73 9,61 51,43" fill="#15100a"/>
+        </svg>
+        Scholaris
+      </a>
+      <a href="{{ url_for('index') }}" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <p class="page-eyebrow">Legal</p>
+    <h1>Privacy Policy</h1>
+    <p class="meta">Last updated: September 15, 2026 &nbsp;·&nbsp; Applies to <strong>Scholaris</strong> (scholariss.onrender.com)</p>
+
+    <nav class="toc" aria-label="Table of contents">
+      <div class="toc-title">Contents</div>
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#information-collected">Information We Collect</a></li>
+        <li><a href="#how-we-use">How We Use Your Information</a></li>
+        <li><a href="#google-integration">Google Account Integration</a></li>
+        <li><a href="#data-sharing">Data Sharing</a></li>
+        <li><a href="#data-retention">Data Retention</a></li>
+        <li><a href="#your-rights">Your Rights</a></li>
+        <li><a href="#security">Security</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ol>
+    </nav>
+
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>Scholaris is a Final Year Project (FYP) management platform for academic institutions. It allows students to submit chapters, supervisors to review work and schedule meetings, and administrators to manage the department's FYP programme.</p>
+      <p>This policy explains what personal information we collect, how we use it, and your rights regarding that information. We take your privacy seriously and do not sell your data to any third party.</p>
+    </section>
+
+    <section id="information-collected">
+      <h2>Information We Collect</h2>
+      <p>We collect only what is necessary to operate the platform:</p>
+      <ul>
+        <li><strong>Account information</strong> — full name, email address, and hashed password created at registration.</li>
+        <li><strong>Academic information</strong> — project title, chapter submissions, feedback, deadlines, and meeting records associated with your account.</li>
+        <li><strong>Profile information</strong> — an optional profile photo you upload.</li>
+        <li><strong>Google account information</strong> — if you choose to connect a Google account for Google Meet scheduling, we store your Google email address and an OAuth access token. See the <a href="#google-integration">Google Integration</a> section for details.</li>
+        <li><strong>Usage data</strong> — standard server logs (IP address, browser type, pages visited) for security and debugging. These are not linked to your identity and are deleted regularly.</li>
+      </ul>
+    </section>
+
+    <section id="how-we-use">
+      <h2>How We Use Your Information</h2>
+      <p>Your information is used solely to provide the Scholaris service:</p>
+      <ul>
+        <li>Authenticating your identity and maintaining your session.</li>
+        <li>Displaying your submissions, feedback, and meeting schedule.</li>
+        <li>Sending email notifications about deadlines, submission feedback, and meeting invitations.</li>
+        <li>Allowing supervisors to view the work and progress of their assigned students.</li>
+        <li>Allowing administrators to manage users and generate progress reports for the department.</li>
+        <li>Creating Google Meet links on your behalf if you have connected a Google account.</li>
+      </ul>
+      <div class="callout">
+        <p>We do not use your data for advertising, analytics profiling, or any purpose unrelated to managing your FYP.</p>
+      </div>
+    </section>
+
+    <section id="google-integration">
+      <h2>Google Account Integration</h2>
+      <p>Supervisors may optionally connect their Google account to enable Google Meet link generation for student meetings. This integration is voluntary and can be disconnected at any time from your profile settings.</p>
+      <p>When you connect your Google account, Scholaris requests the following OAuth scopes:</p>
+      <ul>
+        <li><strong>calendar.events</strong> — to create Google Meet events on your behalf.</li>
+        <li><strong>userinfo.email</strong> — to confirm which Google account is connected.</li>
+      </ul>
+      <p>We store your Google email address and an OAuth token in our database. This token is used only to create calendar events when you schedule a meeting. We do not read your existing calendar events or access any other Google service.</p>
+      <p>Scholaris's use of Google user data complies with the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+    </section>
+
+    <section id="data-sharing">
+      <h2>Data Sharing</h2>
+      <p>We do not sell, rent, or share your personal data with third parties except in the following limited cases:</p>
+      <ul>
+        <li><strong>Service providers</strong> — We use Supabase (database hosting) and Render (application hosting). Both process data only as instructed to operate the platform.</li>
+        <li><strong>Google</strong> — When you connect your Google account, data is exchanged with Google's APIs as described above.</li>
+        <li><strong>Within the institution</strong> — Your supervisor can see your submissions and progress. Administrators can see all user data within the platform.</li>
+        <li><strong>Legal obligation</strong> — We may disclose data if required by law or to protect the rights and safety of users.</li>
+      </ul>
+    </section>
+
+    <section id="data-retention">
+      <h2>Data Retention</h2>
+      <p>Your account and associated academic data (submissions, feedback, meeting records) are retained for the duration of the FYP programme. Accounts may be deactivated by an administrator at the end of the academic year.</p>
+      <p>If you disconnect your Google account, the stored OAuth token is deleted immediately. Your Google email address is removed from your profile at the same time.</p>
+    </section>
+
+    <section id="your-rights">
+      <h2>Your Rights</h2>
+      <p>You have the right to:</p>
+      <ul>
+        <li><strong>Access</strong> — request a copy of the personal data we hold about you.</li>
+        <li><strong>Correction</strong> — update your name, email, or profile photo from your profile settings at any time.</li>
+        <li><strong>Disconnection</strong> — disconnect your Google account from your profile settings at any time.</li>
+        <li><strong>Deletion</strong> — request deletion of your account and associated data by contacting your department administrator or the address below.</li>
+      </ul>
+    </section>
+
+    <section id="security">
+      <h2>Security</h2>
+      <p>We take reasonable measures to protect your data:</p>
+      <ul>
+        <li>Passwords are stored as bcrypt hashes — never in plain text.</li>
+        <li>All connections to the platform use HTTPS/TLS encryption.</li>
+        <li>Database connections use SSL.</li>
+        <li>OAuth tokens are stored in the database and are never exposed in URLs or client-side code.</li>
+      </ul>
+      <p>No system is perfectly secure. If you believe your account has been compromised, contact us immediately.</p>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <div class="contact-box">
+        <p>For questions about this policy, to exercise your rights, or to report a concern, contact us at:</p>
+        <p style="margin-top: 12px;">
+          <strong>Scholaris</strong><br>
+          Email: <a href="mailto:scholarissedu@gmail.com">scholarissedu@gmail.com</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    &copy; {{ now.year }} Scholaris. All rights reserved.
+    &nbsp;·&nbsp;
+    <a href="{{ url_for('index') }}" style="color: inherit; text-decoration: none;">Back to app</a>
+  </footer>
+
+  <script>
+    // Respect the app's stored theme preference
+    const stored = localStorage.getItem('theme') || document.cookie.match(/theme=([^;]+)/)?.[1];
+    if (stored === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    else if (stored === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  </script>
+</body>
+</html>
