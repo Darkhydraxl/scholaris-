@@ -119,7 +119,7 @@ def _register_blueprints(app):
 
     @app.route("/googlefb49e7ecda978378.html")
     def google_site_verification():
-        return "google-site-verification: googlefb49e7ecda978378", 200, {"Content-Type": "text/html; charset=utf-8"}
+        return "google-site-verification: googlefb49e7ecda978378.html", 200, {"Content-Type": "text/html; charset=utf-8"}
 
     @app.route("/")
     def index():
