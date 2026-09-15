@@ -117,6 +117,10 @@ def _register_blueprints(app):
         from flask import jsonify
         return jsonify({"status": "ok"}), 200
 
+    @app.route("/googlefb49e7ecda978378.html")
+    def google_site_verification():
+        return "google-site-verification: googlefb49e7ecda978378", 200, {"Content-Type": "text/html; charset=utf-8"}
+
     @app.route("/")
     def index():
         from flask_login import current_user
