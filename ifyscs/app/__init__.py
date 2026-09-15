@@ -121,6 +121,10 @@ def _register_blueprints(app):
     def google_site_verification():
         return "google-site-verification: googlefb49e7ecda978378.html", 200, {"Content-Type": "text/html; charset=utf-8"}
 
+    @app.route("/googleede61acad8528b7e.html")
+    def google_site_verification_2():
+        return "google-site-verification: googleede61acad8528b7e.html", 200, {"Content-Type": "text/html; charset=utf-8"}
+
     @app.route("/privacy-policy")
     def privacy_policy():
         from datetime import date
