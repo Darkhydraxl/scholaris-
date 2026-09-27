@@ -689,8 +689,18 @@
 ═══════════════════════════════════ */
 @media (max-width: 880px) {
   .asl-wrap  { flex-direction: column; }
-  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); overflow: visible; }
+  .asl-stage { overflow: hidden; }
   .asl-right { flex: none; min-height: 220px; }
+
+  /* Illustration straddles the dividing line between panels */
+  .asl-readers-img {
+    left: 50%;
+    bottom: 0;
+    width: 200px;
+    transform: translateX(-50%) translateY(50%);
+    z-index: 10;
+  }
   [data-theme="light"] .asl-left { border-bottom-color: rgba(0,0,0,0.08); }
 
   /* On stacked layout the blend comes from the top (left panel is above) */
