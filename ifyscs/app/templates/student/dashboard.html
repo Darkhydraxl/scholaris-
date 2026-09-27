@@ -380,8 +380,11 @@
 }
 /* num-frac stays at the system's muted token — brand gold fails 4.5:1 on dark card at 15px/500 */
 
-/* Eyebrow labels: 11px floor (undersized-ui-text rule; glassmorphism.css defined 10px) */
-.ov-eyebrow { font-size: 11px; }
+/* 11px floor for all sub-threshold labels (glassmorphism.css defined 9–10px) */
+.ov-eyebrow    { font-size: 11px; }
+.ov-live       { font-size: 11px; }
+.dlpc-days-lbl { font-size: 11px; }
+.dlpc-prog-label { font-size: 11px; }
 @media (max-width: 768px) { .overview-numbers .num-value { font-size: 28px; } }
 @media (max-width: 420px) { .overview-numbers .num-value { font-size: 24px; } }
 @media (min-width: 1440px) { .overview-numbers .num-value { font-size: 52px; } }
