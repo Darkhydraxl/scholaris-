@@ -31,6 +31,15 @@
         ],
         "createdAt": "2026-09-27T15:00:00.000Z",
         "reason": "False positive — .mcr-field animates transform: translateX(), which is exactly what the rule recommends. Not a layout-thrashing property."
+      },
+      {
+        "rule": "all-caps-body",
+        "value": "*",
+        "files": [
+          "ifyscs/app/templates/admin/login.html"
+        ],
+        "createdAt": "2026-09-27T15:01:00.000Z",
+        "reason": "False positive — all uppercase elements are short UI labels (2–4 words): eyebrow, field labels, button, checkbox label. None are long body passages. Intentional terminal-style admin aesthetic."
       }
     ]
   }
