@@ -7,16 +7,18 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "ifyscs/app/templates/auth/login.html"
+          "ifyscs/app/templates/auth/login.html",
+          "ifyscs/app/templates/auth/register.html"
         ],
         "createdAt": "2026-09-27T10:04:19.896Z",
-        "reason": "Intentional brand gold glow on primary Sign In button — existing design predating this session"
+        "reason": "Intentional brand gold glow on primary action button — existing design predating this session"
       },
       {
         "rule": "layout-transition",
         "value": "*",
         "files": [
-          "ifyscs/app/templates/auth/login.html"
+          "ifyscs/app/templates/auth/login.html",
+          "ifyscs/app/templates/auth/register.html"
         ],
         "createdAt": "2026-09-27T10:04:55.407Z",
         "reason": "Intentional parity with admin login blob parallax — user explicitly requested this background be replicated"

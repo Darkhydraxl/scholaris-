@@ -5,163 +5,23 @@
 {% block auth_content %}
 <div class="asl-wrap">
 
-  <!-- ══════ Left panel: form + doodle background ══════ -->
+  <!-- ══════ Left panel: blob background ══════ -->
   <div class="asl-left">
 
-    <!-- Doodle frame — same as login, colour-switched by theme -->
-    <svg class="asl-doodle-frame" xmlns="http://www.w3.org/2000/svg"
-         viewBox="0 0 460 900" preserveAspectRatio="xMidYMid slice"
-         aria-hidden="true">
-      <defs><style>
-        .ld{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
-        .ldt{fill:currentColor;font-family:monospace;font-weight:bold;}
-      </style></defs>
-      <g transform="translate(10,10) scale(0.82)" opacity=".8">
-        <path class="ld" stroke-width="2.2" d="M0,55 C2,-5 25,-8 28,-2 L28,55"/>
-        <path class="ld" stroke-width="2.2" d="M28,55 C28,-5 50,-8 56,-2 L56,55"/>
-        <text class="ldt" x="5" y="20" font-size="10">MATH</text>
-        <line class="ld" stroke-width="1.2" x1="5" y1="30" x2="25" y2="30"/>
-        <line class="ld" stroke-width="1.2" x1="5" y1="38" x2="25" y2="38"/>
-        <line class="ld" stroke-width="1.2" x1="32" y1="30" x2="52" y2="30"/>
-        <line class="ld" stroke-width="1.2" x1="32" y1="38" x2="52" y2="38"/>
-      </g>
-      <g transform="translate(108,6) scale(0.74)" opacity=".8">
-        <circle class="ld" stroke-width="2.2" cx="20" cy="20" r="16"/>
-        <path class="ld" stroke-width="2" d="M13,34 Q13,40 20,40 Q27,40 27,34"/>
-        <line class="ld" stroke-width="2" x1="14" y1="40" x2="26" y2="40"/>
-        <line class="ld" stroke-width="2" x1="15" y1="44" x2="25" y2="44"/>
-        <line class="ld" stroke-width="2" x1="20" y1="1" x2="20" y2="-6"/>
-        <line class="ld" stroke-width="1.8" x1="38" y1="8" x2="44" y2="4"/>
-        <line class="ld" stroke-width="1.8" x1="2"  y1="8" x2="-4" y2="4"/>
-        <path class="ld" stroke-width="1.5" d="M15,26 L20,32 L25,26"/>
-      </g>
-      <g transform="translate(198,2) rotate(-10,6,40) scale(0.72)" opacity=".75">
-        <rect class="ld" stroke-width="2" x="0" y="8" width="12" height="55" rx="2"/>
-        <path class="ld" stroke-width="2" d="M0,63 L6,76 L12,63"/>
-        <rect class="ld" stroke-width="2" x="0" y="0" width="12" height="10" rx="2"/>
-        <line class="ld" stroke-width="1.5" x1="0" y1="58" x2="12" y2="58"/>
-      </g>
-      <g transform="translate(282,5) scale(0.66)" opacity=".8">
-        <path class="ld" stroke-width="2.2" d="M0,38 A38,38 0 0,1 76,38"/>
-        <line class="ld" stroke-width="2" x1="0" y1="38" x2="76" y2="38"/>
-        <line class="ld" stroke-width="1.5" x1="38" y1="0" x2="38" y2="8"/>
-        <line class="ld" stroke-width="1.2" x1="57" y1="6" x2="54" y2="12"/>
-        <line class="ld" stroke-width="1.2" x1="19" y1="6" x2="22" y2="12"/>
-      </g>
-      <g transform="translate(358,8) scale(0.68)" opacity=".82">
-        <rect class="ld" stroke-width="2" x="0" y="36" width="62" height="13" rx="2"/>
-        <rect class="ld" stroke-width="2" x="3" y="22" width="58" height="13" rx="2"/>
-        <rect class="ld" stroke-width="2" x="6" y="8"  width="54" height="13" rx="2"/>
-      </g>
-      <g transform="translate(392,74)" opacity=".72">
-        <text fill="currentColor" x="0"  y="18" font-size="18">★</text>
-        <text fill="currentColor" x="22" y="10" font-size="12">★</text>
-        <text fill="currentColor" x="38" y="22" font-size="9">★</text>
-      </g>
-      <g transform="translate(8,160) scale(0.82)" opacity=".82">
-        <path class="ld" stroke-width="2.2" d="M10,0 L10,28 L0,55 Q0,68 18,68 Q36,68 36,55 L26,28 L26,0"/>
-        <line class="ld" stroke-width="2.5" x1="7" y1="0" x2="29" y2="0"/>
-        <circle class="ld" stroke-width="1.8" cx="14" cy="52" r="4"/>
-        <circle class="ld" stroke-width="1.5" cx="24" cy="44" r="3"/>
-        <circle class="ld" stroke-width="1.5" cx="17" cy="38" r="2.5"/>
-      </g>
-      <g transform="translate(5,300) scale(0.74)" opacity=".8">
-        <path class="ld" stroke-width="2.2" d="M20,0 C8,12 32,24 20,36 C8,48 32,60 20,72 C8,84 32,96 20,108"/>
-        <path class="ld" stroke-width="2.2" d="M20,0 C32,12 8,24 20,36 C32,48 8,60 20,72 C32,84 8,96 20,108"/>
-        <line class="ld" stroke-width="1.8" x1="11" y1="18" x2="29" y2="18"/>
-        <line class="ld" stroke-width="1.8" x1="11" y1="36" x2="29" y2="36"/>
-        <line class="ld" stroke-width="1.8" x1="11" y1="54" x2="29" y2="54"/>
-        <line class="ld" stroke-width="1.8" x1="11" y1="72" x2="29" y2="72"/>
-        <line class="ld" stroke-width="1.8" x1="11" y1="90" x2="29" y2="90"/>
-      </g>
-      <g transform="translate(6,476) scale(0.68)" opacity=".82">
-        <rect class="ld" stroke-width="2.2" x="0" y="0" width="48" height="62" rx="5"/>
-        <rect class="ld" stroke-width="1.8" x="5" y="6"  width="38" height="13" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="5"  y="25" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="19" y="25" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="33" y="25" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="5"  y="37" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="19" y="37" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="33" y="37" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="5"  y="49" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="19" y="49" width="11" height="9" rx="2"/>
-        <rect class="ld" stroke-width="1.3" x="33" y="49" width="11" height="9" rx="2"/>
-      </g>
-      <g transform="translate(432,140) scale(0.8)" opacity=".8">
-        <rect class="ld" stroke-width="2" x="0" y="0" width="14" height="78" rx="2"/>
-        <line class="ld" stroke-width="1.2" x1="0" y1="10" x2="8" y2="10"/>
-        <line class="ld" stroke-width="1.2" x1="0" y1="20" x2="8" y2="20"/>
-        <line class="ld" stroke-width="1.2" x1="0" y1="30" x2="8" y2="30"/>
-        <line class="ld" stroke-width="1.2" x1="0" y1="40" x2="8" y2="40"/>
-        <line class="ld" stroke-width="1.2" x1="0" y1="50" x2="8" y2="50"/>
-        <line class="ld" stroke-width="1.2" x1="0" y1="60" x2="8" y2="60"/>
-        <line class="ld" stroke-width="1.2" x1="0" y1="70" x2="8" y2="70"/>
-      </g>
-      <g transform="translate(378,306) scale(0.74)" opacity=".82">
-        <path class="ld" stroke-width="2.2" d="M0,14 Q0,10 4,10 L22,10 L27,2 L56,2 Q60,2 60,6 L60,52 Q60,56 56,56 L4,56 Q0,56 0,52 Z"/>
-      </g>
-      <g transform="translate(437,440) scale(0.78)" opacity=".8">
-        <rect class="ld" stroke-width="2" x="0" y="0" width="14" height="52" rx="7"/>
-        <path class="ld" stroke-width="2" d="M2,52 L7,66 L12,52"/>
-        <line class="ld" stroke-width="1.5" x1="0" y1="14" x2="14" y2="14"/>
-      </g>
-      <g transform="translate(382,554) scale(0.7)" opacity=".8">
-        <rect class="ld" stroke-width="2" x="0" y="15" width="50" height="40" rx="5"/>
-        <path class="ld" stroke-width="2" d="M5,15 Q5,0 25,0 Q45,0 45,15"/>
-        <path class="ld" stroke-width="2" d="M10,0 L10,-16 L20,-16"/>
-        <path class="ld" stroke-width="2" d="M40,0 L40,-16 L30,-16"/>
-      </g>
-      <g transform="translate(10,800) scale(0.74)" opacity=".82">
-        <rect class="ld" stroke-width="2.5" x="0" y="0" width="62" height="46" rx="3"/>
-        <line class="ld" stroke-width="2" x1="8"  y1="46" x2="3"  y2="65"/>
-        <line class="ld" stroke-width="2" x1="54" y1="46" x2="59" y2="65"/>
-        <line class="ld" stroke-width="1.5" x1="0" y1="42" x2="62" y2="42"/>
-        <text class="ldt" x="7" y="24" font-size="13">ABC</text>
-        <text class="ldt" x="7" y="39" font-size="12">123</text>
-      </g>
-      <g transform="translate(68,808) scale(0.72)" opacity=".78">
-        <rect class="ld" stroke-width="2" x="0" y="18" width="50" height="6" rx="1"/>
-        <line class="ld" stroke-width="2" x1="5"  y1="24" x2="5"  y2="52"/>
-        <line class="ld" stroke-width="2" x1="45" y1="24" x2="45" y2="52"/>
-        <rect class="ld" stroke-width="2" x="58" y="26" width="28" height="5" rx="1"/>
-        <line class="ld" stroke-width="2" x1="58" y1="26" x2="58" y2="8"/>
-        <line class="ld" stroke-width="2" x1="58" y1="8"  x2="86" y2="8"/>
-        <line class="ld" stroke-width="2" x1="62" y1="31" x2="62" y2="52"/>
-        <line class="ld" stroke-width="2" x1="82" y1="31" x2="82" y2="52"/>
-      </g>
-      <g transform="translate(168,812) scale(0.68)" opacity=".82">
-        <path class="ld" stroke-width="2" d="M35,0 L70,18 L35,36 L0,18 Z"/>
-        <path class="ld" stroke-width="2" d="M15,18 Q15,42 35,46 Q55,42 55,18"/>
-        <line class="ld" stroke-width="2" x1="70" y1="18" x2="70" y2="42"/>
-        <circle class="ld" stroke-width="1.5" cx="70" cy="44" r="3"/>
-      </g>
-      <g transform="translate(286,808) scale(0.66)" opacity=".82">
-        <circle class="ld" stroke-width="2.2" cx="28" cy="28" r="25"/>
-        <ellipse class="ld" stroke-width="1.5" cx="28" cy="28" rx="12" ry="25"/>
-        <line class="ld" stroke-width="1.5" x1="3"  y1="28" x2="53" y2="28"/>
-        <line class="ld" stroke-width="1"   x1="28" y1="3"  x2="28" y2="53"/>
-        <line class="ld" stroke-width="2"   x1="28" y1="53" x2="28" y2="64"/>
-        <line class="ld" stroke-width="2"   x1="18" y1="64" x2="38" y2="64"/>
-      </g>
-      <g transform="translate(352,810) scale(0.68)" opacity=".8">
-        <path class="ld" stroke-width="2" d="M5,48 Q2,5 25,3 Q48,5 45,48 Z"/>
-        <circle class="ld" stroke-width="1.8" cx="25" cy="3"  r="4"/>
-        <circle class="ld" stroke-width="2"   cx="25" cy="52" r="4"/>
-        <line class="ld" stroke-width="1.5" x1="0" y1="48" x2="50" y2="48"/>
-      </g>
-      <g transform="translate(406,818) scale(0.62)" opacity=".82">
-        <path class="ld" stroke-width="2.2" d="M22,12 Q8,10 5,28 Q2,44 10,52 Q16,60 22,56 Q28,60 34,52 Q42,44 39,28 Q36,10 22,12 Z"/>
-        <path class="ld" stroke-width="2"   d="M22,12 Q22,3 28,1 Q34,-2 33,5"/>
-        <path class="ld" stroke-width="1.5" d="M22,8 Q17,2 15,8"/>
-      </g>
-    </svg>
+    <div class="asl-stage" aria-hidden="true">
+      <div class="asl-blob"></div>
+      <div class="asl-blob"></div>
+      <div class="asl-blob"></div>
+      <div class="asl-blob"></div>
+      <div class="asl-blob"></div>
+      <div class="asl-blob"></div>
+    </div>
 
     <button class="theme-toggle-switch" id="themeToggleBtn" aria-label="Toggle dark mode">
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
     </button>
 
-    <div class="asl-glow" aria-hidden="true"></div>
     <div class="asl-inner page-enter">
 
       <!-- Brand -->
@@ -273,8 +133,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,600;0,700;1,400;1,600&display=swap');
 
 /* Default dark body background; light mode overridden below */
-body { background: #0c0c10; }
-[data-theme="light"] body { background: #f5e6b8; }
+body { background: #050505; }
+[data-theme="light"] body { background: #f0f0f0; }
 
 /* ═══════════════════════════════════
    Layout
@@ -282,15 +142,14 @@ body { background: #0c0c10; }
 .asl-wrap {
   display: flex;
   min-height: 100vh;
-  background: #0c0c10;
+  background: #050505;
 }
 
 /* ─── Left panel ─── */
 .asl-left {
   width: 460px;
   flex-shrink: 0;
-  background: #0c0c10;
-  color: #c9952a;            /* drives doodle SVG currentColor */
+  background: #050505;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -302,18 +161,26 @@ body { background: #0c0c10; }
   overflow-y: auto;
 }
 
-/* Doodle SVG sits behind the form */
-.asl-doodle-frame {
+/* ─── Mercury blob background ─── */
+.asl-stage {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.55; pointer-events: none;
+}
+.asl-blob {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.7;
+  background: radial-gradient(circle at 35% 35%, #e8e8e8, #888 60%, #555);
+  border-radius: 50%;
+  animation: asl-blob-float 20s infinite alternate ease-in-out;
+  box-shadow: inset -12px -12px 28px rgba(0,0,0,0.45), inset 6px 6px 14px rgba(255,255,255,0.22), 8px 12px 32px rgba(0,0,0,0.35);
+  transition: margin 0.1s ease-out;
+}
+@keyframes asl-blob-float {
+  0%   { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(8vw,15vh) scale(1.2); }
+  66%  { transform: translate(-4vw,8vh) scale(0.8); }
+  100% { transform: translate(4vw,-8vh) scale(1.1); }
 }
 
-/* Form content sits above the SVG */
+/* Form content sits above the blobs */
 .asl-left .theme-toggle-switch,
 .asl-inner { position: relative; z-index: 1; }
 
@@ -366,7 +233,7 @@ body { background: #0c0c10; }
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -402,20 +269,6 @@ body { background: #0c0c10; }
   letter-spacing: 0.01em;
 }
 .asl-fp svg { flex-shrink: 0; color: rgba(200,164,126,0.6); }
-
-/* ─── Ambient glow orb ─── */
-.asl-glow {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 460px;
-  height: 460px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(200,164,126,0.065) 0%, transparent 65%);
-  pointer-events: none;
-  z-index: 0;
-}
 
 /* ─── Field tokens (dark default, light override) ─── */
 .asl-left {
@@ -643,12 +496,17 @@ body { background: #0c0c10; }
 /* ═══════════════════════════════════
    Light mode overrides
 ═══════════════════════════════════ */
-[data-theme="light"] .asl-wrap { background: #f5e6b8; }
+[data-theme="light"] .asl-wrap { background: #f0f0f0; }
 
 [data-theme="light"] .asl-left {
-  background: #f5e6b8;
-  color: #b8956a;
+  background: #f0f0f0;
   border-right-color: rgba(160,110,60,0.18);
+}
+
+[data-theme="light"] .asl-stage { opacity: 0.28; }
+[data-theme="light"] .asl-blob {
+  background: linear-gradient(135deg, #444, #999);
+  box-shadow: inset -10px -10px 20px rgba(255,255,255,0.3), 10px 10px 30px rgba(0,0,0,0.12);
 }
 
 [data-theme="light"] .asl-brand .logo-name { color: #15100a !important; }
@@ -663,9 +521,6 @@ body { background: #0c0c10; }
   color: rgba(21,16,10,0.42);
 }
 [data-theme="light"] .asl-fp svg { color: rgba(160,110,60,0.6); }
-[data-theme="light"] .asl-glow {
-  background: radial-gradient(circle, rgba(160,110,60,0.055) 0%, transparent 65%);
-}
 
 /* field colours now handled by CSS vars on .asl-left — see token block above */
 
@@ -680,16 +535,16 @@ body { background: #0c0c10; }
 [data-theme="light"] .asl-right::before {
   background: linear-gradient(
     to right,
-    #f5e6b8 0%,
-    rgba(245,230,184,0.62) 14%,
-    rgba(245,230,184,0.18) 34%,
+    #f0f0f0 0%,
+    rgba(240,240,240,0.62) 14%,
+    rgba(240,240,240,0.18) 34%,
     transparent 54%
   );
 }
 [data-theme="light"] .asl-right::after {
   background:
-    linear-gradient(to bottom, rgba(245,230,184,0.3) 0%, transparent 22%),
-    linear-gradient(to top,    rgba(245,230,184,0.3) 0%, transparent 22%);
+    linear-gradient(to bottom, rgba(240,240,240,0.3) 0%, transparent 22%),
+    linear-gradient(to top,    rgba(240,240,240,0.3) 0%, transparent 22%);
 }
 [data-theme="light"] .asl-doodle-img {
   filter: saturate(1.08) contrast(1.04) brightness(1.0);
@@ -713,9 +568,9 @@ body { background: #0c0c10; }
   inset: 0;
   background: linear-gradient(
     to right,
-    #0c0c10 0%,
-    rgba(12,12,16,0.62) 14%,
-    rgba(12,12,16,0.18) 34%,
+    #050505 0%,
+    rgba(5,5,5,0.62) 14%,
+    rgba(5,5,5,0.18) 34%,
     transparent 54%
   );
   pointer-events: none;
@@ -757,16 +612,16 @@ body { background: #0c0c10; }
   .asl-right::before {
     background: linear-gradient(
       to bottom,
-      #0c0c10 0%,
-      rgba(12,12,16,0.55) 18%,
+      #050505 0%,
+      rgba(5,5,5,0.55) 18%,
       transparent 50%
     );
   }
   [data-theme="light"] .asl-right::before {
     background: linear-gradient(
       to bottom,
-      #f5e6b8 0%,
-      rgba(245,230,184,0.55) 18%,
+      #f0f0f0 0%,
+      rgba(240,240,240,0.55) 18%,
       transparent 50%
     );
   }
@@ -1063,6 +918,31 @@ body { background: #0c0c10; }
   }
   bindEye('pwField',        'pwToggle',        'eyeOpen',  'eyeClosed');
   bindEye('pwConfirmField', 'pwConfirmToggle', 'eyeOpen2', 'eyeClosed2');
+
+  /* ─── Mercury blob init + mouse parallax ─── */
+  var blobs = document.querySelectorAll('.asl-blob');
+  blobs.forEach(function (b) {
+    var size = Math.random() * 180 + 120;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = (Math.random() * 80 + 10) + '%';
+    b.style.top = (Math.random() * 80 + 10) + '%';
+    b.style.animationDelay = -(Math.random() * 20) + 's';
+    b.style.animationDuration = (Math.random() * 15 + 15) + 's';
+  });
+  var leftPanel = document.querySelector('.asl-left');
+  if (leftPanel) {
+    leftPanel.addEventListener('mousemove', function (e) {
+      var rect = leftPanel.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top) / rect.height;
+      blobs.forEach(function (b, i) {
+        var spd = (i + 1) * 14;
+        b.style.marginLeft = (x * spd) + 'px';
+        b.style.marginTop = (y * spd) + 'px';
+      });
+    }, { passive: true });
+  }
 })();
 </script>
 {% endblock %}
