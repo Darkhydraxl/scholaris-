@@ -154,15 +154,11 @@ body { background: #050505; }
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 40px 52px;
+  padding: 28px 52px;
   position: relative;
   border-right: 1px solid rgba(255,255,255,0.06);
   overflow: hidden;
-  overflow-y: auto;
-  scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;     /* IE/Edge */
 }
-.asl-left::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
 /* ─── Mercury blob background ─── */
 .asl-stage {
@@ -194,10 +190,10 @@ body { background: #050505; }
   z-index: 10;
 }
 
-.asl-inner { width: 100%; padding: 16px 0; }
+.asl-inner { width: 100%; padding: 6px 0; }
 
 /* Brand logo */
-.asl-brand.sidebar-logo { padding: 0 0 28px !important; }
+.asl-brand.sidebar-logo { padding: 0 0 16px !important; }
 .asl-brand .logo-mark   { width: 36px !important; height: 49px !important; }
 .asl-brand .logo-name   { color: #f0ede8 !important; font-size: 16px !important; }
 
@@ -209,7 +205,7 @@ body { background: #050505; }
   color: #f0ede8;
   line-height: 1.12;
   letter-spacing: -0.01em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 .asl-heading em {
   font-style: italic;
@@ -241,7 +237,7 @@ body { background: #050505; }
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: rgba(200,164,126,0.55);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 .asl-eyebrow::before {
   content: '';
@@ -256,7 +252,7 @@ body { background: #050505; }
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
-  margin: 13px 0 20px;
+  margin: 8px 0 14px;
 }
 .asl-fp {
   display: inline-flex;
@@ -311,7 +307,7 @@ body { background: #050505; }
 }
 
 /* ─── Form ─── */
-.asl-form { display: flex; flex-direction: column; gap: 10px; }
+.asl-form { display: flex; flex-direction: column; gap: 8px; }
 .asl-field { display: flex; flex-direction: column; gap: 4px; }
 
 .asl-label {
@@ -326,7 +322,7 @@ body { background: #050505; }
 .asl-wrap input[type="password"],
 .asl-wrap select {
   width: 100%;
-  padding: 13px 16px;
+  padding: 11px 16px;
   background-color: var(--f-bg);
   border: 1px solid var(--f-border);
   border-radius: 11px;
@@ -407,7 +403,7 @@ body { background: #050505; }
 /* Primary button */
 .asl-btn-primary {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: #c8a47e;
   color: #15100a;
   overflow: hidden;
@@ -420,7 +416,7 @@ body { background: #050505; }
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 4px;
   letter-spacing: 0.02em;
   transition: background 150ms, transform 120ms, box-shadow 150ms;
   box-shadow: 0 4px 18px rgba(200,164,126,0.28);
@@ -485,7 +481,7 @@ body { background: #050505; }
 
 /* Footer */
 .asl-foot {
-  margin-top: 20px;
+  margin-top: 14px;
   text-align: center;
   font-size: 13px;
   color: rgba(240,237,232,0.36);
