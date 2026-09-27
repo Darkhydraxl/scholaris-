@@ -477,75 +477,122 @@
 .asl-wrap .flash-list { margin-bottom: 14px; }
 
 /* ═══════════════════════════════════
-   Light mode overrides
+   Light mode — white / black / yellow
 ═══════════════════════════════════ */
-[data-theme="light"] .asl-wrap { background: #f0f0f0; }
+[data-theme="light"] .asl-wrap { background: #ffffff; }
 
 [data-theme="light"] .asl-left {
-  background: #f0f0f0;
-  color: #888;
-  border-right-color: rgba(0,0,0,0.08);
+  background: #ffffff;
+  color: #111;
+  border-right-color: rgba(0,0,0,0.1);
 }
-[data-theme="light"] .asl-stage { opacity: 0.5; }
+
+/* Yellow mercury blobs */
+[data-theme="light"] .asl-stage { opacity: 0.62; }
 [data-theme="light"] .asl-blob {
-  background: radial-gradient(circle at 32% 32%, #fbebd1, #c8a47e 52%, #7a5228);
+  background: radial-gradient(circle at 32% 32%, #fffae0, #f0c200 52%, #8f6600);
   box-shadow:
-    inset -10px -10px 24px rgba(90,48,10,0.30),
-    inset 6px 6px 14px rgba(255,240,210,0.65),
-    8px 14px 28px rgba(120,70,20,0.18);
+    inset -10px -10px 24px rgba(110,75,0,0.28),
+    inset 6px 6px 14px rgba(255,250,200,0.9),
+    8px 14px 32px rgba(170,120,0,0.22);
 }
 
-/* All text / form elements flip to dark on parchment */
-[data-theme="light"] .asl-brand .logo-name { color: #15100a !important; }
-[data-theme="light"] .asl-heading          { color: #15100a; }
-[data-theme="light"] .asl-sub              { color: rgba(21,16,10,0.5); }
-[data-theme="light"] .asl-eyebrow         { color: rgba(160,110,60,0.52); }
+/* Type */
+[data-theme="light"] .asl-brand .logo-name { color: #111 !important; }
+[data-theme="light"] .asl-heading          { color: #111; }
+[data-theme="light"] .asl-heading em       { color: #d4a800; position: relative; }
+/* Hand-drawn scrawl underline — the human touch */
+[data-theme="light"] .asl-heading em::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: -2px; right: -2px;
+  height: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1,7.5 C10,4 22,8.5 35,5.5 C48,2.5 60,8 73,5.5 C83,3.5 91,6.5 99,5.5' stroke='%23f0c200' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+[data-theme="light"] .asl-sub     { color: rgba(0,0,0,0.46); }
+[data-theme="light"] .asl-eyebrow { color: rgba(0,0,0,0.55); }
+[data-theme="light"] .asl-eyebrow::before { background: #f0c200; }
+
+/* Feature pills — solid black with yellow icon */
 [data-theme="light"] .asl-fp {
-  background: rgba(160,110,60,0.07);
-  border-color: rgba(160,110,60,0.15);
-  color: rgba(21,16,10,0.42);
+  background: #111;
+  border-color: #111;
+  color: #fff;
 }
-[data-theme="light"] .asl-fp svg          { color: rgba(160,110,60,0.6); }
+[data-theme="light"] .asl-fp svg { color: #f0c200; }
+
+/* Ambient glow — yellow tint */
 [data-theme="light"] .asl-glow {
-  background: radial-gradient(circle, rgba(160,110,60,0.055) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(240,194,0,0.07) 0%, transparent 65%);
 }
 
+/* Form inputs — bare transparent with sharp border, yellow focus */
 [data-theme="light"] .asl-input,
 [data-theme="light"] .asl-wrap input[type="email"],
 [data-theme="light"] .asl-wrap input[type="password"],
 [data-theme="light"] .asl-wrap input[type="text"] {
-  background: rgba(255,255,255,0.55) !important;
-  border-color: rgba(160,110,60,0.28) !important;
-  color: #15100a !important;
+  background: transparent !important;
+  border-color: rgba(0,0,0,0.2) !important;
+  color: #111 !important;
 }
 [data-theme="light"] .asl-input::placeholder,
-[data-theme="light"] .asl-wrap input::placeholder { color: rgba(21,16,10,0.32) !important; }
+[data-theme="light"] .asl-wrap input::placeholder { color: rgba(0,0,0,0.28) !important; }
 [data-theme="light"] .asl-input:focus,
 [data-theme="light"] .asl-wrap input:focus {
-  border-color: rgba(160,110,60,0.55) !important;
-  background: rgba(255,255,255,0.75) !important;
+  border-color: #f0c200 !important;
+  background: rgba(240,194,0,0.04) !important;
 }
 
-[data-theme="light"] .asl-pw-eye       { color: rgba(21,16,10,0.32); }
-[data-theme="light"] .asl-pw-eye:hover { color: rgba(21,16,10,0.65); }
-[data-theme="light"] .asl-remember     { color: rgba(21,16,10,0.5); }
+/* Password eye */
+[data-theme="light"] .asl-pw-eye       { color: rgba(0,0,0,0.26); }
+[data-theme="light"] .asl-pw-eye:hover { color: #111; }
 
-[data-theme="light"] .asl-or           { color: rgba(21,16,10,0.3); }
+/* Remember me */
+[data-theme="light"] .asl-remember     { color: rgba(0,0,0,0.46); }
+[data-theme="light"] .asl-remember input[type="checkbox"] { accent-color: #111; }
+
+/* Primary button — black default, flips to yellow on hover */
+[data-theme="light"] .asl-btn-primary {
+  background: #111;
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  transition: background 180ms, color 180ms, box-shadow 180ms, transform 120ms;
+}
+[data-theme="light"] .asl-btn-primary .flow-blob { background: #f0c200; }
+[data-theme="light"] .asl-btn-primary:hover {
+  background: #f0c200;
+  color: #111;
+  box-shadow: 0 6px 28px rgba(240,194,0,0.42);
+}
+[data-theme="light"] .asl-wrap .btn-spinner {
+  border-color: rgba(255,255,255,0.28);
+  border-top-color: #fff;
+}
+
+/* Divider */
+[data-theme="light"] .asl-or           { color: rgba(0,0,0,0.26); }
 [data-theme="light"] .asl-or::before,
-[data-theme="light"] .asl-or::after    { background: rgba(21,16,10,0.12); }
+[data-theme="light"] .asl-or::after    { background: rgba(0,0,0,0.1); }
 
+/* Social buttons — outline, inverts to black on hover */
 [data-theme="light"] .asl-social {
-  background: rgba(255,255,255,0.45);
-  border-color: rgba(160,110,60,0.25);
-  color: rgba(21,16,10,0.65);
+  background: transparent;
+  border-color: rgba(0,0,0,0.16);
+  color: rgba(0,0,0,0.7);
 }
 [data-theme="light"] .asl-social:hover {
-  background: rgba(255,255,255,0.7);
-  border-color: rgba(160,110,60,0.45);
-  color: #15100a;
+  background: #111;
+  border-color: #111;
+  color: #fff;
 }
 
-[data-theme="light"] .asl-foot         { color: rgba(21,16,10,0.4); }
+/* Footer */
+[data-theme="light"] .asl-foot   { color: rgba(0,0,0,0.36); }
+[data-theme="light"] .asl-foot a { color: #111; font-weight: 700; }
 
 /* ═══════════════════════════════════
    Right panel — doodle image
@@ -598,23 +645,23 @@
   image-rendering: crisp-edges;
 }
 
-/* Light mode: blend from parchment */
+/* Light mode: blend from white */
 [data-theme="light"] .asl-right::before {
   background: linear-gradient(
     to right,
-    #f5e6b8 0%,
-    rgba(245,230,184,0.62) 14%,
-    rgba(245,230,184,0.18) 34%,
+    #ffffff 0%,
+    rgba(255,255,255,0.62) 14%,
+    rgba(255,255,255,0.18) 34%,
     transparent 54%
   );
 }
 [data-theme="light"] .asl-right::after {
   background:
-    linear-gradient(to bottom, rgba(245,230,184,0.3) 0%, transparent 22%),
-    linear-gradient(to top,    rgba(245,230,184,0.3) 0%, transparent 22%);
+    linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, transparent 22%),
+    linear-gradient(to top,    rgba(255,255,255,0.28) 0%, transparent 22%);
 }
 [data-theme="light"] .asl-doodle-img {
-  filter: saturate(1.08) contrast(1.04) brightness(1.0);
+  filter: saturate(1.05) contrast(1.06) brightness(1.02);
 }
 
 /* ═══════════════════════════════════
@@ -624,7 +671,7 @@
   .asl-wrap  { flex-direction: column; }
   .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .asl-right { flex: none; min-height: 220px; }
-  [data-theme="light"] .asl-left { border-bottom-color: rgba(160,110,60,0.18); }
+  [data-theme="light"] .asl-left { border-bottom-color: rgba(0,0,0,0.08); }
 
   /* On stacked layout the blend comes from the top (left panel is above) */
   .asl-right::before {
@@ -638,8 +685,8 @@
   [data-theme="light"] .asl-right::before {
     background: linear-gradient(
       to bottom,
-      #f5e6b8 0%,
-      rgba(245,230,184,0.55) 18%,
+      #ffffff 0%,
+      rgba(255,255,255,0.55) 18%,
       transparent 50%
     );
   }
