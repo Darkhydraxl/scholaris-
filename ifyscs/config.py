@@ -7,9 +7,16 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or (
+    _db_url = os.environ.get("DATABASE_URL") or (
         "sqlite:///" + os.path.join(BASE_DIR, "instance", "scholaris.db")
     )
+    # SQLAlchemy 2.1+ defaults to psycopg (v3) for bare postgresql:// URLs.
+    # Force psycopg2 explicitly since we ship psycopg2-binary, not psycopg.
+    if _db_url.startswith("postgres://"):
+        _db_url = "postgresql+psycopg2://" + _db_url[len("postgres://"):]
+    elif _db_url.startswith("postgresql://"):
+        _db_url = "postgresql+psycopg2://" + _db_url[len("postgresql://"):]
+    SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "app", "static", "uploads")
