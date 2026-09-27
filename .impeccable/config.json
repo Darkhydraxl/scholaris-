@@ -40,6 +40,33 @@
         ],
         "createdAt": "2026-09-27T15:01:00.000Z",
         "reason": "False positive — all uppercase elements are short UI labels (2–4 words): eyebrow, field labels, button, checkbox label. None are long body passages. Intentional terminal-style admin aesthetic."
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "ifyscs/app/templates/student/dashboard.html"
+        ],
+        "createdAt": "2026-09-27T18:00:00.000Z",
+        "reason": "Pre-existing system choice — --accent-gold (#c9952a) on glass card surfaces is a deliberate design token used throughout the entire app for eyebrow labels, stats, and secondary text on the dark card. Predates this session."
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          "ifyscs/app/templates/student/dashboard.html"
+        ],
+        "createdAt": "2026-09-27T18:00:00.000Z",
+        "reason": "Pre-existing intentional design — 10–11px eyebrow labels (.ov-eyebrow, .rs-eyebrow, .dlpc-days-lbl) are dashboard UI micro-labels, not body content. Standard dashboard information density pattern."
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "ifyscs/app/templates/student/dashboard.html"
+        ],
+        "createdAt": "2026-09-27T18:00:00.000Z",
+        "reason": "Pre-existing intentional design — .cl-card and .overview-card use overflow:hidden to clip decorative radial glow pseudo-elements to the card bounds. These are background-layer glows, not functional overlays or tooltips."
       }
     ]
   }

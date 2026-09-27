@@ -296,6 +296,102 @@
 {% endblock %}
 {% block extra_css %}
 <style>
+/* ════════════════════════════════════════════════════════════
+   BOLDER — Student Dashboard + Background
+   Amplifies the system's own vocabulary; no new primitives.
+════════════════════════════════════════════════════════════ */
+
+/* ── Background: richer orbs, distinct lighting zones ── */
+[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 8%  10%,  #f9e888 0%, transparent 42%),
+    radial-gradient(circle at 90% 5%,   #f2d050 0%, transparent 50%),
+    radial-gradient(circle at 50% 96%,  #e8bc28 0%, transparent 56%),
+    radial-gradient(circle at 72% 54%,  rgba(201,149,42,0.20) 0%, transparent 38%),
+    radial-gradient(circle at 2%  96%,  rgba(100,65,10,0.06)  0%, transparent 28%),
+    #f6dc60;
+}
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 10% 14%,  rgba(201,149,42,0.07) 0%, transparent 44%),
+    radial-gradient(circle at 88% 7%,   rgba(201,149,42,0.04) 0%, transparent 48%),
+    radial-gradient(circle at 50% 95%,  rgba(201,149,42,0.09) 0%, transparent 52%),
+    #1a1610;
+}
+
+/* ── Topbar greeting: display-weight conviction ── */
+.topbar-greeting h1 {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+@media (min-width: 1280px) { .topbar-greeting h1 { font-size: 38px; } }
+@media (min-width: 1440px) { .topbar-greeting h1 { font-size: 42px; } }
+@media (max-width: 768px)  { .topbar-greeting h1 { font-size: 20px; letter-spacing: -0.015em; } }
+
+/* ── Overview card: gold glow, not white whisper ── */
+.ov-glow {
+  background: radial-gradient(circle, rgba(201,149,42,0.28) 0%, transparent 66%);
+  width: 440px;
+  height: 440px;
+  top: -140px;
+  right: -110px;
+}
+
+/* Counter-glow from bottom-left corner, clipped by card overflow:hidden */
+.overview-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,149,42,0.15) 0%, transparent 70%);
+  transform: translate(-30%, 30%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Top highlight edge: brand-gold shimmer */
+.overview-card::before {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(201,149,42,0.52) 22%,
+    rgba(255,238,170,0.38) 48%,
+    rgba(201,149,42,0.30) 74%,
+    transparent 100%
+  );
+}
+
+/* Progress bar: gold, 5px, visible */
+.overview-progress-bar {
+  height: 5px;
+  background: linear-gradient(90deg,
+    rgba(201,149,42,0.90) 0%,
+    rgba(201,149,42,0.48) 62%,
+    rgba(201,149,42,0.10) 100%
+  );
+}
+
+/* Big numbers: pushed larger, gold fraction */
+.overview-numbers .num-value {
+  font-size: 48px;
+  text-shadow: 0 2px 24px rgba(201,149,42,0.18);
+}
+/* num-frac stays at the system's muted token — brand gold fails 4.5:1 on dark card at 15px/500 */
+@media (max-width: 768px) { .overview-numbers .num-value { font-size: 28px; } }
+@media (max-width: 420px) { .overview-numbers .num-value { font-size: 24px; } }
+@media (min-width: 1440px) { .overview-numbers .num-value { font-size: 52px; } }
+
+/* Mini-stat rails: thicker + color glow */
+.overview-mini-stat::after {
+  width: 3.5px;
+  top: 14%; bottom: 14%;
+}
+.ov-stat-chapters::after { box-shadow: 0 0 8px rgba(108,99,255,0.55); }
+.ov-stat-pending::after  { box-shadow: 0 0 8px rgba(243,156,18,0.55); }
+.ov-stat-rejected::after { box-shadow: 0 0 8px rgba(231,76,60,0.55); }
+
 /* ── Recent Submissions ───────────────────────────────── */
 .rs-section {
   display: flex;
