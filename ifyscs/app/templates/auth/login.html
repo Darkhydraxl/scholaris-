@@ -479,22 +479,22 @@
 /* ═══════════════════════════════════
    Light mode — white / black / yellow
 ═══════════════════════════════════ */
-[data-theme="light"] .asl-wrap { background: #ffffff; }
+[data-theme="light"] .asl-wrap { background: #f4f4f1; }
 
 [data-theme="light"] .asl-left {
-  background: #ffffff;
+  background: #f4f4f1;
   color: #111;
   border-right-color: rgba(0,0,0,0.1);
 }
 
-/* Yellow mercury blobs */
-[data-theme="light"] .asl-stage { opacity: 0.62; }
+/* Silver mercury blobs */
+[data-theme="light"] .asl-stage { opacity: 0.55; }
 [data-theme="light"] .asl-blob {
-  background: radial-gradient(circle at 32% 32%, #fffae0, #f0c200 52%, #8f6600);
+  background: radial-gradient(circle at 32% 32%, #efefef, #aaaaaa 52%, #555);
   box-shadow:
-    inset -10px -10px 24px rgba(110,75,0,0.28),
-    inset 6px 6px 14px rgba(255,250,200,0.9),
-    8px 14px 32px rgba(170,120,0,0.22);
+    inset -10px -10px 24px rgba(0,0,0,0.28),
+    inset 6px 6px 14px rgba(255,255,255,0.82),
+    8px 14px 28px rgba(0,0,0,0.14);
 }
 
 /* Type */
@@ -645,20 +645,20 @@
   image-rendering: crisp-edges;
 }
 
-/* Light mode: blend from white */
+/* Light mode: blend from off-white */
 [data-theme="light"] .asl-right::before {
   background: linear-gradient(
     to right,
-    #ffffff 0%,
-    rgba(255,255,255,0.62) 14%,
-    rgba(255,255,255,0.18) 34%,
+    #f4f4f1 0%,
+    rgba(244,244,241,0.62) 14%,
+    rgba(244,244,241,0.18) 34%,
     transparent 54%
   );
 }
 [data-theme="light"] .asl-right::after {
   background:
-    linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, transparent 22%),
-    linear-gradient(to top,    rgba(255,255,255,0.28) 0%, transparent 22%);
+    linear-gradient(to bottom, rgba(244,244,241,0.28) 0%, transparent 22%),
+    linear-gradient(to top,    rgba(244,244,241,0.28) 0%, transparent 22%);
 }
 [data-theme="light"] .asl-doodle-img {
   filter: saturate(1.05) contrast(1.06) brightness(1.02);
@@ -685,8 +685,8 @@
   [data-theme="light"] .asl-right::before {
     background: linear-gradient(
       to bottom,
-      #ffffff 0%,
-      rgba(255,255,255,0.55) 18%,
+      #f4f4f1 0%,
+      rgba(244,244,241,0.55) 18%,
       transparent 50%
     );
   }
