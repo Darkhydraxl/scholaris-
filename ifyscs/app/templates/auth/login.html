@@ -486,10 +486,13 @@
   color: #888;
   border-right-color: rgba(0,0,0,0.08);
 }
-[data-theme="light"] .asl-stage { opacity: 0.28; }
+[data-theme="light"] .asl-stage { opacity: 0.5; }
 [data-theme="light"] .asl-blob {
-  background: linear-gradient(135deg, #444, #999);
-  box-shadow: inset -10px -10px 20px rgba(255,255,255,0.3), 10px 10px 30px rgba(0,0,0,0.12);
+  background: radial-gradient(circle at 32% 32%, #fbebd1, #c8a47e 52%, #7a5228);
+  box-shadow:
+    inset -10px -10px 24px rgba(90,48,10,0.30),
+    inset 6px 6px 14px rgba(255,240,210,0.65),
+    8px 14px 28px rgba(120,70,20,0.18);
 }
 
 /* All text / form elements flip to dark on parchment */
