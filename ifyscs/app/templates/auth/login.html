@@ -128,12 +128,15 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,600;0,700;1,400;1,600&display=swap');
 
+/* Prevent blobs / any overflow from widening the document on mobile */
+html, body { overflow: hidden; max-width: 100%; }
+
 /* ═══════════════════════════════════
    Layout
 ═══════════════════════════════════ */
 .asl-wrap {
   display: flex;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: #0c0c10;
 }
 
@@ -158,9 +161,9 @@
 }
 @keyframes asl-blob-float {
   0%   { transform: translate(0,0) scale(1); }
-  33%  { transform: translate(8vw,15vh) scale(1.2); }
-  66%  { transform: translate(-4vw,8vh) scale(0.8); }
-  100% { transform: translate(4vw,-8vh) scale(1.1); }
+  33%  { transform: translate(28px,36px) scale(1.2); }
+  66%  { transform: translate(-14px,18px) scale(0.8); }
+  100% { transform: translate(14px,-18px) scale(1.1); }
 }
 @media (prefers-reduced-motion: reduce) {
   .asl-blob { animation: none !important; }

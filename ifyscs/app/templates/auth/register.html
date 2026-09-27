@@ -132,6 +132,9 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,600;0,700;1,400;1,600&display=swap');
 
+/* Prevent blobs / any overflow from widening the document on mobile */
+html, body { overflow: hidden; max-width: 100%; }
+
 /* Default dark body background; light mode overridden below */
 body { background: #050505; }
 [data-theme="light"] body { background: #f0f0f0; }
@@ -141,7 +144,7 @@ body { background: #050505; }
 ═══════════════════════════════════ */
 .asl-wrap {
   display: flex;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: #050505;
 }
 
@@ -174,9 +177,9 @@ body { background: #050505; }
 }
 @keyframes asl-blob-float {
   0%   { transform: translate(0,0) scale(1); }
-  33%  { transform: translate(8vw,15vh) scale(1.2); }
-  66%  { transform: translate(-4vw,8vh) scale(0.8); }
-  100% { transform: translate(4vw,-8vh) scale(1.1); }
+  33%  { transform: translate(28px,36px) scale(1.2); }
+  66%  { transform: translate(-14px,18px) scale(0.8); }
+  100% { transform: translate(14px,-18px) scale(1.1); }
 }
 
 /* Form content sits above the blobs */
@@ -604,7 +607,7 @@ body { background: #050505; }
 ═══════════════════════════════════ */
 @media (max-width: 880px) {
   .asl-wrap  { flex-direction: column; }
-  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); overflow: visible; overflow-y: visible; }
+  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
   .asl-right { flex: none; min-height: 260px; }
   [data-theme="light"] .asl-left { border-bottom-color: rgba(160,110,60,0.18); }
 
