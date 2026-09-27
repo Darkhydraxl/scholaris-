@@ -159,7 +159,10 @@ body { background: #050505; }
   border-right: 1px solid rgba(255,255,255,0.06);
   overflow: hidden;
   overflow-y: auto;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
 }
+.asl-left::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
 /* ─── Mercury blob background ─── */
 .asl-stage {
