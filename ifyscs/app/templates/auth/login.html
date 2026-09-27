@@ -114,6 +114,14 @@
 
       <p class="asl-foot">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
     </div>
+
+    <!-- Decorative readers illustration -->
+    <img
+      src="{{ url_for('static', filename='img/login-readers.png') }}"
+      class="asl-readers-img"
+      alt=""
+      aria-hidden="true"
+    >
   </div>
 
   <!-- ══════ Right panel: doodle illustration ══════ -->
@@ -165,6 +173,21 @@
 @media (prefers-reduced-motion: reduce) {
   .asl-blob { animation: none !important; }
 }
+
+/* ─── Readers illustration ─── */
+.asl-readers-img {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 220px;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+[data-theme="light"] .asl-readers-img { opacity: 0.28; }
 
 /* ─── Left panel ─── */
 .asl-left {
