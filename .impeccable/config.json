@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "ifyscs/app/templates/auth/login.html"
+        ],
+        "createdAt": "2026-09-27T10:04:19.896Z",
+        "reason": "Intentional brand gold glow on primary Sign In button — existing design predating this session"
+      }
+    ]
+  }
+}
