@@ -115,13 +115,7 @@
       <p class="asl-foot">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
     </div>
 
-    <!-- Decorative readers illustration -->
-    <img
-      src="{{ url_for('static', filename='img/login-readers.png') }}"
-      class="asl-readers-img"
-      alt=""
-      aria-hidden="true"
-    >
+
   </div>
 
   <!-- ══════ Right panel: doodle illustration ══════ -->
@@ -174,17 +168,6 @@
   .asl-blob { animation: none !important; }
 }
 
-/* ─── Readers illustration ─── */
-.asl-readers-img {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 260px;
-  opacity: 0.92;
-  pointer-events: none;
-  z-index: 0;
-  user-select: none;
-}
 
 /* ─── Left panel ─── */
 .asl-left {
@@ -693,14 +676,6 @@
   .asl-stage { overflow: hidden; }
   .asl-right { flex: none; min-height: 220px; }
 
-  /* Illustration straddles the dividing line between panels */
-  .asl-readers-img {
-    left: 50%;
-    bottom: 0;
-    width: 200px;
-    transform: translateX(-50%) translateY(50%);
-    z-index: 10;
-  }
   [data-theme="light"] .asl-left { border-bottom-color: rgba(0,0,0,0.08); }
 
   /* On stacked layout the blend comes from the top (left panel is above) */
