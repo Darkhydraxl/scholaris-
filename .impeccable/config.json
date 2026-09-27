@@ -67,6 +67,24 @@
         ],
         "createdAt": "2026-09-27T18:00:00.000Z",
         "reason": "Pre-existing intentional design — .cl-card and .overview-card use overflow:hidden to clip decorative radial glow pseudo-elements to the card bounds. These are background-layer glows, not functional overlays or tooltips."
+      },
+      {
+        "rule": "icon-tile-stack",
+        "value": "*",
+        "files": [
+          "ifyscs/app/templates/student/dashboard.html"
+        ],
+        "createdAt": "2026-09-27T18:30:00.000Z",
+        "reason": "Pre-existing mini-stat layout (.mini-icon-circle above .mini-value/.mini-label) is a compact data-density pattern in the overview card, not a generic AI feature-card. Redesigning the mini-stat layout was not part of the bolder request."
+      },
+      {
+        "rule": "radial-spotlight-glow",
+        "value": "*",
+        "files": [
+          "ifyscs/app/templates/student/dashboard.html"
+        ],
+        "createdAt": "2026-09-27T18:30:00.000Z",
+        "reason": "User-directed — body background orbs and .ov-glow were the explicit deliverable of /impeccable bolder [student dashboard and background]. Removing them directly reverses the user's request."
       }
     ]
   }
