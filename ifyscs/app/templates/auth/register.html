@@ -607,26 +607,8 @@ body { background: #050505; }
 ═══════════════════════════════════ */
 @media (max-width: 880px) {
   .asl-wrap  { flex-direction: column; }
-  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
-  .asl-right { flex: none; min-height: 260px; }
-  [data-theme="light"] .asl-left { border-bottom-color: rgba(160,110,60,0.18); }
-
-  .asl-right::before {
-    background: linear-gradient(
-      to bottom,
-      #050505 0%,
-      rgba(5,5,5,0.55) 18%,
-      transparent 50%
-    );
-  }
-  [data-theme="light"] .asl-right::before {
-    background: linear-gradient(
-      to bottom,
-      #f0f0f0 0%,
-      rgba(240,240,240,0.55) 18%,
-      transparent 50%
-    );
-  }
+  .asl-left  { width: 100%; min-height: 100dvh; padding: 36px 28px; border-right: none; border-bottom: none; overflow: hidden; }
+  .asl-right { display: none; }
 }
 @media (max-width: 480px) {
   .asl-left    { padding: 28px 20px; }

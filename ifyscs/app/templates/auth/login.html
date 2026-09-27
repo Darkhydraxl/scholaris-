@@ -622,27 +622,8 @@ body { overflow-x: hidden; }
 ═══════════════════════════════════ */
 @media (max-width: 880px) {
   .asl-wrap  { flex-direction: column; }
-  .asl-left  { width: 100%; padding: 36px 28px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .asl-right { flex: none; min-height: 220px; }
-  [data-theme="light"] .asl-left { border-bottom-color: rgba(160,110,60,0.18); }
-
-  /* On stacked layout the blend comes from the top (left panel is above) */
-  .asl-right::before {
-    background: linear-gradient(
-      to bottom,
-      #0c0c10 0%,
-      rgba(12,12,16,0.55) 18%,
-      transparent 50%
-    );
-  }
-  [data-theme="light"] .asl-right::before {
-    background: linear-gradient(
-      to bottom,
-      #f5e6b8 0%,
-      rgba(245,230,184,0.55) 18%,
-      transparent 50%
-    );
-  }
+  .asl-left  { width: 100%; min-height: 100dvh; padding: 36px 28px; border-right: none; border-bottom: none; overflow: hidden; }
+  .asl-right { display: none; }
 }
 @media (max-width: 480px) {
   .asl-left    { padding: 28px 20px; }
