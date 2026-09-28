@@ -6,8 +6,8 @@
   --bg-mesh-2: #b8cfe8;
   --bg-mesh-3: #d4e7f7;
 
-  --surface-glass: rgba(255, 255, 255, 0.7);
-  --surface-glass-border: rgba(255, 255, 255, 0.6);
+  --surface-glass: rgba(196, 217, 240, 0.82);
+  --surface-glass-border: rgba(255, 255, 255, 0.55);
   --surface-glass-blur: 40px;
 
   --card-light: #ffffff;
