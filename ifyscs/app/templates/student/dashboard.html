@@ -305,9 +305,9 @@
 [data-theme="light"] body { background: #c4d9f0; }
 [data-theme="dark"] body {
   background:
-    radial-gradient(circle at 10% 14%,  rgba(201,149,42,0.07) 0%, transparent 44%),
-    radial-gradient(circle at 88% 7%,   rgba(201,149,42,0.04) 0%, transparent 48%),
-    radial-gradient(circle at 50% 95%,  rgba(201,149,42,0.09) 0%, transparent 52%),
+    radial-gradient(circle at 10% 14%,  rgba(96,165,250,0.05) 0%, transparent 44%),
+    radial-gradient(circle at 88% 7%,   rgba(96,165,250,0.03) 0%, transparent 48%),
+    radial-gradient(circle at 50% 95%,  rgba(96,165,250,0.06) 0%, transparent 52%),
     #000000;
 }
 
@@ -322,9 +322,9 @@
 @media (min-width: 1440px) { .topbar-greeting h1 { font-size: 42px; } }
 @media (max-width: 768px)  { .topbar-greeting h1 { font-size: 20px; letter-spacing: -0.015em; } }
 
-/* ── Overview card: gold glow, not white whisper ── */
+/* ── Overview card: sky-blue glow ── */
 .ov-glow {
-  background: radial-gradient(circle, rgba(201,149,42,0.28) 0%, transparent 66%);
+  background: radial-gradient(circle, rgba(96,165,250,0.22) 0%, transparent 66%);
   width: 440px;
   height: 440px;
   top: -140px;
@@ -338,37 +338,37 @@
   bottom: 0; left: 0;
   width: 180px; height: 180px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(201,149,42,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(96,165,250,0.12) 0%, transparent 70%);
   transform: translate(-30%, 30%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Top highlight edge: brand-gold shimmer */
+/* Top highlight edge: sky-blue shimmer */
 .overview-card::before {
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(201,149,42,0.52) 22%,
-    rgba(255,238,170,0.38) 48%,
-    rgba(201,149,42,0.30) 74%,
+    rgba(96,165,250,0.45) 22%,
+    rgba(186,222,255,0.32) 48%,
+    rgba(96,165,250,0.24) 74%,
     transparent 100%
   );
 }
 
-/* Progress bar: gold, 5px, visible */
+/* Progress bar: sky-blue, 5px, visible */
 .overview-progress-bar {
   height: 5px;
   background: linear-gradient(90deg,
-    rgba(201,149,42,0.90) 0%,
-    rgba(201,149,42,0.48) 62%,
-    rgba(201,149,42,0.10) 100%
+    rgba(96,165,250,0.92) 0%,
+    rgba(96,165,250,0.50) 62%,
+    rgba(96,165,250,0.10) 100%
   );
 }
 
-/* Big numbers: pushed larger, gold fraction */
+/* Big numbers: pushed larger */
 .overview-numbers .num-value {
   font-size: 48px;
-  text-shadow: 0 2px 24px rgba(201,149,42,0.18);
+  text-shadow: 0 2px 24px rgba(96,165,250,0.20);
 }
 /* num-frac stays at the system's muted token — brand gold fails 4.5:1 on dark card at 15px/500 */
 
