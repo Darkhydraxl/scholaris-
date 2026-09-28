@@ -2,9 +2,9 @@
 :root {
   --font-sans: 'Inter', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --bg-mesh-1: #f5e6b8;
-  --bg-mesh-2: #f0dda0;
-  --bg-mesh-3: #f7ecc8;
+  --bg-mesh-1: #c4d9f0;
+  --bg-mesh-2: #b8cfe8;
+  --bg-mesh-3: #d4e7f7;
 
   --surface-glass: rgba(255, 255, 255, 0.7);
   --surface-glass-border: rgba(255, 255, 255, 0.6);
@@ -66,6 +66,7 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
+[data-theme="light"] body { background: #c4d9f0; }
 
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; margin: 0; padding: 0; }
