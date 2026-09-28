@@ -130,9 +130,9 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,600;0,700;1,400;1,600&display=swap');
 
-/* Default dark body background; light mode overridden below */
-body { background: #0b0c0f; overflow-x: hidden; }
-[data-theme="light"] body { background: #c4d9f0; }
+/* Override global dark-mode.css [data-theme="dark"] body rule so no warm base bleeds through */
+body { background: #0b0c0f !important; overflow-x: hidden; }
+[data-theme="light"] body { background: #c4d9f0 !important; }
 
 /* ═══════════════════════════════════
    Layout
