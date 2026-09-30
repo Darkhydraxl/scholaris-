@@ -2,7 +2,7 @@ import calendar
 import json
 from datetime import date
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, Response, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, Response, current_app, jsonify
 from flask_login import current_user
 
 from app.decorators import role_required, super_admin_required
@@ -97,17 +97,25 @@ def user_management():
 def create_user():
     form = UserForm()
     _set_role_choices(form)
+    is_xhr = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
     if form.validate_on_submit():
         # Explicit server-side guard: only super admins may mint admin accounts
         if form.role.data == "admin" and not current_user.is_super_admin:
             log_action(current_user.id, "unauthorized_admin_creation",
                        f"{current_user.email} attempted to create an admin account")
+            if is_xhr:
+                return jsonify({"ok": False, "message": "You are not allowed to create admin accounts."}), 403
             flash("You are not allowed to create admin accounts.", "error")
             return redirect(url_for("admin.user_management"))
 
         if User.query.filter_by(email=form.email.data.lower().strip()).first():
+            if is_xhr:
+                return jsonify({"ok": False, "message": "A user with that email already exists."}), 400
             flash("A user with that email already exists.", "error")
         elif not form.password.data:
+            if is_xhr:
+                return jsonify({"ok": False, "message": "Password is required for new users."}), 400
             flash("Password is required for new users.", "error")
         else:
             user = User(
@@ -127,9 +135,17 @@ def create_user():
                 notify_user_created(user, plain_password=form.password.data, login_url=login_url)
             except Exception:
                 current_app.logger.exception("Failed to send welcome email to %s", user.email)
-            flash(f"{user.role.title()} account created. Login details sent to {user.email}.", "success")
+            msg = f"{user.role.title()} account created. Login details sent to {user.email}."
+            if is_xhr:
+                return jsonify({"ok": True, "message": msg})
+            flash(msg, "success")
     else:
+        if is_xhr:
+            return jsonify({"ok": False, "message": "Could not create user — check the form."}), 400
         flash("Could not create user — check the form.", "error")
+
+    if is_xhr:
+        return jsonify({"ok": False, "message": "Could not create user."}), 400
     return redirect(url_for("admin.user_management"))
 
 

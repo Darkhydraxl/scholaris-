@@ -530,13 +530,13 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <form method="POST" action="{{ url_for('admin.create_user') }}">
+    <form method="POST" action="{{ url_for('admin.create_user') }}" autocomplete="off">
       {{ form.hidden_tag() }}
-      <div class="field">{{ form.full_name(placeholder=" ") }}<label>Full name</label></div>
-      <div class="field">{{ form.email(placeholder=" ") }}<label>Email</label></div>
+      <div class="field">{{ form.full_name(placeholder=" ", autocomplete="off") }}<label>Full name</label></div>
+      <div class="field">{{ form.email(placeholder=" ", autocomplete="off") }}<label>Email</label></div>
       <div class="field"><label style="position:static;transform:none;display:block;margin-bottom:6px;color:var(--text-secondary);font-size:13px;">Department</label>{{ form.department(style="padding-top:12px;") }}</div>
       <div class="field"><label style="position:static;transform:none;display:block;margin-bottom:6px;color:var(--text-secondary);font-size:13px;">Role</label>{{ form.role(style="padding-top:12px;") }}</div>
-      <div class="field">{{ form.password(placeholder=" ") }}<label>Temporary password</label></div>
+      <div class="field">{{ form.password(placeholder=" ", autocomplete="new-password") }}<label>Temporary password</label></div>
       <button type="submit" class="btn btn-primary js-submit-btn" style="width:100%;justify-content:center;">
         <span class="btn-spinner"></span><span class="btn-label">Create user</span>
       </button>
@@ -660,9 +660,41 @@
     const openBtn  = document.getElementById('openAddUserModalBtn');
     const addModal = document.getElementById('addUserModalBackdrop');
     if (openBtn && addModal) {
-      openBtn.addEventListener('click', () => addModal.classList.add('open'));
+      const addForm = addModal.querySelector('form');
+
+      function openAddModal() {
+        addForm.reset();
+        addModal.classList.add('open');
+      }
+
+      openBtn.addEventListener('click', openAddModal);
       document.getElementById('addUserModalClose').addEventListener('click', () => addModal.classList.remove('open'));
       addModal.addEventListener('click', e => { if (e.target === addModal) addModal.classList.remove('open'); });
+
+      addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = addForm.querySelector('.js-submit-btn');
+        if (btn) { btn.classList.add('is-loading'); btn.disabled = true; }
+        try {
+          const res = await fetch(addForm.action, {
+            method: 'POST',
+            body: new FormData(addForm),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          });
+          const data = await res.json();
+          if (data.ok) {
+            addModal.classList.remove('open');
+            window.Scholaris.showToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 800);
+          } else {
+            window.Scholaris.showToast(data.message || 'Could not create user.', 'error');
+          }
+        } catch (_) {
+          window.Scholaris.showToast('Network error. Please try again.', 'error');
+        } finally {
+          if (btn) { btn.classList.remove('is-loading'); btn.disabled = false; }
+        }
+      });
     }
 
     // ── Edit-user modal ────────────────────────────────────────────────────
