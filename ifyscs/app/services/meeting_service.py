@@ -131,9 +131,13 @@ def _create_zoom(title, start_dt, duration_minutes, description, host_email=None
         current_app.config.get("ZOOM_CLIENT_ID"),
         current_app.config.get("ZOOM_CLIENT_SECRET"),
     ]):
+        missing = [
+            name for name in ("ZOOM_ACCOUNT_ID", "ZOOM_CLIENT_ID", "ZOOM_CLIENT_SECRET")
+            if not current_app.config.get(name)
+        ]
         raise RuntimeError(
-            "Zoom credentials not configured. Set ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, "
-            "and ZOOM_CLIENT_SECRET in your .env file."
+            "Zoom is not configured. Missing: " + ", ".join(missing) +
+            ". Set these as environment variables on the server (or in .env locally)."
         )
 
     token = _zoom_access_token()
