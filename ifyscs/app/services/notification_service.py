@@ -1,8 +1,14 @@
 import re
+from email.utils import parseaddr
+
+import requests
+
 from app.extensions import db, mail
 from app.models import Notification, User
 from flask_mail import Message
 from flask import current_app, render_template
+
+BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
 
 
 def notify(user_id, message, type="submission"):
@@ -28,48 +34,85 @@ def _html_to_text(html):
     return '\n'.join(line.strip() for line in text.splitlines()).strip()
 
 
-def send_email(subject, recipients, template_name, raise_on_error=False, **context):
-    """Renders app/templates/email/<template_name>.html and sends it.
-    Always includes a plain-text alternative to avoid spam filters.
-    Returns the Message on success, None on delivery failure (so callers
-    never crash due to SMTP issues). Pass raise_on_error=True where the
-    caller needs to report the underlying SMTP error to the user.
+def _send_via_brevo(subject, recipients, html, text):
+    """POSTs the email to Brevo over HTTPS. Raises on any non-2xx response.
+
+    Used instead of SMTP because hosts such as Render block outbound SMTP
+    ports outright, which surfaces as an unroutable-network error.
     """
-    html = render_template(f"email/{template_name}.html", **context)
+    sender_name, sender_email = parseaddr(current_app.config.get("MAIL_DEFAULT_SENDER") or "")
+    if not sender_email:
+        raise RuntimeError("MAIL_DEFAULT_SENDER has no usable email address")
+
+    response = requests.post(
+        BREVO_ENDPOINT,
+        headers={
+            "api-key": current_app.config["BREVO_API_KEY"],
+            "content-type": "application/json",
+            "accept": "application/json",
+        },
+        json={
+            "sender": {"name": sender_name or "Scholaris", "email": sender_email},
+            "to": [{"email": r} for r in recipients],
+            "subject": subject,
+            "htmlContent": html,
+            "textContent": text,
+        },
+        timeout=20,
+    )
+    if response.status_code >= 300:
+        raise RuntimeError(
+            f"Brevo API returned {response.status_code}: {response.text[:400]}"
+        )
+
+
+def _send_via_smtp(subject, recipients, html, text):
     msg = Message(subject=subject, recipients=recipients)
     msg.html = html
-    msg.body = _html_to_text(html)
+    msg.body = text
     msg.extra_headers = {
         "X-Mailer": "Scholaris",
         "Precedence": "transactional",
         "X-Auto-Response-Suppress": "OOF, AutoReply",
     }
+    mail.send(msg)
+
+
+def send_email(subject, recipients, template_name, raise_on_error=False, **context):
+    """Renders app/templates/email/<template_name>.html and sends it.
+    Always includes a plain-text alternative to avoid spam filters.
+    Sends via the Brevo HTTPS API when BREVO_API_KEY is set, else SMTP.
+    Returns True on success, None on delivery failure (so callers never
+    crash due to mail issues). Pass raise_on_error=True where the caller
+    needs to report the underlying error to the user.
+    """
+    html = render_template(f"email/{template_name}.html", **context)
+    text = _html_to_text(html)
+    use_brevo = bool(current_app.config.get("BREVO_API_KEY"))
+    transport = "brevo" if use_brevo else "smtp"
+
+    if current_app.config.get("MAIL_SUPPRESS_SEND"):
+        current_app.logger.info("[mail:suppressed] to=%s subject=%s", recipients, subject)
+        return True
+
     try:
-        mail.send(msg)
-        if current_app.config.get("MAIL_SUPPRESS_SEND"):
-            current_app.logger.info(
-                "[mail:suppressed] to=%s subject=%s", recipients, subject
-            )
+        if use_brevo:
+            _send_via_brevo(subject, recipients, html, text)
         else:
-            current_app.logger.info(
-                "[mail:sent] to=%s subject=%s", recipients, subject
-            )
+            _send_via_smtp(subject, recipients, html, text)
+        current_app.logger.info(
+            "[mail:sent] via=%s to=%s subject=%s", transport, recipients, subject
+        )
     except Exception as exc:
         import traceback
         current_app.logger.error(
-            "[mail:failed] to=%s subject=%s\nSMTP_SERVER=%s SMTP_PORT=%s USE_TLS=%s USERNAME=%s\nerror=%r\n%s",
-            recipients, subject,
-            current_app.config.get("MAIL_SERVER"),
-            current_app.config.get("MAIL_PORT"),
-            current_app.config.get("MAIL_USE_TLS"),
-            current_app.config.get("MAIL_USERNAME"),
-            exc,
-            traceback.format_exc(),
+            "[mail:failed] via=%s to=%s subject=%s\nerror=%r\n%s",
+            transport, recipients, subject, exc, traceback.format_exc(),
         )
         if raise_on_error:
             raise
         return None
-    return msg
+    return True
 
 
 def notify_chapter_submitted(submission):

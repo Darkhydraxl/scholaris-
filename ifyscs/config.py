@@ -44,6 +44,10 @@ class Config:
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "Scholaris <no-reply@scholaris.local>")
     MAIL_SUPPRESS_SEND = os.environ.get("MAIL_SUPPRESS_SEND", "False") == "True"
 
+    # Set this to send over Brevo's HTTPS API instead of SMTP. Required on hosts
+    # that block outbound SMTP ports (Render free instances drop them entirely).
+    BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+
     BASE_URL = os.environ.get("BASE_URL", "").rstrip("/")
 
     DEADLINE_REMINDER_HOUR = int(os.environ.get("DEADLINE_REMINDER_HOUR", 8))
