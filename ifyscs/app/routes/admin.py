@@ -123,7 +123,10 @@ def create_user():
                 email=form.email.data.lower().strip(),
                 department=form.department.data.strip() if form.department.data else None,
                 role=form.role.data,
-                is_active=form.is_active.data,
+                # Not form.is_active.data: the create form renders no such
+                # checkbox, and an absent checkbox reads False regardless of
+                # BooleanField(default=True), which locked new users out of login.
+                is_active=True,
                 password_hash=bcrypt.generate_password_hash(form.password.data).decode("utf-8"),
             )
             db.session.add(user)
