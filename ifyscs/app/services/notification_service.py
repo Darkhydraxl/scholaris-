@@ -49,9 +49,13 @@ def send_email(subject, recipients, template_name, **context):
             current_app.logger.info(
                 "[mail:suppressed] to=%s subject=%s", recipients, subject
             )
+        else:
+            current_app.logger.info(
+                "[mail:sent] to=%s subject=%s", recipients, subject
+            )
     except Exception as exc:
-        current_app.logger.warning(
-            "[mail:failed] to=%s subject=%s error=%s", recipients, subject, exc
+        current_app.logger.error(
+            "[mail:failed] to=%s subject=%s error=%r", recipients, subject, exc
         )
         return None
     return msg
@@ -117,7 +121,7 @@ def notify_supervisor_assigned(student, new_supervisor, is_reassignment=False):
 
 def notify_user_created(user, plain_password, login_url):
     first_name = user.full_name.split()[0] if user.full_name else "there"
-    send_email(
+    return send_email(
         subject=f"Hi {first_name}, your Scholaris account is ready",
         recipients=[user.email],
         template_name="welcome_credentials",
