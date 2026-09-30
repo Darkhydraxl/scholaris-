@@ -28,11 +28,12 @@ def _html_to_text(html):
     return '\n'.join(line.strip() for line in text.splitlines()).strip()
 
 
-def send_email(subject, recipients, template_name, **context):
+def send_email(subject, recipients, template_name, raise_on_error=False, **context):
     """Renders app/templates/email/<template_name>.html and sends it.
     Always includes a plain-text alternative to avoid spam filters.
     Returns the Message on success, None on delivery failure (so callers
-    never crash due to SMTP issues).
+    never crash due to SMTP issues). Pass raise_on_error=True where the
+    caller needs to report the underlying SMTP error to the user.
     """
     html = render_template(f"email/{template_name}.html", **context)
     msg = Message(subject=subject, recipients=recipients)
@@ -65,6 +66,8 @@ def send_email(subject, recipients, template_name, **context):
             exc,
             traceback.format_exc(),
         )
+        if raise_on_error:
+            raise
         return None
     return msg
 
@@ -127,12 +130,13 @@ def notify_supervisor_assigned(student, new_supervisor, is_reassignment=False):
     )
 
 
-def notify_user_created(user, plain_password, login_url):
+def notify_user_created(user, plain_password, login_url, raise_on_error=False):
     first_name = user.full_name.split()[0] if user.full_name else "there"
     return send_email(
         subject=f"Hi {first_name}, your Scholaris account is ready",
         recipients=[user.email],
         template_name="welcome_credentials",
+        raise_on_error=raise_on_error,
         user=user,
         plain_password=plain_password,
         login_url=login_url,

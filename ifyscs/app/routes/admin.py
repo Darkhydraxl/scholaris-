@@ -130,16 +130,27 @@ def create_user():
             db.session.commit()
             log_action(current_user.id, "create_user", f"Created {user.role} account for {user.email}")
             email_sent = False
+            email_error = None
             try:
                 base = current_app.config.get("BASE_URL", "")
                 login_url = (base + url_for("auth.login")) if base else url_for("auth.login", _external=True)
-                email_sent = bool(notify_user_created(user, plain_password=form.password.data, login_url=login_url))
-            except Exception:
+                email_sent = bool(notify_user_created(
+                    user, plain_password=form.password.data, login_url=login_url,
+                    raise_on_error=True,
+                ))
+            except Exception as exc:
                 current_app.logger.exception("Failed to send welcome email to %s", user.email)
+                email_error = f"{type(exc).__name__}: {exc}"
             if email_sent:
                 msg = f"{user.role.title()} account created. Login details sent to {user.email}."
             else:
-                msg = f"{user.role.title()} account created, but the welcome email could not be sent to {user.email}. Check your mail configuration."
+                msg = (
+                    f"{user.role.title()} account created, but the welcome email to "
+                    f"{user.email} failed — {email_error or 'unknown error'} "
+                    f"[{current_app.config.get('MAIL_SERVER')}:{current_app.config.get('MAIL_PORT')} "
+                    f"ssl={current_app.config.get('MAIL_USE_SSL')} "
+                    f"user={current_app.config.get('MAIL_USERNAME') or 'NOT SET'}]"
+                )
             if is_xhr:
                 return jsonify({"ok": True, "message": msg, "email_sent": email_sent})
             flash(msg, "success" if email_sent else "warning")
