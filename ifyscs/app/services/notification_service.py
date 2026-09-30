@@ -54,8 +54,16 @@ def send_email(subject, recipients, template_name, **context):
                 "[mail:sent] to=%s subject=%s", recipients, subject
             )
     except Exception as exc:
+        import traceback
         current_app.logger.error(
-            "[mail:failed] to=%s subject=%s error=%r", recipients, subject, exc
+            "[mail:failed] to=%s subject=%s\nSMTP_SERVER=%s SMTP_PORT=%s USE_TLS=%s USERNAME=%s\nerror=%r\n%s",
+            recipients, subject,
+            current_app.config.get("MAIL_SERVER"),
+            current_app.config.get("MAIL_PORT"),
+            current_app.config.get("MAIL_USE_TLS"),
+            current_app.config.get("MAIL_USERNAME"),
+            exc,
+            traceback.format_exc(),
         )
         return None
     return msg

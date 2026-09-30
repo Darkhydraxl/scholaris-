@@ -153,6 +153,42 @@ def create_user():
     return redirect(url_for("admin.user_management"))
 
 
+@admin_bp.route("/test-email")
+@super_admin_required
+def test_email():
+    """Diagnostic route — sends a test email and shows the raw result/error."""
+    import traceback
+    from flask_mail import Message as MailMessage
+    from app.extensions import mail
+
+    cfg = {
+        "MAIL_SERVER":          current_app.config.get("MAIL_SERVER"),
+        "MAIL_PORT":            current_app.config.get("MAIL_PORT"),
+        "MAIL_USE_TLS":         current_app.config.get("MAIL_USE_TLS"),
+        "MAIL_USE_SSL":         current_app.config.get("MAIL_USE_SSL"),
+        "MAIL_USERNAME":        current_app.config.get("MAIL_USERNAME"),
+        "MAIL_PASSWORD_SET":    bool(current_app.config.get("MAIL_PASSWORD")),
+        "MAIL_DEFAULT_SENDER":  current_app.config.get("MAIL_DEFAULT_SENDER"),
+        "MAIL_SUPPRESS_SEND":   current_app.config.get("MAIL_SUPPRESS_SEND"),
+    }
+
+    msg = MailMessage(
+        subject="Scholaris test email",
+        recipients=[current_user.email],
+        body="This is a test email from Scholaris. If you receive this, SMTP is working.",
+    )
+    try:
+        mail.send(msg)
+        return jsonify({"ok": True, "message": f"Test email sent to {current_user.email}", "config": cfg})
+    except Exception as exc:
+        return jsonify({
+            "ok": False,
+            "error": repr(exc),
+            "traceback": traceback.format_exc(),
+            "config": cfg,
+        }), 500
+
+
 @admin_bp.route("/users/<int:user_id>/edit", methods=["POST"])
 @role_required("admin")
 def edit_user(user_id):
