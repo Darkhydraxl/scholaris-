@@ -141,9 +141,6 @@ def _create_zoom(title, start_dt, duration_minutes, description, host_email=None
         )
 
     token = _zoom_access_token()
-    # Use the supervisor's own Zoom email so they are the meeting host.
-    # Falls back to the configured account email if none was supplied.
-    user_email = host_email or current_app.config.get("ZOOM_USER_EMAIL", "me")
 
     payload = json.dumps({
         "topic": title,
@@ -159,23 +156,42 @@ def _create_zoom(title, start_dt, duration_minutes, description, host_email=None
         },
     }).encode()
 
-    req = urllib.request.Request(
-        f"https://api.zoom.us/v2/users/{user_email}/meetings",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read())
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode(errors="replace")
-        raise RuntimeError(f"Zoom API error {exc.code}: {body[:300]}") from exc
+    # Server-to-Server OAuth can only schedule for users provisioned in the Zoom
+    # account. A supervisor's personal address usually isn't one (Zoom answers
+    # 404/1001), so try them first and fall back to the account's own user.
+    account_user = current_app.config.get("ZOOM_USER_EMAIL") or "me"
+    candidates = [host_email] if host_email else []
+    if account_user not in candidates:
+        candidates.append(account_user)
 
-    return str(data["id"]), data["join_url"]
+    last_error = None
+    for candidate in candidates:
+        req = urllib.request.Request(
+            f"https://api.zoom.us/v2/users/{candidate}/meetings",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read())
+            return str(data["id"]), data["join_url"]
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode(errors="replace")
+            last_error = f"Zoom API error {exc.code}: {body[:300]}"
+            no_such_user = exc.code == 404 and '"code":1001' in body.replace(" ", "")
+            if no_such_user and candidate != candidates[-1]:
+                current_app.logger.info(
+                    "Zoom user %s is not in this account; retrying as %s",
+                    candidate, account_user,
+                )
+                continue
+            raise RuntimeError(last_error) from exc
+
+    raise RuntimeError(last_error or "Zoom meeting creation failed")
 
 
 # ── public entry point ────────────────────────────────────────────────────────
