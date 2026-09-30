@@ -1,9 +1,9 @@
 """
 Meeting link creation for Google Meet and Zoom.
 
-MEETING_DEMO_MODE=true (default in .env) generates placeholder links so the
-feature works immediately without API credentials.  Set it to false and
-supply the appropriate environment variables to use real APIs.
+MEETING_DEMO_MODE=true generates placeholder links so the feature works
+without API credentials. It is opt-in and defaults to false, because the
+placeholder links are rejected by the real services.
 
 Google Meet  — needs GOOGLE_SERVICE_ACCOUNT_FILE or GOOGLE_SERVICE_ACCOUNT_INFO
                plus the google-api-python-client package.

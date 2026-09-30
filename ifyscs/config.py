@@ -78,8 +78,10 @@ class Config:
     ZOOM_CLIENT_SECRET = os.environ.get("ZOOM_CLIENT_SECRET")
     ZOOM_USER_EMAIL = os.environ.get("ZOOM_USER_EMAIL", "me")
 
-    # Set to True to use placeholder links (no real API calls) — good for local dev
-    MEETING_DEMO_MODE = os.environ.get("MEETING_DEMO_MODE", "true").lower() == "true"
+    # Opt-in only: demo mode returns placeholder links that no real meeting
+    # service will accept, so it must never be what an unconfigured host falls
+    # back to. Set MEETING_DEMO_MODE=true explicitly for local dev.
+    MEETING_DEMO_MODE = os.environ.get("MEETING_DEMO_MODE", "false").lower() == "true"
 
 
 class DevelopmentConfig(Config):
