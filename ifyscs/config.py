@@ -35,7 +35,10 @@ class Config:
 
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
-    MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "True") == "True"
+    # Port 465 speaks implicit SSL, 587 speaks STARTTLS. Deriving the flags from
+    # the port avoids the silent connection hang a mismatched pair causes.
+    MAIL_USE_SSL = os.environ.get("MAIL_USE_SSL", "True" if MAIL_PORT == 465 else "False") == "True"
+    MAIL_USE_TLS = False if MAIL_USE_SSL else os.environ.get("MAIL_USE_TLS", "True") == "True"
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "Scholaris <no-reply@scholaris.local>")
