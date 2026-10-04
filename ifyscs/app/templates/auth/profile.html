@@ -165,8 +165,8 @@
       <input type="file" id="spAvatarInput" accept="image/jpeg,image/png,image/webp" hidden>
       <div class="sp-avatar" id="spAvatar">
         {% if current_user.avatar %}
-          <img src="{{ url_for('auth.serve_upload', filepath='uploads/avatars/' ~ current_user.avatar) }}"
-               alt="" class="sp-avatar-img">
+          <img src="{{ url_for('auth.avatar', user_id=current_user.id, v=current_user.avatar) }}"
+               alt="" class="sp-avatar-img" onerror="this.remove()">
         {% else %}
           {{ current_user.full_name[0]|upper if current_user.full_name else '?' }}
         {% endif %}

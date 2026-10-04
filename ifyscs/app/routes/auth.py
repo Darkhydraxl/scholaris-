@@ -1,3 +1,4 @@
+import hashlib
 import os
 from datetime import datetime, timezone
 
@@ -14,6 +15,8 @@ _IMG_SIGNATURES = {
     b'\xff\xd8\xff': 'jpg',
     b'\x89PNG':      'png',
 }
+
+_IMG_MIMES = {'jpg': 'image/jpeg', 'png': 'image/png', 'webp': 'image/webp'}
 
 
 def _detect_image(header12: bytes):
@@ -37,17 +40,19 @@ def _save_avatar_file(user, av_file):
         return "Image must be under 5 MB."
     av_file.seek(0)
 
-    avatar_dir = os.path.join(current_app.config["UPLOAD_FOLDER"], "avatars")
-    os.makedirs(avatar_dir, exist_ok=True)
+    data = av_file.read()
+    if not data:
+        return "That image appears to be empty."
 
-    if user.avatar:
-        old = os.path.join(avatar_dir, user.avatar)
-        if os.path.isfile(old):
-            os.remove(old)
-
-    filename = f"uid_{user.id}_{int(datetime.now(timezone.utc).timestamp())}.{ext}"
-    av_file.save(os.path.join(avatar_dir, filename))
-    user.avatar = filename
+    # Stored in the database rather than on disk — an ephemeral host filesystem
+    # loses the file on the next restart while the row survives, which made
+    # pictures silently disappear. `avatar` stays as the cache-busting token.
+    user.avatar_data = data
+    user.avatar_mime = _IMG_MIMES[ext]
+    # Token is derived from the image bytes, not the clock: the served response
+    # is cached for a week, so the URL must change whenever the picture changes
+    # (a second-resolution timestamp collides on same-second replacements).
+    user.avatar = f"uid_{user.id}_{hashlib.sha256(data).hexdigest()[:16]}.{ext}"
     return None
 
 # Pre-computed bcrypt hash for constant-time dummy checks (prevents timing-based email enumeration)
@@ -197,7 +202,7 @@ def upload_avatar():
             log_action(current_user.id, "update_avatar", "Updated profile picture")
         except Exception:
             current_app.logger.exception("Avatar audit log failed — ignored")
-        return jsonify({"url": url_for("auth.serve_upload", filepath=f"uploads/avatars/{current_user.avatar}")})
+        return jsonify({"url": url_for("auth.avatar", user_id=current_user.id, v=current_user.avatar)})
     except Exception:
         current_app.logger.exception("Avatar upload unexpected error")
         try:
@@ -205,6 +210,33 @@ def upload_avatar():
         except Exception:
             pass
         return jsonify({"error": "An unexpected error occurred."}), 500
+
+
+@auth_bp.route("/avatar/<int:user_id>")
+@login_required
+def avatar(user_id):
+    """Serves an avatar from the database.
+
+    Falls back to the legacy on-disk copy so avatars uploaded before the move
+    to database storage keep working wherever the file still exists.
+    """
+    user = User.query.get_or_404(user_id)
+
+    if user.avatar_data:
+        return current_app.response_class(
+            user.avatar_data,
+            mimetype=user.avatar_mime or "image/jpeg",
+            headers={"Cache-Control": "private, max-age=604800"},
+        )
+
+    if user.avatar:
+        legacy = os.path.join(current_app.config["UPLOAD_FOLDER"], "avatars", user.avatar)
+        if os.path.isfile(legacy):
+            return send_from_directory(
+                os.path.join(current_app.config["UPLOAD_FOLDER"], "avatars"), user.avatar
+            )
+
+    abort(404)
 
 
 @auth_bp.route("/files/upload/<path:filepath>")

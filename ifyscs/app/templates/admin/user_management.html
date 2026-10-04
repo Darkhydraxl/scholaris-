@@ -382,7 +382,7 @@
             <div class="um-person">
               <div class="um-avatar um-avatar-{{ loop.index0 % 5 }}">
                 {% if s.avatar %}
-                  <img src="{{ url_for('auth.serve_upload', filepath='uploads/avatars/' ~ s.avatar) }}" alt="">
+                  <img src="{{ url_for('auth.avatar', user_id=s.id, v=s.avatar) }}" alt="" onerror="this.remove()">
                 {% else %}
                   {{ s.full_name[0]|upper }}
                 {% endif %}
@@ -464,7 +464,7 @@
             <div class="um-person">
               <div class="um-avatar um-avatar-{{ (loop.index0 + 2) % 5 }}">
                 {% if sup.avatar %}
-                  <img src="{{ url_for('auth.serve_upload', filepath='uploads/avatars/' ~ sup.avatar) }}" alt="">
+                  <img src="{{ url_for('auth.avatar', user_id=sup.id, v=sup.avatar) }}" alt="" onerror="this.remove()">
                 {% else %}
                   {{ sup.full_name[0]|upper }}
                 {% endif %}

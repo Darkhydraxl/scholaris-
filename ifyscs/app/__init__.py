@@ -39,6 +39,7 @@ def create_app(config_name=None):
     _register_scheduler(app)
     _register_template_globals(app)
     _ensure_schema(app)
+    _ensure_avatar_storage(app)
 
     return app
 
@@ -305,3 +306,29 @@ def _ensure_schema(app):
             if "is_super_admin" not in existing:
                 conn.execute(text("ALTER TABLE users ADD COLUMN is_super_admin BOOLEAN NOT NULL DEFAULT 0"))
                 app.logger.info("Schema: added users.is_super_admin column.")
+
+
+def _ensure_avatar_storage(app):
+    """Add the avatar blob columns on both SQLite and PostgreSQL.
+
+    Unlike _ensure_schema this must run against production Postgres as well:
+    the deploy command starts gunicorn directly and never runs `flask db
+    upgrade`, so an Alembic-only migration would never be applied.
+    """
+    from sqlalchemy import inspect, text
+    with app.app_context():
+        is_postgres = "postgresql" in app.config["SQLALCHEMY_DATABASE_URI"]
+        blob_type = "BYTEA" if is_postgres else "BLOB"
+        try:
+            existing = {col["name"] for col in inspect(db.engine).get_columns("users")}
+            with db.engine.begin() as conn:
+                if "avatar_data" not in existing:
+                    conn.execute(text(f"ALTER TABLE users ADD COLUMN avatar_data {blob_type}"))
+                    app.logger.info("Schema: added users.avatar_data column.")
+                if "avatar_mime" not in existing:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN avatar_mime VARCHAR(32)"))
+                    app.logger.info("Schema: added users.avatar_mime column.")
+        except Exception:
+            # These columns are additive, so a failure here costs avatars but
+            # must never stop the app from booting.
+            app.logger.exception("Schema: could not ensure avatar columns")

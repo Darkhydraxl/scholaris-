@@ -33,6 +33,12 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=False)
     department = db.Column(db.String(120), nullable=True)
     avatar             = db.Column(db.String(255), nullable=True)
+    # Avatar bytes live in the database, not on disk: hosts like Render use an
+    # ephemeral filesystem that is wiped on every deploy, restart and spin-down,
+    # which silently lost every uploaded picture. `avatar` is kept as the
+    # cache-busting token and the "has a picture" flag.
+    avatar_data        = db.Column(db.LargeBinary, nullable=True)
+    avatar_mime        = db.Column(db.String(32), nullable=True)
     zoom_email         = db.Column(db.String(120), nullable=True)
     google_email       = db.Column(db.String(120), nullable=True)
     google_oauth_token = db.Column(db.Text, nullable=True)  # JSON refresh token
