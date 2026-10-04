@@ -86,8 +86,11 @@ def login():
                 flash("Admin accounts must sign in through the admin portal.", "info")
                 return redirect(url_for("admin_auth.login"))
             login_user(user, remember=form.remember.data)
-            # Rotate session ID to prevent session fixation
-            _keys = {k: v for k, v in session.items() if k.startswith("_")}
+            # Rotate session ID to prevent session fixation. "csrf_token" must
+            # be carried over: dropping it invalidates every form rendered
+            # before login with "The CSRF session token is missing."
+            _keys = {k: v for k, v in session.items()
+                     if k.startswith("_") or k == "csrf_token"}
             session.clear()
             session.update(_keys)
             session.permanent = True
@@ -222,10 +225,20 @@ def avatar(user_id):
     """
     user = User.query.get_or_404(user_id)
 
-    if user.avatar_data:
+    # Deferred columns are loaded on access, which raises if the database has
+    # not had them added yet. A missing picture must degrade to the initials
+    # fallback, never take the page down.
+    try:
+        data, mime = user.avatar_data, user.avatar_mime
+    except Exception:
+        current_app.logger.exception("Avatar columns unavailable")
+        db.session.rollback()
+        data, mime = None, None
+
+    if data:
         return current_app.response_class(
-            user.avatar_data,
-            mimetype=user.avatar_mime or "image/jpeg",
+            data,
+            mimetype=mime or "image/jpeg",
             headers={"Cache-Control": "private, max-age=604800"},
         )
 

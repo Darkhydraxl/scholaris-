@@ -33,8 +33,11 @@ def login():
         password_ok = bcrypt.check_password_hash(candidate_hash, form.password.data)
         if user and user.is_active and password_ok and user.role == "admin" and user.is_super_admin:
             login_user(user, remember=form.remember.data)
-            # Rotate session ID to prevent session fixation
-            _keys = {k: v for k, v in session.items() if k.startswith("_")}
+            # Rotate session ID to prevent session fixation. "csrf_token" must
+            # be carried over: dropping it invalidates every form rendered
+            # before login with "The CSRF session token is missing."
+            _keys = {k: v for k, v in session.items()
+                     if k.startswith("_") or k == "csrf_token"}
             session.clear()
             session.update(_keys)
             session.permanent = True

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from flask_login import UserMixin
+from sqlalchemy.orm import deferred
 
 from app.extensions import db
 
@@ -37,8 +38,12 @@ class User(UserMixin, db.Model):
     # ephemeral filesystem that is wiped on every deploy, restart and spin-down,
     # which silently lost every uploaded picture. `avatar` is kept as the
     # cache-busting token and the "has a picture" flag.
-    avatar_data        = db.Column(db.LargeBinary, nullable=True)
-    avatar_mime        = db.Column(db.String(32), nullable=True)
+    #
+    # Deferred so they never appear in a normal User SELECT: listing users would
+    # otherwise pull every image into memory, and a query would fail outright on
+    # a database where these columns have not been added yet.
+    avatar_data        = deferred(db.Column(db.LargeBinary, nullable=True))
+    avatar_mime        = deferred(db.Column(db.String(32), nullable=True))
     zoom_email         = db.Column(db.String(120), nullable=True)
     google_email       = db.Column(db.String(120), nullable=True)
     google_oauth_token = db.Column(db.Text, nullable=True)  # JSON refresh token

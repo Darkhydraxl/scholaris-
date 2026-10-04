@@ -2,7 +2,7 @@ import os
 import time
 from datetime import datetime, timezone
 
-from flask import Flask, render_template, session, request
+from flask import Flask, render_template, session, request, flash, redirect, url_for
 from flask_login import current_user, login_required
 
 from config import config_by_name
@@ -236,6 +236,24 @@ def _register_request_hooks(app):
 
 
 def _register_error_handlers(app):
+    from flask_wtf.csrf import CSRFError
+
+    @app.errorhandler(CSRFError)
+    def csrf_error(e):
+        """Send the user back to a freshly rendered form.
+
+        CSRF tokens expire after WTF_CSRF_TIME_LIMIT, so a login page left open
+        posts a stale token. The default response is a bare 400 reading "The
+        CSRF token is missing", which looks like a broken site.
+        """
+        app.logger.info("CSRF rejected on %s: %s", request.path, e.description)
+        flash("Your session expired. Please try again.", "error")
+        target = request.referrer
+        # Only trust a same-host referrer, otherwise this is an open redirect.
+        if not target or request.host not in target:
+            target = url_for("auth.login")
+        return redirect(target)
+
     @app.errorhandler(403)
     def forbidden(e):
         return render_template("errors/403.html"), 403
