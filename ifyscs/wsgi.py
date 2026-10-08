@@ -11,10 +11,25 @@ logging.basicConfig(
     level=logging.WARNING,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
+# Our own INFO lines carry the operational detail worth having in production —
+# notably whether an email was actually sent. WARNING hid those, which made a
+# successful send indistinguishable from one that was never attempted.
+# Third-party loggers stay at WARNING so this does not become noise.
+logging.getLogger("app").setLevel(logging.INFO)
 
 from app import create_app  # noqa: E402
 
 app = create_app(os.environ.get("FLASK_ENV", "production"))
+
+# Record which mail transport is live, so a misconfiguration is visible at boot
+# rather than only when someone tries to create a user.
+if app.config.get("BREVO_API_KEY"):
+    app.logger.info("MAIL: sending via Brevo HTTPS API")
+else:
+    app.logger.warning(
+        "MAIL: BREVO_API_KEY is not set — falling back to SMTP, which hosts "
+        "that block outbound SMTP ports (Render) will refuse"
+    )
 
 # Run database migrations and seed the super admin on every startup.
 #
