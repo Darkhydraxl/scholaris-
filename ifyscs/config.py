@@ -19,6 +19,16 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Managed Postgres closes idle connections, and hosts that suspend idle
+    # compute kill them outright. The pool does not notice, so it hands out a
+    # dead connection and the request dies on "SSL SYSCALL error: EOF detected".
+    # pre_ping tests a connection before use and transparently replaces a dead
+    # one; recycle retires connections before the server does it for us.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+    }
+
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "app", "static", "uploads")
     MAX_CONTENT_LENGTH = 20 * 1024 * 1024  # 20 MB
     ALLOWED_UPLOAD_EXTENSIONS = {"pdf"}
