@@ -115,8 +115,27 @@ def _register_blueprints(app):
 
     @app.route("/health")
     def health():
+        """Liveness + database reachability.
+
+        The query is the point: without it this returns "ok" while every page
+        that touches the database is failing, which is exactly how a suspended
+        database went unnoticed. It also gives an uptime pinger a cheap way to
+        register real database activity, which hosts that pause idle projects
+        require to keep them awake.
+        """
         from flask import jsonify
-        return jsonify({"status": "ok"}), 200
+        from sqlalchemy import text
+        try:
+            db.session.execute(text("SELECT 1"))
+            return jsonify({"status": "ok", "database": "ok"}), 200
+        except Exception as exc:
+            app.logger.error("[health] database unreachable: %r", exc)
+            db.session.rollback()
+            return jsonify({
+                "status": "error",
+                "database": "unreachable",
+                "detail": f"{type(exc).__name__}: {str(exc)[:200]}",
+            }), 503
 
     @app.route("/googlefb49e7ecda978378.html")
     def google_site_verification():
