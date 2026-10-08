@@ -147,12 +147,19 @@ def create_user():
             if email_sent:
                 msg = f"{user.role.title()} account created. Login details sent to {user.email}."
             else:
+                # Name the transport that actually ran; quoting SMTP settings for
+                # a Brevo failure sent earlier debugging down the wrong path.
+                if current_app.config.get("BREVO_API_KEY"):
+                    where = "transport=Brevo API"
+                else:
+                    where = (
+                        f"transport=SMTP {current_app.config.get('MAIL_SERVER')}:"
+                        f"{current_app.config.get('MAIL_PORT')} "
+                        f"user={current_app.config.get('MAIL_USERNAME') or 'NOT SET'}"
+                    )
                 msg = (
                     f"{user.role.title()} account created, but the welcome email to "
-                    f"{user.email} failed — {email_error or 'unknown error'} "
-                    f"[{current_app.config.get('MAIL_SERVER')}:{current_app.config.get('MAIL_PORT')} "
-                    f"ssl={current_app.config.get('MAIL_USE_SSL')} "
-                    f"user={current_app.config.get('MAIL_USERNAME') or 'NOT SET'}]"
+                    f"{user.email} failed — {email_error or 'unknown error'} [{where}]"
                 )
             if is_xhr:
                 return jsonify({"ok": True, "message": msg, "email_sent": email_sent})
