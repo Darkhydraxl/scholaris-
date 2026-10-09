@@ -35,6 +35,11 @@ with app.app_context():
     else:
         app.logger.info("MAIL: sending via %s HTTPS API", _transport)
 
+    # BASE_URL is operator-set and cannot be read back from the Render API, so
+    # record it: a stale value aims every email image at a dead host.
+    _base = app.config.get("BASE_URL") or ""
+    app.logger.info("BASE_URL: %s", _base if _base else "(not set — derived per request)")
+
 # Run database migrations and seed the super admin on every startup.
 #
 # Both steps are best-effort. They used to run bare at import time, so an
