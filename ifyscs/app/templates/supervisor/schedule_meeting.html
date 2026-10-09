@@ -2,6 +2,8 @@
 {% block title %}Schedule Meeting{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/flatpickr.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/scholaris-pickers.css') }}">
 <style>
 /* ── Page wrapper ──────────────────────────────── */
 .sm-wrap {
@@ -21,7 +23,10 @@
 .sm-back-link svg { width:14px; height:14px; }
 
 /* ── Card ──────────────────────────────────────── */
-.sm-card { padding:32px 36px; overflow:hidden; }
+/* Not overflow:hidden — the time list is absolutely positioned inside this
+   card and a clip here cuts it off at the card edge. The input rules below
+   are what actually keep content inside the card. */
+.sm-card { padding:32px 36px; }
 @media (max-width:600px) { .sm-card { padding:24px 16px; } }
 @media (max-width:400px) { .sm-card { padding:20px 12px; } }
 
@@ -38,23 +43,16 @@
 .sm-card select {
   width:100%; max-width:100%; box-sizing:border-box; min-width:0;
 }
-/* Date/time — shrink native chrome on mobile */
-.sm-card input[type="date"],
-.sm-card input[type="time"] {
-  width:100% !important; min-width:0 !important;
-  box-sizing:border-box !important;
-}
+/* Grid cells must shrink, but the time panel has to escape its cell. */
+.sm-row > * { min-width:0; }
+.sm-row > .time-field { overflow:visible; }
+
+/* The pickers carry their own type scale; keep them legible on small screens
+   rather than shrinking them the way the native controls needed. */
 @media (max-width:600px) {
-  .sm-card input[type="date"],
-  .sm-card input[type="time"] {
-    font-size:12px;
-    padding:14px 8px 6px;
-    -webkit-appearance:none;
-    appearance:none;
-  }
+  .date-field input,
+  .time-field .ts-display { font-size:13.5px; padding:16px 40px 8px 12px; }
 }
-/* Grid cells must also shrink */
-.sm-row > * { min-width:0; overflow:hidden; }
 
 /* ── Platform selector ─────────────────────────── */
 .sm-platform-grid {
@@ -95,8 +93,9 @@
 .sm-platform-name { font-size:14px; font-weight:700; color:var(--text-primary); }
 .sm-platform-desc { font-size:11.5px; color:var(--text-secondary); line-height:1.4; }
 @media (max-width:480px) {
-  .sm-platform-name { font-size:12px; }
-  .sm-platform-desc { font-size:10.5px; }
+  .sm-platform-name { font-size:12.5px; }
+  /* Holds at 11px: this is the only text telling the two platforms apart. */
+  .sm-platform-desc { font-size:11px; }
 }
 
 /* ── Field groups ──────────────────────────────── */
@@ -288,14 +287,27 @@
       <!-- Date, time, duration -->
       <div class="sm-group-label">Schedule</div>
       <div class="sm-row">
-        <div class="field has-value">
-          {{ form.date(type="date", placeholder=" ") }}
-          <label>{{ form.date.label.text }}</label>
+        <div class="date-field" id="smDateField">
+          {{ form.date(type="text", placeholder=" ", readonly=True, id="smDate", autocomplete="off") }}
+          <label for="smDate">{{ form.date.label.text }}</label>
+          <svg class="cal-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
           {% for err in form.date.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
         </div>
-        <div class="field has-value">
-          {{ form.time(type="time", placeholder=" ") }}
-          <label>{{ form.time.label.text }}</label>
+
+        <div class="time-field" id="smTimeField" data-time-select data-step="15">
+          <input type="text" class="ts-display" id="smTimeDisplay" placeholder=" " readonly
+                 autocomplete="off" role="combobox" aria-expanded="false"
+                 aria-haspopup="listbox" aria-controls="smTimeList">
+          <label for="smTimeDisplay">{{ form.time.label.text }}</label>
+          <svg class="clock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/>
+          </svg>
+          {{ form.time(type="hidden", class="ts-value", id="smTimeValue") }}
+          <div class="ts-panel">
+            <ul class="ts-list" id="smTimeList" role="listbox" aria-label="{{ form.time.label.text }}"></ul>
+          </div>
           {% for err in form.time.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
         </div>
       </div>
@@ -322,14 +334,13 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/flatpickr.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scholaris-pickers.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  /* Set date input minimum to today */
-  const dateInput = document.querySelector('input[type="date"]');
-  if (dateInput) {
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.setAttribute('min', today);
-  }
+  /* Calendar — same control as the admin deadline centre. A meeting cannot be
+     scheduled in the past, so today is the floor. */
+  const smDateFp = window.Scholaris.datePicker('#smDate', { minDate: 'today' });
 
   /* Platform radio — highlight selected card + toggle platform sections */
   const radios        = document.querySelectorAll('.sm-platform-option input[type="radio"]');
@@ -353,15 +364,25 @@ document.addEventListener('DOMContentLoaded', () => {
   function clearMeetingDetails() {
     const titleInput = document.querySelector('input[name="title"]');
     const descInput  = document.querySelector('textarea[name="description"]');
-    const dateInput2 = document.querySelector('input[name="date"]');
-    const timeInput  = document.querySelector('input[name="time"]');
     const durationSel = document.querySelector('select[name="duration"]');
     if (titleInput)   { titleInput.value = '';  titleInput.closest('.field')?.classList.remove('has-value'); }
     if (descInput)    { descInput.value  = '';  descInput.closest('.field')?.classList.remove('has-value');  }
-    if (dateInput2)   { dateInput2.value = '';  dateInput2.closest('.field')?.classList.remove('has-value'); }
-    if (timeInput)    { timeInput.value  = '';  timeInput.closest('.field')?.classList.remove('has-value');  }
     if (durationSel)  durationSel.selectedIndex = 0;
     if (zoomEmailInput) { zoomEmailInput.value = ''; }
+
+    /* The pickers own their display text and raised-label state, so clearing
+       the underlying value is not enough — reset them through their own API. */
+    if (smDateFp) smDateFp.clear();
+    document.getElementById('smDateField')?.classList.remove('has-val');
+
+    const timeField = document.getElementById('smTimeField');
+    const timeValue = document.getElementById('smTimeValue');
+    const timeDisplay = document.getElementById('smTimeDisplay');
+    if (timeValue)   timeValue.value = '';
+    if (timeDisplay) timeDisplay.value = '';
+    timeField?.classList.remove('has-val');
+    timeField?.querySelectorAll('.ts-option.is-selected')
+      .forEach(el => { el.classList.remove('is-selected'); el.setAttribute('aria-selected', 'false'); });
   }
 
   radios.forEach(r => {
