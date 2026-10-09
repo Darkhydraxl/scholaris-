@@ -1,5 +1,8 @@
 import re
+from datetime import datetime, timezone
 from email.utils import parseaddr
+from html import unescape
+from urllib.parse import urlsplit
 
 import requests
 
@@ -51,7 +54,16 @@ def notify_many(user_ids, message, type="broadcast"):
 def _html_to_text(html):
     """Strip HTML tags to produce a plain-text fallback for multipart emails."""
     text = re.sub(r'<(style|script)[^>]*>.*?</\1>', '', html, flags=re.S | re.I)
+    # Carry link targets through. Stripping tags alone leaves a text part whose
+    # call to action reads "Sign in" with no address attached to it.
+    text = re.sub(
+        r'<a\b[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
+        lambda m: f"{m.group(2)} ({m.group(1)})",
+        text, flags=re.S | re.I,
+    )
     text = re.sub(r'<[^>]+>', ' ', text)
+    # Otherwise the text part shows "&copy;" and "&middot;" literally.
+    text = unescape(text)
     text = re.sub(r'[ \t]+', ' ', text)
     text = re.sub(r'\n{3,}', '\n\n', text)
     return '\n'.join(line.strip() for line in text.splitlines()).strip()
@@ -141,8 +153,6 @@ def send_email(subject, recipients, template_name, raise_on_error=False, **conte
     failure (so callers never crash due to mail issues). Pass
     raise_on_error=True where the caller needs to report the error to the user.
     """
-    html = render_template(f"email/{template_name}.html", **context)
-    text = _html_to_text(html)
     transport = active_transport()
 
     if current_app.config.get("MAIL_SUPPRESS_SEND"):
@@ -155,6 +165,11 @@ def send_email(subject, recipients, template_name, raise_on_error=False, **conte
         "smtp": _send_via_smtp,
     }
     try:
+        # Rendering is inside the try on purpose: a template error is a mail
+        # failure as far as the caller is concerned, and this function promises
+        # not to crash them.
+        html = render_template(f"email/{template_name}.html", **context)
+        text = _html_to_text(html)
         senders[transport](subject, recipients, html, text)
         current_app.logger.info(
             "[mail:sent] via=%s to=%s subject=%s", transport, recipients, subject
@@ -231,6 +246,12 @@ def notify_supervisor_assigned(student, new_supervisor, is_reassignment=False):
 
 def notify_user_created(user, plain_password, login_url, raise_on_error=False):
     first_name = user.full_name.split()[0] if user.full_name else "there"
+    # Mail clients fetch images over the network, so every asset and link in the
+    # template has to be absolute. login_url is already absolute, so its origin
+    # is the one reliable base available whether BASE_URL is set or not.
+    parts = urlsplit(login_url)
+    origin = f"{parts.scheme}://{parts.netloc}" if parts.netloc else ""
+
     return send_email(
         subject=f"Hi {first_name}, your Scholaris account is ready",
         recipients=[user.email],
@@ -239,6 +260,16 @@ def notify_user_created(user, plain_password, login_url, raise_on_error=False):
         user=user,
         plain_password=plain_password,
         login_url=login_url,
+        year=datetime.now(timezone.utc).year,
+        assets={
+            "masthead": f"{origin}/static/img/email/masthead.png",
+            "hero": f"{origin}/static/img/email/hero.jpg",
+            "headline": f"{origin}/static/img/email/headline.png",
+        },
+        site={
+            "privacy": f"{origin}/privacy-policy",
+            "terms": f"{origin}/terms-of-service",
+        },
     )
 
 
