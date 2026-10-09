@@ -9,6 +9,29 @@ from flask_mail import Message
 from flask import current_app, render_template
 
 BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
+MAILJET_ENDPOINT = "https://api.mailjet.com/v3.1/send"
+
+
+def active_transport():
+    """Which transport send_email will use, given the current config.
+
+    Single source of truth: the boot log and the admin-facing error message
+    both report this, and SMTP is unusable on hosts that block its ports, so
+    the three must never disagree about what actually ran.
+    """
+    cfg = current_app.config
+    if cfg.get("MAILJET_API_KEY") and cfg.get("MAILJET_SECRET_KEY"):
+        return "mailjet"
+    if cfg.get("BREVO_API_KEY"):
+        return "brevo"
+    return "smtp"
+
+
+def _sender_pair():
+    name, email = parseaddr(current_app.config.get("MAIL_DEFAULT_SENDER") or "")
+    if not email:
+        raise RuntimeError("MAIL_DEFAULT_SENDER has no usable email address")
+    return (name or "Scholaris"), email
 
 
 def notify(user_id, message, type="submission"):
@@ -34,15 +57,47 @@ def _html_to_text(html):
     return '\n'.join(line.strip() for line in text.splitlines()).strip()
 
 
+def _send_via_mailjet(subject, recipients, html, text):
+    """POSTs the email to Mailjet's Send API v3.1 over HTTPS."""
+    sender_name, sender_email = _sender_pair()
+
+    response = requests.post(
+        MAILJET_ENDPOINT,
+        auth=(current_app.config["MAILJET_API_KEY"],
+              current_app.config["MAILJET_SECRET_KEY"]),
+        json={"Messages": [{
+            "From": {"Email": sender_email, "Name": sender_name},
+            "To": [{"Email": r} for r in recipients],
+            "Subject": subject,
+            "HTMLPart": html,
+            "TextPart": text,
+        }]},
+        timeout=20,
+    )
+    if response.status_code >= 300:
+        raise RuntimeError(
+            f"Mailjet API returned {response.status_code}: {response.text[:400]}"
+        )
+
+    # v3.1 answers 200 even when a message was rejected, so the per-message
+    # Status is what actually confirms delivery was accepted.
+    try:
+        messages = response.json().get("Messages", [])
+    except ValueError:
+        raise RuntimeError(f"Mailjet returned unparseable response: {response.text[:300]}")
+
+    failed = [m for m in messages if str(m.get("Status", "")).lower() != "success"]
+    if failed or not messages:
+        raise RuntimeError(f"Mailjet rejected the message: {str(failed or messages)[:400]}")
+
+
 def _send_via_brevo(subject, recipients, html, text):
     """POSTs the email to Brevo over HTTPS. Raises on any non-2xx response.
 
     Used instead of SMTP because hosts such as Render block outbound SMTP
     ports outright, which surfaces as an unroutable-network error.
     """
-    sender_name, sender_email = parseaddr(current_app.config.get("MAIL_DEFAULT_SENDER") or "")
-    if not sender_email:
-        raise RuntimeError("MAIL_DEFAULT_SENDER has no usable email address")
+    sender_name, sender_email = _sender_pair()
 
     response = requests.post(
         BREVO_ENDPOINT,
@@ -81,25 +136,26 @@ def _send_via_smtp(subject, recipients, html, text):
 def send_email(subject, recipients, template_name, raise_on_error=False, **context):
     """Renders app/templates/email/<template_name>.html and sends it.
     Always includes a plain-text alternative to avoid spam filters.
-    Sends via the Brevo HTTPS API when BREVO_API_KEY is set, else SMTP.
-    Returns True on success, None on delivery failure (so callers never
-    crash due to mail issues). Pass raise_on_error=True where the caller
-    needs to report the underlying error to the user.
+    Transport is chosen by active_transport(): Mailjet or Brevo over HTTPS
+    where configured, else SMTP. Returns True on success, None on delivery
+    failure (so callers never crash due to mail issues). Pass
+    raise_on_error=True where the caller needs to report the error to the user.
     """
     html = render_template(f"email/{template_name}.html", **context)
     text = _html_to_text(html)
-    use_brevo = bool(current_app.config.get("BREVO_API_KEY"))
-    transport = "brevo" if use_brevo else "smtp"
+    transport = active_transport()
 
     if current_app.config.get("MAIL_SUPPRESS_SEND"):
         current_app.logger.info("[mail:suppressed] to=%s subject=%s", recipients, subject)
         return True
 
+    senders = {
+        "mailjet": _send_via_mailjet,
+        "brevo": _send_via_brevo,
+        "smtp": _send_via_smtp,
+    }
     try:
-        if use_brevo:
-            _send_via_brevo(subject, recipients, html, text)
-        else:
-            _send_via_smtp(subject, recipients, html, text)
+        senders[transport](subject, recipients, html, text)
         current_app.logger.info(
             "[mail:sent] via=%s to=%s subject=%s", transport, recipients, subject
         )

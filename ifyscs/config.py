@@ -54,8 +54,11 @@ class Config:
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "Scholaris <no-reply@scholaris.local>")
     MAIL_SUPPRESS_SEND = os.environ.get("MAIL_SUPPRESS_SEND", "False") == "True"
 
-    # Set this to send over Brevo's HTTPS API instead of SMTP. Required on hosts
-    # that block outbound SMTP ports (Render free instances drop them entirely).
+    # Mail is sent over an HTTPS API rather than SMTP because hosts such as
+    # Render block outbound SMTP ports entirely. Mailjet takes precedence over
+    # Brevo when both are set; SMTP is the fallback. See active_transport().
+    MAILJET_API_KEY = os.environ.get("MAILJET_API_KEY")
+    MAILJET_SECRET_KEY = os.environ.get("MAILJET_SECRET_KEY")
     BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
 
     BASE_URL = os.environ.get("BASE_URL", "").rstrip("/")

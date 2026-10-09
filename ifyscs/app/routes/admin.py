@@ -148,15 +148,17 @@ def create_user():
                 msg = f"{user.role.title()} account created. Login details sent to {user.email}."
             else:
                 # Name the transport that actually ran; quoting SMTP settings for
-                # a Brevo failure sent earlier debugging down the wrong path.
-                if current_app.config.get("BREVO_API_KEY"):
-                    where = "transport=Brevo API"
-                else:
+                # an API failure sent earlier debugging down the wrong path.
+                from app.services.notification_service import active_transport
+                transport = active_transport()
+                if transport == "smtp":
                     where = (
                         f"transport=SMTP {current_app.config.get('MAIL_SERVER')}:"
                         f"{current_app.config.get('MAIL_PORT')} "
                         f"user={current_app.config.get('MAIL_USERNAME') or 'NOT SET'}"
                     )
+                else:
+                    where = f"transport={transport} API"
                 msg = (
                     f"{user.role.title()} account created, but the welcome email to "
                     f"{user.email} failed — {email_error or 'unknown error'} [{where}]"

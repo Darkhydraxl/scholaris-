@@ -23,13 +23,17 @@ app = create_app(os.environ.get("FLASK_ENV", "production"))
 
 # Record which mail transport is live, so a misconfiguration is visible at boot
 # rather than only when someone tries to create a user.
-if app.config.get("BREVO_API_KEY"):
-    app.logger.info("MAIL: sending via Brevo HTTPS API")
-else:
-    app.logger.warning(
-        "MAIL: BREVO_API_KEY is not set — falling back to SMTP, which hosts "
-        "that block outbound SMTP ports (Render) will refuse"
-    )
+with app.app_context():
+    from app.services.notification_service import active_transport
+    _transport = active_transport()
+    if _transport == "smtp":
+        app.logger.warning(
+            "MAIL: no API key set (MAILJET_API_KEY/MAILJET_SECRET_KEY or "
+            "BREVO_API_KEY) — falling back to SMTP, which hosts that block "
+            "outbound SMTP ports (Render) will refuse"
+        )
+    else:
+        app.logger.info("MAIL: sending via %s HTTPS API", _transport)
 
 # Run database migrations and seed the super admin on every startup.
 #
