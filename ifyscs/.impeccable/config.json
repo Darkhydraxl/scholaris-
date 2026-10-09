@@ -1,0 +1,31 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "app/templates/email/welcome_credentials.html"
+        ],
+        "createdAt": "2026-10-09T16:02:08.459Z"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-10-09T16:58:42.927Z",
+        "reason": "Email clients strip @font-face; a web-safe stack is the only face that reliably renders. Asgrike was attempted via images and failed in a real inbox three times, so Arial is the documented fallback, not a default reach."
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          "app/templates/email/welcome_credentials.html"
+        ],
+        "createdAt": "2026-10-09T16:58:43.362Z",
+        "reason": "Remaining sub-11px values are not readable text: font-size:1px on the display:none inbox-preheader, and font-size:0 on four spacer cells whose only content is &nbsp; (the standard email trick to stop a spacer gaining height). The one real instance, 10.5px footer links on mobile, was fixed to 11px."
+      }
+    ]
+  }
+}
