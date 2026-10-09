@@ -30,35 +30,6 @@ def active_transport():
     return "smtp"
 
 
-def load_inline_images(names):
-    """Read email images off disk as base64, for embedding in the message.
-
-    Hosting them and letting the client fetch does not survive a free-tier
-    host: Gmail proxies every image through its own fetcher, and a sleeping
-    instance takes longer to wake than that fetcher waits, so the images never
-    arrive. Embedded images need no fetch at all, and most clients show them
-    even when "block external images" is on.
-    """
-    import base64
-    from pathlib import Path
-
-    mimes = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
-    root = Path(current_app.root_path) / "static" / "img" / "email"
-    out = []
-    for name in names:
-        path = root / name
-        if not path.is_file():
-            current_app.logger.warning("[mail:inline] missing asset %s", path)
-            continue
-        out.append({
-            "cid": path.stem,
-            "filename": name,
-            "mime": mimes.get(path.suffix.lower(), "application/octet-stream"),
-            "b64": base64.b64encode(path.read_bytes()).decode(),
-        })
-    return out
-
-
 def _sender_pair():
     name, email = parseaddr(current_app.config.get("MAIL_DEFAULT_SENDER") or "")
     if not email:
@@ -98,7 +69,7 @@ def _html_to_text(html):
     return '\n'.join(line.strip() for line in text.splitlines()).strip()
 
 
-def _send_via_mailjet(subject, recipients, html, text, inline=None):
+def _send_via_mailjet(subject, recipients, html, text):
     """POSTs the email to Mailjet's Send API v3.1 over HTTPS."""
     sender_name, sender_email = _sender_pair()
 
@@ -109,16 +80,6 @@ def _send_via_mailjet(subject, recipients, html, text, inline=None):
         "HTMLPart": html,
         "TextPart": text,
     }
-    if inline:
-        message["InlinedAttachments"] = [
-            {
-                "ContentType": a["mime"],
-                "Filename": a["filename"],
-                "ContentID": a["cid"],
-                "Base64Content": a["b64"],
-            }
-            for a in inline
-        ]
 
     response = requests.post(
         MAILJET_ENDPOINT,
@@ -186,7 +147,7 @@ def _send_via_smtp(subject, recipients, html, text):
     mail.send(msg)
 
 
-def send_email(subject, recipients, template_name, raise_on_error=False, inline_images=None, **context):
+def send_email(subject, recipients, template_name, raise_on_error=False, **context):
     """Renders app/templates/email/<template_name>.html and sends it.
     Always includes a plain-text alternative to avoid spam filters.
     Transport is chosen by active_transport(): Mailjet or Brevo over HTTPS
@@ -209,17 +170,9 @@ def send_email(subject, recipients, template_name, raise_on_error=False, inline_
         # Rendering is inside the try on purpose: a template error is a mail
         # failure as far as the caller is concerned, and this function promises
         # not to crash them.
-        # Only Mailjet carries embedded images today; the others still receive
-        # URL-based markup, so the template is told which form to emit.
-        inline = load_inline_images(inline_images) if (inline_images and transport == "mailjet") else []
-        context["inline_cids"] = {a["filename"]: a["cid"] for a in inline}
-
         html = render_template(f"email/{template_name}.html", **context)
         text = _html_to_text(html)
-        if transport == "mailjet":
-            senders[transport](subject, recipients, html, text, inline=inline)
-        else:
-            senders[transport](subject, recipients, html, text)
+        senders[transport](subject, recipients, html, text)
         current_app.logger.info(
             "[mail:sent] via=%s to=%s subject=%s", transport, recipients, subject
         )
@@ -312,7 +265,6 @@ def notify_user_created(user, plain_password, login_url, raise_on_error=False):
         recipients=[user.email],
         template_name="welcome_credentials",
         raise_on_error=raise_on_error,
-        inline_images=["masthead.png", "hero.jpg", "headline.png"],
         user=user,
         plain_password=plain_password,
         login_url=login_url,
