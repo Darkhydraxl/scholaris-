@@ -9,7 +9,7 @@ import requests
 from app.extensions import db, mail
 from app.models import Notification, User
 from flask_mail import Message
-from flask import current_app, render_template, request, has_request_context
+from flask import current_app, render_template, request, has_request_context, url_for
 
 BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
 MAILJET_ENDPOINT = "https://api.mailjet.com/v3.1/send"
@@ -252,19 +252,35 @@ def notify_supervisor_assigned(student, new_supervisor, is_reassignment=False):
     )
 
 
+#: Where each role lands after signing in, mirroring auth._redirect_for_role.
+_ROLE_LANDING = {
+    "student": "student.dashboard",
+    "supervisor": "supervisor.dashboard",
+}
+
+
 def notify_user_created(user, plain_password, login_url, raise_on_error=False):
     first_name = user.full_name.split()[0] if user.full_name else "there"
-    # Mail clients fetch images over the network, so assets and links must be
-    # absolute. Prefer the host actually serving this request: BASE_URL is
-    # operator-set and can point somewhere stale, which would aim every image
-    # at a dead host. Fall back to login_url's origin outside a request.
+    # Links must be absolute. Prefer the host actually serving this request:
+    # BASE_URL is operator-set and can point somewhere stale. Fall back to
+    # login_url's origin outside a request.
     origin = ""
     if has_request_context():
         origin = request.url_root.rstrip("/")
     if not origin:
         parts = urlsplit(login_url)
         origin = f"{parts.scheme}://{parts.netloc}" if parts.netloc else ""
-    current_app.logger.info("[mail:assets] origin=%s", origin)
+
+    # Point the button at the reader's own dashboard rather than the generic
+    # login page. Signed out, they are sent to log in and arrive there anyway;
+    # already signed in, they skip the detour entirely.
+    endpoint = _ROLE_LANDING.get(user.role, "admin.dashboard")
+    try:
+        destination = origin + url_for(endpoint)
+    except Exception:
+        current_app.logger.warning("[mail:link] no route for %s; using login", endpoint)
+        destination = login_url
+    current_app.logger.info("[mail:link] origin=%s cta=%s", origin, destination)
 
     return send_email(
         subject=f"Hi {first_name}, your Scholaris account is ready",
@@ -273,13 +289,8 @@ def notify_user_created(user, plain_password, login_url, raise_on_error=False):
         raise_on_error=raise_on_error,
         user=user,
         plain_password=plain_password,
-        login_url=login_url,
+        login_url=destination,
         year=datetime.now(timezone.utc).year,
-        assets={
-            "masthead": f"{origin}/static/img/email/masthead.png",
-            "hero": f"{origin}/static/img/email/hero.jpg",
-            "headline": f"{origin}/static/img/email/headline.png",
-        },
         site={
             "privacy": f"{origin}/privacy-policy",
             "terms": f"{origin}/terms-of-service",
