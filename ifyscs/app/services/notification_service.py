@@ -79,6 +79,12 @@ def _send_via_mailjet(subject, recipients, html, text):
         "Subject": subject,
         "HTMLPart": html,
         "TextPart": text,
+        # Deliver the real URLs. Mailjet otherwise rewrites every link through
+        # its own redirector, which puts a third-party hop between the reader
+        # and the sign-in page and is a common source of dead links on a new
+        # account. These are credential emails; there is nothing to track.
+        "TrackClicks": "disabled",
+        "TrackOpens": "disabled",
     }
 
     response = requests.post(
